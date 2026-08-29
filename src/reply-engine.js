@@ -1,4 +1,4 @@
-const { buildSystemPrompt } = require("./prompt");
+const { buildSystemPrompt, BASE_RULES } = require("./prompt");
 
 const hasRealKey = Boolean(process.env.OPENAI_API_KEY);
 
@@ -128,6 +128,73 @@ async function realReply(history, familyState) {
   return { reply, extracted };
 }
 
+/* ------------------------------------------------------------------ *
+ * Session self-review: after a conversation, the assistant grades its
+ * OWN replies against both the pwl7 framework (BASE_RULES) and general
+ * child development research — not just "did it follow the rules" but
+ * "would a developmental psychologist actually agree with this advice."
+ * Stored in session_reviews (see src/db.js) so patterns across many
+ * reviews can be folded back into BASE_RULES over time.
+ * ------------------------------------------------------------------ */
+
+const REVIEW_MODEL = process.env.REVIEW_MODEL || MODEL;
+
+async function reviewSession(history) {
+  if (!client) {
+    return {
+      available: false,
+      message:
+        "Session self-review needs a real OpenAI connection — this app is currently running in demo mode."
+    };
+  }
+
+  const transcript = history
+    .map((m) => `${m.role === "user" ? "Parent" : "Assistant"}: ${m.content}`)
+    .join("\n\n");
+
+  const reviewerSystemPrompt = `You are an independent reviewer with deep expertise in child development research — developmental psychology, attachment theory, authoritative-parenting research (e.g. Baumrind), emotion-coaching research (e.g. Gottman), and positive discipline research. You are auditing an AI parenting assistant's OWN replies in the transcript below.
+
+The assistant is supposed to follow this framework:
+"""
+${BASE_RULES}
+"""
+
+Judge the assistant's actual replies against BOTH (a) whether it followed its own framework, and (b) whether that framework's guidance, as applied here, actually matches what solid child development research would support. Push back if the research would qualify, refine, or disagree with something the assistant said or the framework itself — don't just check boxes.
+
+Be concrete and specific to what was actually said in THIS transcript, not generic parenting advice. If the assistant did well, say exactly what it did right. If not, say exactly what a stronger, research-grounded reply would have included instead.
+
+Return ONLY strict JSON of this shape:
+{
+  "overallScore": number (1-10),
+  "dimensionScores": {
+    "loveAndSafety": number (1-10),
+    "understandingBeforeGuiding": number (1-10),
+    "regulationTiming": number (1-10),
+    "validation": number (1-10),
+    "boundaryWarmth": number (1-10),
+    "developmentalAppropriateness": number (1-10),
+    "researchGrounding": number (1-10)
+  },
+  "strengths": [string, ...],
+  "concerns": [string, ...],
+  "missedOpportunities": [string, ...],
+  "suggestedPromptChanges": [string, ...]
+}
+Each array should have 0-4 short, specific items (empty array if genuinely none). "suggestedPromptChanges" should be concrete edits to the assistant's system prompt/framework, phrased as instructions (e.g. "Add a rule that..."), only when a change is actually warranted by this transcript.`;
+
+  const completion = await client.chat.completions.create({
+    model: REVIEW_MODEL,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: reviewerSystemPrompt },
+      { role: "user", content: `Transcript to review:\n\n${transcript}` }
+    ]
+  });
+
+  const review = JSON.parse(completion.choices[0].message.content);
+  return Object.assign({ available: true }, review);
+}
+
 /**
  * @param {Array<{role: 'user'|'assistant', content: string}>} history - this browser session's conversation so far (oldest first)
  * @param {{children: Array<{name:string|null, age:number|null}>, topics_discussed: string[], notes: string[]}} familyState - everything stored about this user
@@ -144,4 +211,4 @@ async function getReply({ history, familyState }) {
   return { reply, extracted };
 }
 
-module.exports = { getReply, isDemoMode: !hasRealKey };
+module.exports = { getReply, reviewSession, isDemoMode: !hasRealKey };

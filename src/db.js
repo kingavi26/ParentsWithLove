@@ -38,6 +38,23 @@ function initDb() {
       notes TEXT NOT NULL DEFAULT '[]',
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- One row per "rate this session" click: the assistant's self-critique
+    -- of its own replies in that conversation, judged against both the
+    -- pwl7 framework and general child development research. Used to spot
+    -- patterns worth folding back into BASE_RULES in src/prompt.js.
+    CREATE TABLE IF NOT EXISTS session_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      overall_score REAL,
+      dimension_scores TEXT NOT NULL DEFAULT '{}',
+      strengths TEXT NOT NULL DEFAULT '[]',
+      concerns TEXT NOT NULL DEFAULT '[]',
+      missed_opportunities TEXT NOT NULL DEFAULT '[]',
+      suggested_prompt_changes TEXT NOT NULL DEFAULT '[]',
+      message_count INTEGER,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 }
 

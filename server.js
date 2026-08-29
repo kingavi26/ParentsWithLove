@@ -7,6 +7,7 @@ const path = require("path");
 const { initDb } = require("./src/db");
 const authRoutes = require("./src/routes/auth");
 const chatRoutes = require("./src/routes/chat");
+const reviewRoutes = require("./src/routes/review");
 const { isDemoMode } = require("./src/reply-engine");
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", authRoutes);
 app.use("/api", chatRoutes);
+app.use("/api", reviewRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
 app.get("/api/status", (req, res) => {

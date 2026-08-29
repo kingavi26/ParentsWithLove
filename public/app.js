@@ -24,6 +24,11 @@
   var memoryTopics = document.getElementById("memory-topics");
   var memoryNotes = document.getElementById("memory-notes");
 
+  var rateSessionBtn = document.getElementById("rate-session-btn");
+  var reviewPanel = document.getElementById("review-panel");
+  var reviewBody = document.getElementById("review-body");
+  var reviewCloseBtn = document.getElementById("review-close-btn");
+
   var authMode = "login"; // or "signup"
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
 
@@ -114,6 +119,8 @@
     appScreen.hidden = false;
     conversation = [];
     chatLog.innerHTML = "";
+    reviewPanel.hidden = true;
+    reviewBody.innerHTML = "";
     refreshMe();
   }
 
@@ -235,6 +242,101 @@
         chatSend.disabled = false;
         addMessage("Couldn't reach the server. Please try again.", "bot");
       });
+  });
+
+  // ---------------- session self-review ----------------
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderList(items) {
+    if (!items || !items.length) {
+      return '<div class="review-empty">None noted</div>';
+    }
+    return (
+      '<ul class="review-list">' +
+      items.map(function (item) { return "<li>" + escapeHtml(item) + "</li>"; }).join("") +
+      "</ul>"
+    );
+  }
+
+  var DIMENSION_LABELS = {
+    loveAndSafety: "Love & safety",
+    understandingBeforeGuiding: "Understanding first",
+    regulationTiming: "Regulation timing",
+    validation: "Validation",
+    boundaryWarmth: "Boundary warmth",
+    developmentalAppropriateness: "Developmentally appropriate",
+    researchGrounding: "Research grounding"
+  };
+
+  function renderReview(review) {
+    if (review.available === false) {
+      reviewBody.innerHTML = '<div class="review-unavailable">' + escapeHtml(review.message) + "</div>";
+      return;
+    }
+
+    var dims = review.dimensionScores || {};
+    var dimChips = Object.keys(DIMENSION_LABELS)
+      .filter(function (key) { return dims[key] != null; })
+      .map(function (key) {
+        return '<span class="review-dim-chip">' + DIMENSION_LABELS[key] + ": " + dims[key] + "/10</span>";
+      })
+      .join("");
+
+    reviewBody.innerHTML =
+      '<div class="review-score-row">' +
+        '<span class="review-score-big">' + (review.overallScore != null ? review.overallScore : "—") + '/10</span>' +
+        '<span class="review-score-label">overall, based on this session\'s replies</span>' +
+      "</div>" +
+      (dimChips ? '<div class="review-dims">' + dimChips + "</div>" : "") +
+      '<div class="review-section"><div class="review-section-label">What went well</div>' + renderList(review.strengths) + "</div>" +
+      '<div class="review-section"><div class="review-section-label">Concerns</div>' + renderList(review.concerns) + "</div>" +
+      '<div class="review-section"><div class="review-section-label">Missed opportunities</div>' + renderList(review.missedOpportunities) + "</div>" +
+      '<div class="review-section"><div class="review-section-label">Suggested prompt changes</div>' + renderList(review.suggestedPromptChanges) + "</div>" +
+      '<div class="review-prompt-note">Saved so patterns across sessions can be folded back into how the assistant is instructed.</div>';
+  }
+
+  rateSessionBtn.addEventListener("click", function () {
+    if (!conversation.length) {
+      reviewPanel.hidden = false;
+      reviewBody.innerHTML = '<div class="review-unavailable">Chat a bit first, then rate the session.</div>';
+      return;
+    }
+
+    reviewPanel.hidden = false;
+    rateSessionBtn.disabled = true;
+    reviewBody.innerHTML = '<div class="review-loading">Reviewing this session against child development research&hellip;</div>';
+
+    fetch("/api/session/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history: conversation })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        rateSessionBtn.disabled = false;
+        if (!result.ok) {
+          reviewBody.innerHTML = '<div class="review-error">' + escapeHtml(result.data.error || "Something went wrong.") + "</div>";
+          return;
+        }
+        renderReview(result.data);
+      })
+      .catch(function () {
+        rateSessionBtn.disabled = false;
+        reviewBody.innerHTML = '<div class="review-error">Couldn\'t reach the server. Please try again.</div>';
+      });
+  });
+
+  reviewCloseBtn.addEventListener("click", function () {
+    reviewPanel.hidden = true;
   });
 
   // ---------------- boot ----------------

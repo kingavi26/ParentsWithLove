@@ -102,6 +102,25 @@ point at that URL instead of the current Artifact link.
 Railway.app or Fly.io work too (similar env vars), but would need their
 own equivalent of the disk + `DB_PATH` setup above to persist data.
 
+## Session self-review ("Rate this session")
+
+After chatting, the parent can click **Rate this session** in the chat header. This sends
+the visible conversation to a second, independent OpenAI call that grades the assistant's
+OWN replies — both against the framework in `src/prompt.js` (`BASE_RULES`) and against
+general child development research (attachment theory, authoritative-parenting research,
+emotion-coaching research) — and returns an overall score, per-dimension scores, strengths,
+concerns, missed opportunities, and concrete suggested prompt changes. Only available in
+real mode (needs `OPENAI_API_KEY`); in demo mode it just explains that a real connection is
+needed.
+
+Every review is stored in the `session_reviews` table (see `src/db.js`), so patterns across
+many sessions can be reviewed later rather than judging the prompt off one conversation.
+`GET /api/admin/reviews` (disabled unless `ADMIN_KEY` is set — see `.env.example`) lists the
+most recent 200 reviews across all users, for exactly that purpose: pull them periodically,
+look for a concern or suggested change that keeps recurring, and update `BASE_RULES`
+accordingly. This is a manual loop by design — nothing auto-edits the prompt, so a bad or
+one-off critique can't silently degrade the assistant's behavior for everyone.
+
 ## Security notes
 
 - Passwords are hashed with bcrypt — never stored in plain text.

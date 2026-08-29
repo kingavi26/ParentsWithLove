@@ -50,7 +50,10 @@
     <section id="app-screen" hidden>
       <div class="app-header">
         <span id="account-email" style="font-size: 0.85rem; color: var(--muted)"></span>
-        <button type="button" class="logout-link" id="logout-btn">Log out</button>
+        <div class="app-header-actions">
+          <button type="button" class="logout-link" id="rate-session-btn">Rate this session</button>
+          <button type="button" class="logout-link" id="logout-btn">Log out</button>
+        </div>
       </div>
 
       <div class="app-grid">
@@ -96,6 +99,14 @@
           </div>
         </aside>
       </div>
+
+      <section id="review-panel" class="review-panel" hidden>
+        <div class="review-head">
+          <h2>Self-review</h2>
+          <button type="button" class="review-close" id="review-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div id="review-body"></div>
+      </section>
     </section>
   </div>
 
