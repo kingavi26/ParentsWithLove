@@ -8,7 +8,9 @@ const { initDb } = require("./src/db");
 const authRoutes = require("./src/routes/auth");
 const chatRoutes = require("./src/routes/chat");
 const reviewRoutes = require("./src/routes/review");
+const voiceRoutes = require("./src/routes/voice");
 const { isDemoMode } = require("./src/reply-engine");
+const { isVoiceAvailable } = require("./src/voice");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,10 +24,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api", authRoutes);
 app.use("/api", chatRoutes);
 app.use("/api", reviewRoutes);
+app.use("/api", voiceRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
 app.get("/api/status", (req, res) => {
-  res.json({ demoMode: isDemoMode });
+  res.json({ demoMode: isDemoMode, voiceAvailable: isVoiceAvailable });
 });
 
 app.listen(PORT, () => {

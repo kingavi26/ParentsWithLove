@@ -29,8 +29,23 @@
   var reviewBody = document.getElementById("review-body");
   var reviewCloseBtn = document.getElementById("review-close-btn");
 
+  var voiceToggleBtn = document.getElementById("voice-toggle-btn");
+  var micBtn = document.getElementById("mic-btn");
+  var voicePlayer = document.getElementById("voice-player");
+
   var authMode = "login"; // or "signup"
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
+
+  var voiceAvailable = false; // set from /api/status — needs a real OpenAI key on the server
+  var micSupported = Boolean(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  var readAloudEnabled = false;
+  try {
+    readAloudEnabled = window.localStorage.getItem("pwl7_read_aloud") === "1";
+  } catch (e) {
+    // localStorage can throw in locked-down browser contexts — read-aloud just stays off.
+  }
+  var mediaRecorder = null;
+  var recordedChunks = [];
 
   // ---------------- auth screen ----------------
 
@@ -93,6 +108,8 @@
       appScreen.hidden = true;
       authScreen.hidden = false;
       passwordInput.value = "";
+      stopRecording();
+      voicePlayer.pause();
     });
   });
 
@@ -109,6 +126,13 @@
       } else {
         chatSubtitle.textContent = "Connected to OpenAI";
       }
+
+      voiceAvailable = Boolean(data.voiceAvailable);
+      if (voiceAvailable) {
+        voiceToggleBtn.hidden = false;
+        updateVoiceToggleUI();
+        if (micSupported) micBtn.hidden = false;
+      }
     })
     .catch(function () {});
 
@@ -121,6 +145,8 @@
     chatLog.innerHTML = "";
     reviewPanel.hidden = true;
     reviewBody.innerHTML = "";
+    stopRecording();
+    voicePlayer.pause();
     refreshMe();
   }
 
@@ -235,6 +261,7 @@
         addMessage(result.data.reply, "bot");
         conversation.push({ role: "assistant", content: result.data.reply });
         if (result.data.remembered) renderMemory(Object.assign({ email: accountEmail.textContent }, result.data.remembered));
+        speakText(result.data.reply);
       })
       .catch(function () {
         pending.remove();
@@ -338,6 +365,132 @@
   reviewCloseBtn.addEventListener("click", function () {
     reviewPanel.hidden = true;
   });
+
+  // ---------------- voice input & output ----------------
+
+  function updateVoiceToggleUI() {
+    voiceToggleBtn.setAttribute("aria-pressed", readAloudEnabled ? "true" : "false");
+    voiceToggleBtn.textContent = readAloudEnabled ? "\uD83D\uDD0A Reading replies aloud" : "\uD83D\uDD08 Read replies aloud";
+  }
+
+  voiceToggleBtn.addEventListener("click", function () {
+    readAloudEnabled = !readAloudEnabled;
+    try {
+      window.localStorage.setItem("pwl7_read_aloud", readAloudEnabled ? "1" : "0");
+    } catch (e) {
+      // Best-effort only — the toggle still works for this page load either way.
+    }
+    updateVoiceToggleUI();
+    if (!readAloudEnabled) {
+      voicePlayer.pause();
+    }
+  });
+
+  function speakText(text) {
+    if (!readAloudEnabled || !voiceAvailable || !text) return;
+
+    fetch("/api/voice/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("tts request failed");
+        return res.blob();
+      })
+      .then(function (blob) {
+        voicePlayer.src = URL.createObjectURL(blob);
+        return voicePlayer.play();
+      })
+      .catch(function () {
+        // Voice is an enhancement on top of the text reply that's already shown —
+        // fail silently rather than interrupting the conversation with an error.
+      });
+  }
+
+  micBtn.addEventListener("click", function () {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      return;
+    }
+    startRecording();
+  });
+
+  function startRecording() {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(function (stream) {
+        var mimeType = "";
+        if (window.MediaRecorder.isTypeSupported("audio/webm")) {
+          mimeType = "audio/webm";
+        } else if (window.MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        }
+
+        recordedChunks = [];
+        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+
+        mediaRecorder.addEventListener("dataavailable", function (e) {
+          if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+        });
+
+        mediaRecorder.addEventListener("stop", function () {
+          stream.getTracks().forEach(function (track) { track.stop(); });
+          micBtn.classList.remove("recording");
+          var recordedType = mediaRecorder.mimeType || mimeType || "audio/webm";
+          mediaRecorder = null;
+          if (recordedChunks.length) {
+            transcribeAndFill(new Blob(recordedChunks, { type: recordedType }));
+          }
+        });
+
+        mediaRecorder.start();
+        micBtn.classList.add("recording");
+      })
+      .catch(function () {
+        addMessage("Couldn't access your microphone. Check your browser's microphone permission and try again.", "bot");
+      });
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+  }
+
+  function transcribeAndFill(blob) {
+    micBtn.disabled = true;
+    var previousPlaceholder = chatInput.placeholder;
+    chatInput.placeholder = "Transcribing\u2026";
+
+    fetch("/api/voice/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": blob.type || "audio/webm" },
+      body: blob
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        micBtn.disabled = false;
+        chatInput.placeholder = previousPlaceholder;
+        if (!result.ok) {
+          addMessage(result.data.error || "Couldn't transcribe that. Please try again or type your message.", "bot");
+          return;
+        }
+        if (result.data.text) {
+          chatInput.value = result.data.text;
+          chatInput.focus();
+        }
+      })
+      .catch(function () {
+        micBtn.disabled = false;
+        chatInput.placeholder = previousPlaceholder;
+        addMessage("Couldn't reach the server to transcribe that. Please try again.", "bot");
+      });
+  }
 
   // ---------------- boot ----------------
 

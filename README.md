@@ -121,6 +121,28 @@ look for a concern or suggested change that keeps recurring, and update `BASE_RU
 accordingly. This is a manual loop by design — nothing auto-edits the prompt, so a bad or
 one-off critique can't silently degrade the assistant's behavior for everyone.
 
+## Voice input and voice output
+
+Two independent, optional features, both reusing `OPENAI_API_KEY` (no separate key needed)
+and both hidden automatically in demo mode since they can't work without a real key:
+
+- **Voice input** — a microphone button next to the chat input. Click to start recording
+  (the browser will ask for microphone permission the first time), click again to stop.
+  The recording is sent to `POST /api/voice/transcribe`, which calls OpenAI's Whisper API
+  (`TRANSCRIBE_MODEL`, defaults to `whisper-1`) and returns the transcribed text into the
+  input box for the parent to review/edit before sending — it does not auto-send, so a
+  mis-transcription never reaches the assistant unedited.
+- **Voice output** — a "Read replies aloud" toggle in the chat header (remembered per
+  browser via `localStorage`). When on, every new assistant reply is sent to
+  `POST /api/voice/speak`, which calls OpenAI's text-to-speech API (`TTS_MODEL`, defaults to
+  `tts-1`; `TTS_VOICE`, defaults to `alloy`) and plays the returned audio automatically.
+
+Both add a real, paid OpenAI API call per use on top of the existing reply/fact-extraction/
+review calls — see `.env.example` for the cost note and the model/voice override variables.
+Browser support: the mic button only appears when the browser has both `getUserMedia` and
+`MediaRecorder` (all current Chrome/Edge/Safari/Firefox do); the read-aloud toggle works
+anywhere `<audio>` playback works, which is effectively everywhere.
+
 ## Security notes
 
 - Passwords are hashed with bcrypt — never stored in plain text.

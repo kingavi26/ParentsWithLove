@@ -63,11 +63,15 @@
               <div class="chat-title">Parenting Help Chat</div>
               <div class="chat-subtitle" id="chat-subtitle">Demo mode &mdash; scripted answers for now</div>
             </div>
+            <button type="button" class="voice-toggle" id="voice-toggle-btn" aria-pressed="false" hidden>
+              &#128264; Read replies aloud
+            </button>
           </div>
 
           <div class="chat-log" id="chat-log" aria-live="polite"></div>
 
           <form class="chat-inputrow" id="chat-form">
+            <button type="button" class="mic-btn" id="mic-btn" aria-label="Record a voice message" hidden>&#127908;</button>
             <input
               type="text"
               id="chat-input"
@@ -77,6 +81,7 @@
             />
             <button type="submit" class="chat-send" id="chat-send">Send</button>
           </form>
+          <audio id="voice-player" hidden></audio>
 
           <div class="chat-footer">
             <button type="button" class="rate-session-link" id="rate-session-btn">Rate this session based on deep child development research</button>

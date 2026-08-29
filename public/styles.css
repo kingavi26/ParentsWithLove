@@ -215,6 +215,26 @@ h1 {
 .chat-title { font-weight: 700; font-size: 0.98rem; }
 .chat-subtitle { font-size: 0.78rem; opacity: 0.65; }
 
+.voice-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: var(--bg);
+  font-size: 0.72rem;
+  font-family: inherit;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.voice-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
 .chat-log {
   padding: 1.25rem;
   display: flex;
@@ -270,6 +290,36 @@ h1 {
 }
 
 .chat-send:disabled { opacity: 0.6; cursor: default; }
+
+.mic-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.mic-btn.recording {
+  background: #d64545;
+  border-color: #d64545;
+  color: #fff;
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+.mic-btn:disabled { opacity: 0.5; cursor: default; }
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(214, 69, 69, 0.45); }
+  50% { box-shadow: 0 0 0 8px rgba(214, 69, 69, 0); }
+}
 
 .chat-footer {
   display: flex;
