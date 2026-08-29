@@ -184,6 +184,13 @@ h1 {
 .btn-google { border-color: var(--border); }
 .btn-facebook { border-color: var(--border); }
 
+/* .btn-social sets display:block above, which (author styles always beat
+   the UA stylesheet, regardless of specificity) would otherwise override
+   the [hidden] attribute's default display:none and show the button
+   anyway. These restore that. */
+.btn-social[hidden] { display: none; }
+.social-auth[hidden] { display: none; }
+
 .form-error {
   background: color-mix(in srgb, var(--error) 12%, transparent);
   color: var(--error);
