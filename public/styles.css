@@ -322,12 +322,9 @@ h1 {
 /* ---------- session self-review ---------- */
 
 .review-panel {
-  margin-top: 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  border-top: 1px solid var(--border);
   background: var(--surface);
   padding: 1.1rem 1.35rem 1.35rem;
-  box-shadow: var(--shadow);
 }
 
 .review-head {
