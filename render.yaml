@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: pwl7-chatbot
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DB_PATH
+        value: /var/data/data.sqlite
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: pwl7-data
+      mountPath: /var/data
+      sizeGB: 1

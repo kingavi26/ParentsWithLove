@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parenting Help Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Karla:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">pwl7 &middot; prototype</div>
+      <h1>Parenting help chat</h1>
+      <p>Log in and it remembers your kids and what you've already talked about, so the conversation picks up where it left off.</p>
+    </div>
+
+    <div id="demo-banner" class="demo-banner" hidden></div>
+
+    <!-- Auth screen -->
+    <section id="auth-screen">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" data-mode="login">Log in</button>
+          <button type="button" class="auth-tab" data-mode="signup">Sign up</button>
+        </div>
+
+        <div id="auth-error" class="form-error"></div>
+
+        <form id="auth-form">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" autocomplete="current-password" required minlength="8" />
+          </div>
+          <button type="submit" class="btn-primary" id="auth-submit">Log in</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Chat screen -->
+    <section id="app-screen" hidden>
+      <div class="app-header">
+        <span id="account-email" style="font-size: 0.85rem; color: var(--muted)"></span>
+        <button type="button" class="logout-link" id="logout-btn">Log out</button>
+      </div>
+
+      <div class="app-grid">
+        <div class="chat-card">
+          <div class="chat-header">
+            <span class="chat-dot"></span>
+            <div>
+              <div class="chat-title">Parenting Help Chat</div>
+              <div class="chat-subtitle" id="chat-subtitle">Demo mode &mdash; scripted answers for now</div>
+            </div>
+          </div>
+
+          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+
+          <form class="chat-inputrow" id="chat-form">
+            <input
+              type="text"
+              id="chat-input"
+              class="chat-input"
+              placeholder="Type a question about your kid&hellip;"
+              autocomplete="off"
+            />
+            <button type="submit" class="chat-send" id="chat-send">Send</button>
+          </form>
+        </div>
+
+        <aside class="memory-card">
+          <h2>What we remember</h2>
+
+          <div class="memory-section">
+            <div class="memory-label">Children</div>
+            <div id="memory-children"><div class="memory-empty">Nothing yet</div></div>
+          </div>
+
+          <div class="memory-section">
+            <div class="memory-label">Topics discussed</div>
+            <div id="memory-topics" class="chip-row"><div class="memory-empty">Nothing yet</div></div>
+          </div>
+
+          <div class="memory-section">
+            <div class="memory-label">Notes</div>
+            <div id="memory-notes"><div class="memory-empty">Nothing yet</div></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
