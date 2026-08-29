@@ -17,7 +17,9 @@ function initDb() {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
+      password_hash TEXT,
+      google_id TEXT,
+      facebook_id TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -56,6 +58,18 @@ function initDb() {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+
+  // Migration path for a users table created before social login existed
+  // (password_hash was NOT NULL and there was no google_id/facebook_id).
+  // Matters once a persistent disk is attached; a no-op on the current
+  // ephemeral deploy since the table above is always created fresh there.
+  const columns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+  if (!columns.includes("google_id")) {
+    db.exec("ALTER TABLE users ADD COLUMN google_id TEXT");
+  }
+  if (!columns.includes("facebook_id")) {
+    db.exec("ALTER TABLE users ADD COLUMN facebook_id TEXT");
+  }
 }
 
 module.exports = { db, initDb };

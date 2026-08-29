@@ -7,6 +7,9 @@
   var authError = document.getElementById("auth-error");
   var authSubmit = document.getElementById("auth-submit");
   var authTabs = document.querySelectorAll(".auth-tab");
+  var socialAuthWrap = document.getElementById("social-auth");
+  var googleLoginBtn = document.getElementById("google-login-btn");
+  var facebookLoginBtn = document.getElementById("facebook-login-btn");
   var emailInput = document.getElementById("email");
   var passwordInput = document.getElementById("password");
 
@@ -133,8 +136,29 @@
         updateVoiceToggleUI();
         if (micSupported) micBtn.hidden = false;
       }
+
+      var googleOn = Boolean(data.googleLoginAvailable);
+      var facebookOn = Boolean(data.facebookLoginAvailable);
+      if (googleOn) googleLoginBtn.hidden = false;
+      if (facebookOn) facebookLoginBtn.hidden = false;
+      if (googleOn || facebookOn) socialAuthWrap.hidden = false;
     })
     .catch(function () {});
+
+  // A social-login redirect (or an expired/cancelled attempt) comes back to
+  // "/" with ?authError=... rather than a JSON error, since the browser
+  // itself navigated here rather than app.js making the request.
+  (function showSocialAuthErrorFromUrl() {
+    var params = new URLSearchParams(window.location.search);
+    var message = params.get("authError");
+    if (message) {
+      showAuthError(message);
+      params.delete("authError");
+      var rest = params.toString();
+      var cleanUrl = window.location.pathname + (rest ? "?" + rest : "");
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  })();
 
   // ---------------- app screen ----------------
 
@@ -157,6 +181,8 @@
         return res.json();
       })
       .then(function (data) {
+        authScreen.hidden = true;
+        appScreen.hidden = false;
         accountEmail.textContent = data.email;
         renderMemory(data);
         if (chatLog.children.length === 0) {

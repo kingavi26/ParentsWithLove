@@ -3,3 +3,5 @@ node_modules/
 data.sqlite
 data.sqlite-journal
 *.log
+data.sqlite-shm
+data.sqlite-wal

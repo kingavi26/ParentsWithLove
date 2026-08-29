@@ -143,6 +143,48 @@ Browser support: the mic button only appears when the browser has both `getUserM
 `MediaRecorder` (all current Chrome/Edge/Safari/Firefox do); the read-aloud toggle works
 anywhere `<audio>` playback works, which is effectively everywhere.
 
+## Social login (Google / Facebook)
+
+Optional "Continue with Google" / "Continue with Facebook" buttons on the login screen,
+each independently hidden until its own credentials are configured — so leaving both
+unset changes nothing about the existing email/password flow.
+
+Both use a plain OAuth2 "authorization code" flow (`src/oauth.js`, `src/routes/social-auth.js`)
+rather than a session-management library, so a social sign-in ends up issuing the exact
+same JWT cookie a password login does (`src/auth-middleware.js`) — there's only ever one
+kind of session in the app.
+
+**Account matching:** signing in finds an existing account by that provider's user id
+first; if there isn't one, it looks for an existing account with a matching *verified*
+email and links the new provider onto it (so someone who signed up with a password can
+later also use "Continue with Google" with the same address); otherwise it creates a
+brand-new account with no password. Linking never happens on an unverified email, so a
+stranger can't claim someone else's account by typing their email into a throwaway
+social profile.
+
+**To turn on Google:**
+1. In the [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
+   create an OAuth client ID of type "Web application".
+2. Add `{APP_BASE_URL}/api/auth/google/callback` as an authorized redirect URI (e.g.
+   `https://pwl7-chatbot.onrender.com/api/auth/google/callback`).
+3. Set `APP_BASE_URL`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` in `.env` (or your
+   host's environment variables). Free — no paid account needed.
+
+**To turn on Facebook:**
+1. Create an app at [Facebook for Developers](https://developers.facebook.com/apps) and
+   add the "Facebook Login" product.
+2. Add `{APP_BASE_URL}/api/auth/facebook/callback` as a valid OAuth redirect URI.
+3. Set `APP_BASE_URL`, `FACEBOOK_APP_ID`, and `FACEBOOK_APP_SECRET`. Free, but Meta's app
+   review process can take a while before the login works for the public rather than
+   just accounts you've added as testers on the app — testers can use it immediately.
+
+**Apple ("Sign in with Apple") is not implemented yet.** It's a meaningfully bigger lift
+than Google or Facebook: it requires an active Apple Developer Program membership ($99/
+year) and the client "secret" isn't a plain string but a JWT you generate yourself and
+re-sign periodically using a private key from Apple. Worth adding once there's an actual
+iOS app in the picture (Apple requires it there) or once Avi has confirmed he wants to
+pay for the Developer Program for the web-only case.
+
 ## Security notes
 
 - Passwords are hashed with bcrypt — never stored in plain text.
@@ -154,3 +196,6 @@ anywhere `<audio>` playback works, which is effectively everywhere.
 - This is a first pass: there's no email verification, password reset,
   or rate limiting yet. Fine for an early prototype; worth adding before
   a wide public launch.
+- Social login uses a random per-attempt `state` value stored in a short-lived
+  httpOnly cookie to prevent CSRF on the OAuth callback, and never trusts an
+  email address as "verified" unless the provider itself confirms it.
