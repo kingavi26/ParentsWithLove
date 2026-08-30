@@ -11,6 +11,7 @@ const chatRoutes = require("./src/routes/chat");
 const reviewRoutes = require("./src/routes/review");
 const voiceRoutes = require("./src/routes/voice");
 const socialAuthRoutes = require("./src/routes/social-auth");
+const adminRoutes = require("./src/routes/admin");
 const { isDemoMode } = require("./src/reply-engine");
 const { isVoiceAvailable } = require("./src/voice");
 const { isGoogleAvailable, isFacebookAvailable } = require("./src/oauth");
@@ -30,6 +31,7 @@ app.use("/api", chatRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api", voiceRoutes);
 app.use("/api", socialAuthRoutes);
+app.use("/api", adminRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
 app.get("/api/status", (req, res) => {
