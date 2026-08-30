@@ -6,6 +6,7 @@ const path = require("path");
 
 const { initDb } = require("./src/db");
 const authRoutes = require("./src/routes/auth");
+const accountRoutes = require("./src/routes/account");
 const chatRoutes = require("./src/routes/chat");
 const reviewRoutes = require("./src/routes/review");
 const voiceRoutes = require("./src/routes/voice");
@@ -24,6 +25,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", authRoutes);
+app.use("/api", accountRoutes);
 app.use("/api", chatRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api", voiceRoutes);
