@@ -731,6 +731,54 @@ h1 {
 
 .modal-static { font-size: 0.93rem; }
 
+.modal-hint {
+  font-size: 0.83rem;
+  color: var(--muted);
+  margin: 0 0 0.7rem;
+}
+
+.account-children-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.account-child-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.account-child-row input {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  min-width: 0;
+}
+
+.account-child-row input.account-child-name { flex: 1 1 8rem; }
+.account-child-row input.account-child-age { flex: 0 1 4.5rem; }
+
+.account-child-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.account-child-save,
+.account-child-delete {
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.account-child-save:hover { border-color: var(--accent); color: var(--accent); }
+.account-child-delete:hover { border-color: var(--error); color: var(--error); }
+.account-child-save:disabled,
+.account-child-delete:disabled { opacity: 0.6; cursor: default; }
+
 .disclaimer-body p {
   margin: 0 0 0.95rem;
   font-size: 0.9rem;

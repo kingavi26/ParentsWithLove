@@ -31,6 +31,8 @@
   var newPasswordLabel = document.getElementById("new-password-label");
   var newPasswordInput = document.getElementById("new-password");
   var accountPasswordSubmit = document.getElementById("account-password-submit");
+  var accountChildrenError = document.getElementById("account-children-error");
+  var accountChildrenList = document.getElementById("account-children-list");
   var accountDeleteError = document.getElementById("account-delete-error");
   var showDeleteConfirmBtn = document.getElementById("show-delete-confirm-btn");
   var deleteConfirmBlock = document.getElementById("delete-confirm-block");
@@ -61,6 +63,7 @@
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
   var currentEmail = "";
   var accountHasPassword = false;
+  var latestChildren = []; // kept in sync with renderMemory(), used to fill the account modal's edit list
 
   var voiceAvailable = false; // set from /api/status — needs a real OpenAI key on the server
   var micSupported = Boolean(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -212,6 +215,7 @@
         currentEmail = data.email;
         accountHasPassword = Boolean(data.hasPassword);
         renderMemory(data);
+        if (!accountModal.hidden) renderAccountChildrenList();
         if (chatLog.children.length === 0) {
           greet(data);
         }
@@ -252,6 +256,8 @@
         memoryLastActive.hidden = true;
       }
     }
+
+    latestChildren = data.children || [];
 
     if (data.children && data.children.length) {
       memoryChildren.innerHTML = "";
@@ -456,6 +462,123 @@
     accountPasswordSubmit.textContent = accountHasPassword ? "Update password" : "Set password";
   }
 
+  // Builds one editable row per remembered child in the account modal, so a
+  // wrong or "Unnamed child" entry (see mergeChildren in src/routes/chat.js
+  // for how those happen) can be fixed or removed by hand rather than only
+  // via full account deletion.
+  function renderAccountChildrenList() {
+    accountChildrenError.textContent = "";
+    accountChildrenError.classList.remove("visible");
+
+    if (!latestChildren.length) {
+      accountChildrenList.innerHTML = '<div class="memory-empty">Nothing remembered yet.</div>';
+      return;
+    }
+
+    accountChildrenList.innerHTML = "";
+    latestChildren.forEach(function (child) {
+      var row = document.createElement("div");
+      row.className = "account-child-row";
+      row.dataset.id = child.id;
+
+      var nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "account-child-name";
+      nameInput.placeholder = "Name";
+      nameInput.value = child.name || "";
+
+      var ageInput = document.createElement("input");
+      ageInput.type = "number";
+      ageInput.className = "account-child-age";
+      ageInput.placeholder = "Age";
+      ageInput.min = "0";
+      ageInput.max = "17";
+      ageInput.value = child.age != null ? child.age : "";
+
+      var saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "account-child-save";
+      saveBtn.textContent = "Save";
+
+      var deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "account-child-delete";
+      deleteBtn.setAttribute("aria-label", "Remove this child");
+      deleteBtn.textContent = "Remove";
+
+      row.appendChild(nameInput);
+      row.appendChild(ageInput);
+      row.appendChild(saveBtn);
+      row.appendChild(deleteBtn);
+      accountChildrenList.appendChild(row);
+    });
+  }
+
+  accountChildrenList.addEventListener("click", function (e) {
+    var row = e.target.closest(".account-child-row");
+    if (!row) return;
+    var childId = row.dataset.id;
+
+    if (e.target.classList.contains("account-child-save")) {
+      var nameVal = row.querySelector(".account-child-name").value.trim();
+      var ageVal = row.querySelector(".account-child-age").value.trim();
+
+      accountChildrenError.textContent = "";
+      accountChildrenError.classList.remove("visible");
+      e.target.disabled = true;
+
+      fetch("/api/account/children/" + childId, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nameVal, age: ageVal === "" ? null : Number(ageVal) })
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          e.target.disabled = false;
+          if (!result.ok) {
+            accountChildrenError.textContent = result.data.error || "Couldn't save that change.";
+            accountChildrenError.classList.add("visible");
+            return;
+          }
+          refreshMe();
+        })
+        .catch(function () {
+          e.target.disabled = false;
+          accountChildrenError.textContent = "Couldn't reach the server. Please try again.";
+          accountChildrenError.classList.add("visible");
+        });
+    } else if (e.target.classList.contains("account-child-delete")) {
+      accountChildrenError.textContent = "";
+      accountChildrenError.classList.remove("visible");
+      e.target.disabled = true;
+
+      fetch("/api/account/children/" + childId, { method: "DELETE" })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          e.target.disabled = false;
+          if (!result.ok) {
+            accountChildrenError.textContent = result.data.error || "Couldn't remove that entry.";
+            accountChildrenError.classList.add("visible");
+            return;
+          }
+          refreshMe();
+        })
+        .catch(function () {
+          e.target.disabled = false;
+          accountChildrenError.textContent = "Couldn't reach the server. Please try again.";
+          accountChildrenError.classList.add("visible");
+        });
+    }
+  });
+
   function openAccountModal() {
     accountModalEmail.textContent = currentEmail;
     deleteConfirmEmailHint.textContent = currentEmail;
@@ -469,6 +592,7 @@
     deleteConfirmEmailInput.value = "";
     deleteConfirmBlock.hidden = true;
     updatePasswordFormUI();
+    renderAccountChildrenList();
     accountModal.hidden = false;
   }
 

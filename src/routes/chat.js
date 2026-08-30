@@ -38,25 +38,64 @@ function mergeNotes(existingNotes, newNotes) {
   return merged.slice(-30);
 }
 
+// A parent's name and age for the same child often arrive in *different*
+// messages ("he's 7 and having a rough week" today, "Kai loved the park"
+// next week) or even split within one extraction ("my son Kai is 7" can
+// come back from demoExtractFacts as two separate facts). Without help,
+// each half creates its own row and the name-less one shows up in the UI
+// forever as "Unnamed child". So before creating a brand-new row, this
+// looks for a single existing partial record the new fact could complete
+// — an unnamed row at the stated age, or the one unnamed/ageless row on
+// file when the new fact has no matching field of its own to key off of.
+// It only auto-attaches when exactly one such candidate exists; with two
+// or more (e.g. twins, or several kids with no name yet) it's genuinely
+// ambiguous, so it plays it safe and inserts a new row instead of guessing.
 function mergeChildren(userId, existingChildren, newChildren) {
   for (const c of newChildren || []) {
     if (!c) continue;
+    const hasAge = c.age != null;
+
     if (c.name) {
-      const existing = db.prepare("SELECT id FROM children WHERE user_id = ? AND name = ?").get(userId, c.name);
-      if (existing) {
-        if (c.age != null) {
-          db.prepare("UPDATE children SET age = ?, updated_at = datetime('now') WHERE id = ?").run(c.age, existing.id);
+      const existingByName = db.prepare("SELECT id FROM children WHERE user_id = ? AND name = ?").get(userId, c.name);
+      if (existingByName) {
+        if (hasAge) {
+          db.prepare("UPDATE children SET age = ?, updated_at = datetime('now') WHERE id = ?").run(c.age, existingByName.id);
         }
+        continue;
+      }
+
+      let candidate = null;
+      if (hasAge) {
+        const matches = db
+          .prepare("SELECT id FROM children WHERE user_id = ? AND name IS NULL AND age = ?")
+          .all(userId, c.age);
+        if (matches.length === 1) candidate = matches[0];
+      } else {
+        const nameless = db.prepare("SELECT id FROM children WHERE user_id = ? AND name IS NULL").all(userId);
+        if (nameless.length === 1) candidate = nameless[0];
+      }
+
+      if (candidate) {
+        db.prepare("UPDATE children SET name = ?, updated_at = datetime('now') WHERE id = ?").run(c.name, candidate.id);
       } else {
         db.prepare("INSERT INTO children (user_id, name, age) VALUES (?, ?, ?)").run(userId, c.name, c.age ?? null);
       }
-    } else if (c.age != null) {
+    } else if (hasAge) {
       // No name given — only add if we don't already have an unnamed child at this age,
       // to avoid piling up duplicate rows every time an age gets re-mentioned.
-      const existing = db
+      const existingNameless = db
         .prepare("SELECT id FROM children WHERE user_id = ? AND name IS NULL AND age = ?")
         .get(userId, c.age);
-      if (!existing) {
+      if (existingNameless) continue;
+
+      // Otherwise, does this age belong to a child we already know by name
+      // but never got an age for yet?
+      const agelessNamed = db
+        .prepare("SELECT id FROM children WHERE user_id = ? AND name IS NOT NULL AND age IS NULL")
+        .all(userId);
+      if (agelessNamed.length === 1) {
+        db.prepare("UPDATE children SET age = ?, updated_at = datetime('now') WHERE id = ?").run(c.age, agelessNamed[0].id);
+      } else {
         db.prepare("INSERT INTO children (user_id, name, age) VALUES (?, NULL, ?)").run(userId, c.age);
       }
     }
@@ -94,7 +133,7 @@ router.post("/chat", requireAuth, async (req, res) => {
     "UPDATE family_notes SET topics_discussed = ?, notes = ?, last_message_at = datetime('now'), updated_at = datetime('now') WHERE user_id = ?"
   ).run(JSON.stringify(mergedTopics), JSON.stringify(mergedNotes), req.userId);
 
-  const updatedChildren = db.prepare("SELECT name, age FROM children WHERE user_id = ? ORDER BY id").all(req.userId);
+  const updatedChildren = db.prepare("SELECT id, name, age FROM children WHERE user_id = ? ORDER BY id").all(req.userId);
 
   res.json({
     reply: result.reply,

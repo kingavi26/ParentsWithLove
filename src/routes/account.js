@@ -71,4 +71,70 @@ router.delete("/account", requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// Fix or remove one remembered child directly, rather than only being able
+// to nuke every remembered fact via full account deletion. Mainly exists
+// for the "Unnamed child" case: fact-extraction sometimes learns an age
+// without a name (or vice versa) from a single message, and while
+// mergeChildren (src/routes/chat.js) now tries to auto-attach a later
+// name/age onto that same row when there's exactly one unambiguous
+// candidate, it deliberately won't guess when that's ambiguous (e.g. two
+// kids with no name yet) — so a parent needs a way to fix it by hand too.
+router.patch("/account/children/:id", requireAuth, (req, res) => {
+  const childId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(childId)) {
+    return res.status(400).json({ error: "Invalid child id." });
+  }
+
+  const existing = db.prepare("SELECT id, name, age FROM children WHERE id = ? AND user_id = ?").get(childId, req.userId);
+  if (!existing) {
+    return res.status(404).json({ error: "No remembered child with that id." });
+  }
+
+  const body = req.body || {};
+  let nextName = existing.name;
+  if (body.name !== undefined) {
+    const trimmed = String(body.name || "").trim();
+    nextName = trimmed || null;
+  }
+
+  let nextAge = existing.age;
+  if (body.age !== undefined) {
+    if (body.age === null || body.age === "") {
+      nextAge = null;
+    } else {
+      const parsed = Number(body.age);
+      if (!Number.isInteger(parsed) || parsed < 0 || parsed > 17) {
+        return res.status(400).json({ error: "Age must be a whole number between 0 and 17." });
+      }
+      nextAge = parsed;
+    }
+  }
+
+  if (nextName == null && nextAge == null) {
+    return res.status(400).json({ error: "A remembered child needs a name or an age — delete it instead if it's wrong." });
+  }
+
+  db.prepare("UPDATE children SET name = ?, age = ?, updated_at = datetime('now') WHERE id = ?").run(
+    nextName,
+    nextAge,
+    existing.id
+  );
+
+  res.json({ ok: true, child: { id: existing.id, name: nextName, age: nextAge } });
+});
+
+router.delete("/account/children/:id", requireAuth, (req, res) => {
+  const childId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(childId)) {
+    return res.status(400).json({ error: "Invalid child id." });
+  }
+
+  const result = db.prepare("DELETE FROM children WHERE id = ? AND user_id = ?").run(childId, req.userId);
+  if (result.changes === 0) {
+    return res.status(404).json({ error: "No remembered child with that id." });
+  }
+
+  res.json({ ok: true });
+});
+
 module.exports = router;

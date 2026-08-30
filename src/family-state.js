@@ -17,7 +17,7 @@ function normalizeNotes(raw) {
 // at all (family_notes.last_message_at — null until their first real chat
 // message, distinct from the row being created at signup).
 function loadFamilyState(userId) {
-  const children = db.prepare("SELECT name, age FROM children WHERE user_id = ? ORDER BY id").all(userId);
+  const children = db.prepare("SELECT id, name, age FROM children WHERE user_id = ? ORDER BY id").all(userId);
   const notesRow = db
     .prepare("SELECT topics_discussed, notes, last_message_at FROM family_notes WHERE user_id = ?")
     .get(userId);
