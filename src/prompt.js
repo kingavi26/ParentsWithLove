@@ -2,12 +2,19 @@
 // these to change how the bot behaves for everyone), plus a per-family
 // context block generated fresh from whatever is stored about THIS user.
 //
-// BASE_RULES below encodes Avi's full parenting framework (love-first,
-// understand-before-guide, regulate-if-needed, validate, warm boundaries,
-// repair, etc). Edit it freely — nothing else in the app needs to change
-// when you do.
+// DEFAULT_BASE_RULES below encodes Avi's full parenting framework
+// (love-first, understand-before-guide, regulate-if-needed, validate, warm
+// boundaries, repair, etc). Edit it freely — nothing else in the app needs
+// to change when you do. This is the fallback, source-controlled version;
+// the admin dashboard (src/routes/admin.js) can also save a *live* override
+// into the app_settings table, which — since that table lives on the
+// persistent disk — survives redeploys and takes effect immediately with
+// no code change or GitHub upload needed. getActiveBaseRules() below always
+// prefers that override when one is saved.
 
-const BASE_RULES = `You are the parenting help assistant for pwl7, a site that helps parents of young and school-age kids.
+const { db } = require("./db");
+
+const DEFAULT_BASE_RULES = `You are the parenting help assistant for pwl7, a site that helps parents of young and school-age kids.
 
 PURPOSE
 Help parents understand their child's behavior, emotions, development, and needs, and give warm, practical, research-informed guidance that supports love, emotional safety, healthy boundaries, independence, and connection.
@@ -139,6 +146,30 @@ I am loved. I am safe. I am understood. My feelings and actions matter. I can le
 
 Use what you already know about this family (below) naturally, the way a person who remembered would — don't recite it back like a form, and don't over-mention it. Never invent facts about this specific family that weren't actually told to you.`;
 
+const BASE_RULES_KEY = "base_rules";
+
+// The currently-in-effect framework text: an admin override if one has
+// been saved, otherwise the source-controlled default above.
+function getActiveBaseRules() {
+  const row = db.prepare("SELECT value FROM app_settings WHERE key = ?").get(BASE_RULES_KEY);
+  return row && row.value ? row.value : DEFAULT_BASE_RULES;
+}
+
+function isBaseRulesCustomized() {
+  return Boolean(db.prepare("SELECT 1 FROM app_settings WHERE key = ?").get(BASE_RULES_KEY));
+}
+
+function setBaseRulesOverride(text) {
+  db.prepare(
+    "INSERT INTO app_settings (key, value, updated_at) VALUES (?, ?, datetime('now')) " +
+      "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')"
+  ).run(BASE_RULES_KEY, text);
+}
+
+function clearBaseRulesOverride() {
+  db.prepare("DELETE FROM app_settings WHERE key = ?").run(BASE_RULES_KEY);
+}
+
 // Formats a stored timestamp ("YYYY-MM-DD" or a SQLite "YYYY-MM-DD HH:MM:SS")
 // as a readable date. Returns null for anything missing/unparseable so
 // callers can just skip the date rather than printing "Invalid Date".
@@ -192,7 +223,15 @@ function buildSystemPrompt(familyState) {
   // it actually reason about "last time was 3 days ago" / "a few weeks ago"
   // instead of just repeating a raw date back.
   const today = formatDate(new Date().toISOString());
-  return `${BASE_RULES}\n\nToday's date is ${today}.\n\nWhat you know about this family:\n${buildFamilyContext(familyState)}`;
+  return `${getActiveBaseRules()}\n\nToday's date is ${today}.\n\nWhat you know about this family:\n${buildFamilyContext(familyState)}`;
 }
 
-module.exports = { BASE_RULES, buildSystemPrompt, buildFamilyContext };
+module.exports = {
+  DEFAULT_BASE_RULES,
+  getActiveBaseRules,
+  isBaseRulesCustomized,
+  setBaseRulesOverride,
+  clearBaseRulesOverride,
+  buildSystemPrompt,
+  buildFamilyContext
+};

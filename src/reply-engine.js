@@ -1,4 +1,4 @@
-const { buildSystemPrompt, BASE_RULES } = require("./prompt");
+const { buildSystemPrompt, getActiveBaseRules } = require("./prompt");
 
 const hasRealKey = Boolean(process.env.OPENAI_API_KEY);
 
@@ -156,7 +156,7 @@ async function reviewSession(history) {
 
 The assistant is supposed to follow this framework:
 """
-${BASE_RULES}
+${getActiveBaseRules()}
 """
 
 Judge the assistant's actual replies against BOTH (a) whether it followed its own framework, and (b) whether that framework's guidance, as applied here, actually matches what solid child development research would support. Push back if the research would qualify, refine, or disagree with something the assistant said or the framework itself — don't just check boxes.

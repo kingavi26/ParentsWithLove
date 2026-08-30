@@ -58,6 +58,17 @@ function initDb() {
       message_count INTEGER,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- Small key/value store for admin-editable app config that needs to
+    -- survive redeploys. Right now this holds one key, "base_rules" — an
+    -- admin-set override of the BASE_RULES framework text in src/prompt.js
+    -- — but the shape is generic so future admin-editable settings can
+    -- reuse it without another migration.
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Migration path for a users table created before social login existed
@@ -70,6 +81,12 @@ function initDb() {
   }
   if (!columns.includes("facebook_id")) {
     db.exec("ALTER TABLE users ADD COLUMN facebook_id TEXT");
+  }
+  // Lets an admin suspend an account (see src/routes/admin.js) without
+  // deleting it — blocks both password and social login, and immediately
+  // invalidates any session already in progress (see requireAuth).
+  if (!columns.includes("suspended")) {
+    db.exec("ALTER TABLE users ADD COLUMN suspended INTEGER NOT NULL DEFAULT 0");
   }
 
   // Migration path for a family_notes table created before conversations

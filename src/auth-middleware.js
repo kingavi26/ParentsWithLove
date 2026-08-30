@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { db } = require("./db");
 
 const SECRET = process.env.SESSION_SECRET || "dev-secret-change-me";
 const COOKIE_NAME = "pwl7_session";
@@ -27,13 +28,30 @@ function clearSession(res) {
 function requireAuth(req, res, next) {
   const token = req.cookies && req.cookies[COOKIE_NAME];
   if (!token) return res.status(401).json({ error: "Not logged in." });
+
+  let payload;
   try {
-    const payload = jwt.verify(token, SECRET);
-    req.userId = payload.userId;
-    next();
+    payload = jwt.verify(token, SECRET);
   } catch (err) {
     return res.status(401).json({ error: "Your session expired. Please log in again." });
   }
+
+  // A DB lookup on every authenticated request (cheap — SQLite, indexed
+  // primary key) rather than trusting the JWT alone, so an admin
+  // suspending or deleting an account takes effect immediately instead of
+  // waiting up to 30 days for that account's existing session to expire.
+  const user = db.prepare("SELECT id, suspended FROM users WHERE id = ?").get(payload.userId);
+  if (!user) {
+    clearSession(res);
+    return res.status(401).json({ error: "Account no longer exists." });
+  }
+  if (user.suspended) {
+    clearSession(res);
+    return res.status(403).json({ error: "This account has been suspended." });
+  }
+
+  req.userId = payload.userId;
+  next();
 }
 
 module.exports = { requireAuth, issueSession, clearSession };
