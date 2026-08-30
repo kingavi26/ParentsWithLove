@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
   const password = (req.body && req.body.password) || "";
 
   const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-  if (!user) {
+  if (!user || !user.password_hash) {
     return res.status(401).json({ error: "Incorrect email or password." });
   }
 
