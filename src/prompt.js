@@ -139,7 +139,18 @@ I am loved. I am safe. I am understood. My feelings and actions matter. I can le
 
 Use what you already know about this family (below) naturally, the way a person who remembered would — don't recite it back like a form, and don't over-mention it. Never invent facts about this specific family that weren't actually told to you.`;
 
-function buildFamilyContext({ children, topics_discussed, notes }) {
+// Formats a stored timestamp ("YYYY-MM-DD" or a SQLite "YYYY-MM-DD HH:MM:SS")
+// as a readable date. Returns null for anything missing/unparseable so
+// callers can just skip the date rather than printing "Invalid Date".
+function formatDate(stored) {
+  if (!stored) return null;
+  const datePart = String(stored).slice(0, 10);
+  const d = new Date(`${datePart}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+}
+
+function buildFamilyContext({ children, topics_discussed, notes, last_conversation_at }) {
   const hasChildren = children && children.length > 0;
   const hasTopics = topics_discussed && topics_discussed.length > 0;
   const hasNotes = notes && notes.length > 0;
@@ -149,6 +160,12 @@ function buildFamilyContext({ children, topics_discussed, notes }) {
   }
 
   const lines = [];
+
+  const lastConversationDate = formatDate(last_conversation_at);
+  if (lastConversationDate) {
+    lines.push(`Your last conversation with this family was on ${lastConversationDate}.`);
+  }
+
   if (hasChildren) {
     const desc = children
       .map((c) => `${c.name || "a child"}${c.age != null ? ` (age ${c.age})` : ""}`)
@@ -156,16 +173,26 @@ function buildFamilyContext({ children, topics_discussed, notes }) {
     lines.push(`Children: ${desc}`);
   }
   if (hasTopics) {
-    lines.push(`Topics already discussed with this parent: ${topics_discussed.join(", ")}`);
+    const desc = topics_discussed
+      .map((t) => (t.lastDiscussedAt ? `${t.topic} (last discussed ${formatDate(t.lastDiscussedAt)})` : t.topic))
+      .join(", ");
+    lines.push(`Topics already discussed with this parent: ${desc}`);
   }
   if (hasNotes) {
-    lines.push(`Other notes from past conversations: ${notes.join("; ")}`);
+    const desc = notes
+      .map((n) => (n.date ? `${n.text} (${formatDate(n.date)})` : n.text))
+      .join("; ");
+    lines.push(`Other notes from past conversations: ${desc}`);
   }
   return lines.join("\n");
 }
 
 function buildSystemPrompt(familyState) {
-  return `${BASE_RULES}\n\nWhat you know about this family:\n${buildFamilyContext(familyState)}`;
+  // The model has no innate sense of "now" — spelling out today's date lets
+  // it actually reason about "last time was 3 days ago" / "a few weeks ago"
+  // instead of just repeating a raw date back.
+  const today = formatDate(new Date().toISOString());
+  return `${BASE_RULES}\n\nToday's date is ${today}.\n\nWhat you know about this family:\n${buildFamilyContext(familyState)}`;
 }
 
 module.exports = { BASE_RULES, buildSystemPrompt, buildFamilyContext };

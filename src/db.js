@@ -38,6 +38,7 @@ function initDb() {
       user_id INTEGER PRIMARY KEY REFERENCES users(id),
       topics_discussed TEXT NOT NULL DEFAULT '[]',
       notes TEXT NOT NULL DEFAULT '[]',
+      last_message_at TEXT,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -69,6 +70,14 @@ function initDb() {
   }
   if (!columns.includes("facebook_id")) {
     db.exec("ALTER TABLE users ADD COLUMN facebook_id TEXT");
+  }
+
+  // Migration path for a family_notes table created before conversations
+  // were timestamped. Left NULL for existing rows (we genuinely don't know
+  // when their last message was) rather than backfilling a guess.
+  const familyNotesColumns = db.prepare("PRAGMA table_info(family_notes)").all().map((c) => c.name);
+  if (!familyNotesColumns.includes("last_message_at")) {
+    db.exec("ALTER TABLE family_notes ADD COLUMN last_message_at TEXT");
   }
 }
 
