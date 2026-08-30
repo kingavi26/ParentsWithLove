@@ -58,7 +58,7 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/me", requireAuth, (req, res) => {
-  const user = db.prepare("SELECT id, email FROM users WHERE id = ?").get(req.userId);
+  const user = db.prepare("SELECT id, email, password_hash FROM users WHERE id = ?").get(req.userId);
   if (!user) {
     clearSession(res);
     return res.status(401).json({ error: "Account no longer exists." });
@@ -68,6 +68,7 @@ router.get("/me", requireAuth, (req, res) => {
 
   res.json({
     email: user.email,
+    hasPassword: Boolean(user.password_hash),
     children: familyState.children,
     topics_discussed: familyState.topics_discussed,
     notes: familyState.notes,
