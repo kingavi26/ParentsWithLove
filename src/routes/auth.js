@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const { db } = require("../db");
 const { requireAuth, issueSession, clearSession } = require("../auth-middleware");
+const { loadFamilyState } = require("../family-state");
 
 const router = express.Router();
 
@@ -63,14 +64,14 @@ router.get("/me", requireAuth, (req, res) => {
     return res.status(401).json({ error: "Account no longer exists." });
   }
 
-  const children = db.prepare("SELECT name, age FROM children WHERE user_id = ? ORDER BY id").all(req.userId);
-  const notesRow = db.prepare("SELECT topics_discussed, notes FROM family_notes WHERE user_id = ?").get(req.userId);
+  const familyState = loadFamilyState(req.userId);
 
   res.json({
     email: user.email,
-    children,
-    topics_discussed: notesRow ? JSON.parse(notesRow.topics_discussed) : [],
-    notes: notesRow ? JSON.parse(notesRow.notes) : []
+    children: familyState.children,
+    topics_discussed: familyState.topics_discussed,
+    notes: familyState.notes,
+    last_conversation_at: familyState.last_conversation_at
   });
 });
 

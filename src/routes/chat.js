@@ -2,17 +2,40 @@ const express = require("express");
 const { db } = require("../db");
 const { requireAuth } = require("../auth-middleware");
 const { getReply, isDemoMode } = require("../reply-engine");
+const { loadFamilyState } = require("../family-state");
 
 const router = express.Router();
 
-function loadFamilyState(userId) {
-  const children = db.prepare("SELECT name, age FROM children WHERE user_id = ? ORDER BY id").all(userId);
-  const notesRow = db.prepare("SELECT topics_discussed, notes FROM family_notes WHERE user_id = ?").get(userId);
-  return {
-    children,
-    topics_discussed: notesRow ? JSON.parse(notesRow.topics_discussed) : [],
-    notes: notesRow ? JSON.parse(notesRow.notes) : []
-  };
+function todayISO() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD, server time
+}
+
+// existingTopics/newTopics: {topic, lastDiscussedAt}[] and string[] respectively.
+// Re-mentioning a topic just refreshes its date rather than adding a duplicate.
+function mergeTopics(existingTopics, newTopics) {
+  const today = todayISO();
+  const byTopic = new Map(existingTopics.map((t) => [t.topic, t.lastDiscussedAt]));
+  for (const topic of newTopics || []) {
+    if (!topic) continue;
+    byTopic.set(topic, today);
+  }
+  const merged = Array.from(byTopic, ([topic, lastDiscussedAt]) => ({ topic, lastDiscussedAt }));
+  merged.sort((a, b) => String(b.lastDiscussedAt || "").localeCompare(String(a.lastDiscussedAt || "")));
+  return merged.slice(0, 20);
+}
+
+// existingNotes: {text, date}[]. New notes are one-off observations, so
+// unlike topics they're just appended (deduped by exact text), not refreshed.
+function mergeNotes(existingNotes, newNotes) {
+  const today = todayISO();
+  const seen = new Set(existingNotes.map((n) => n.text));
+  const merged = existingNotes.slice();
+  for (const text of newNotes || []) {
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    merged.push({ text, date: today });
+  }
+  return merged.slice(-30);
 }
 
 function mergeChildren(userId, existingChildren, newChildren) {
@@ -64,11 +87,11 @@ router.post("/chat", requireAuth, async (req, res) => {
 
   mergeChildren(req.userId, familyState.children, extracted.children);
 
-  const mergedTopics = Array.from(new Set([...(familyState.topics_discussed || []), ...(extracted.topics || [])])).slice(-20);
-  const mergedNotes = Array.from(new Set([...(familyState.notes || []), ...(extracted.notes || [])])).slice(-30);
+  const mergedTopics = mergeTopics(familyState.topics_discussed, extracted.topics);
+  const mergedNotes = mergeNotes(familyState.notes, extracted.notes);
 
   db.prepare(
-    "UPDATE family_notes SET topics_discussed = ?, notes = ?, updated_at = datetime('now') WHERE user_id = ?"
+    "UPDATE family_notes SET topics_discussed = ?, notes = ?, last_message_at = datetime('now'), updated_at = datetime('now') WHERE user_id = ?"
   ).run(JSON.stringify(mergedTopics), JSON.stringify(mergedNotes), req.userId);
 
   const updatedChildren = db.prepare("SELECT name, age FROM children WHERE user_id = ? ORDER BY id").all(req.userId);
@@ -79,7 +102,10 @@ router.post("/chat", requireAuth, async (req, res) => {
     remembered: {
       children: updatedChildren,
       topics_discussed: mergedTopics,
-      notes: mergedNotes
+      notes: mergedNotes,
+      // The timestamp from BEFORE this message (i.e. when the previous
+      // conversation left off) — so the UI can say "last time was on X".
+      last_conversation_at: familyState.last_conversation_at
     }
   });
 });
