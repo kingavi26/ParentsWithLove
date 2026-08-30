@@ -412,6 +412,12 @@ h1 {
   margin: 0 0 0.75rem;
 }
 
+.memory-last-active {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: -0.4rem 0 0.9rem;
+}
+
 .memory-section { margin-bottom: 0.9rem; }
 .memory-section:last-child { margin-bottom: 0; }
 

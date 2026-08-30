@@ -23,6 +23,7 @@
   var chatInput = document.getElementById("chat-input");
   var chatSend = document.getElementById("chat-send");
 
+  var memoryLastActive = document.getElementById("memory-last-active");
   var memoryChildren = document.getElementById("memory-children");
   var memoryTopics = document.getElementById("memory-topics");
   var memoryNotes = document.getElementById("memory-notes");
@@ -195,15 +196,37 @@
       });
   }
 
+  // Accepts either "YYYY-MM-DD" or a SQLite "YYYY-MM-DD HH:MM:SS" timestamp.
+  // Returns null (rather than "Invalid Date") for anything missing/bad.
+  function formatShortDate(stored) {
+    if (!stored) return null;
+    var d = new Date(stored.slice(0, 10) + "T00:00:00Z");
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
   function greet(data) {
     var hasHistory = data.children.length || data.topics_discussed.length || data.notes.length;
+    var lastDate = formatShortDate(data.last_conversation_at);
     var text = hasHistory
-      ? "Welcome back! I remember a bit about your family already — feel free to keep going, or ask something new."
+      ? "Welcome back!" +
+        (lastDate ? " We last talked on " + lastDate + "." : "") +
+        " I remember a bit about your family already — feel free to keep going, or ask something new."
       : "Hi! I'm the parenting help chatbot. Tell me what's going on, or ask about tantrums, screen time, bedtime, or sibling conflict.";
     addMessage(text, "bot");
   }
 
   function renderMemory(data) {
+    if (memoryLastActive) {
+      var lastActiveDate = formatShortDate(data.last_conversation_at);
+      if (lastActiveDate) {
+        memoryLastActive.hidden = false;
+        memoryLastActive.textContent = "Last conversation: " + lastActiveDate;
+      } else {
+        memoryLastActive.hidden = true;
+      }
+    }
+
     if (data.children && data.children.length) {
       memoryChildren.innerHTML = "";
       data.children.forEach(function (c) {
@@ -221,7 +244,9 @@
       data.topics_discussed.forEach(function (t) {
         var chip = document.createElement("span");
         chip.className = "chip";
-        chip.textContent = t;
+        var topic = typeof t === "string" ? t : t.topic;
+        var when = typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null;
+        chip.textContent = when ? topic + " (" + when + ")" : topic;
         memoryTopics.appendChild(chip);
       });
     } else {
@@ -233,7 +258,9 @@
       data.notes.forEach(function (n) {
         var item = document.createElement("div");
         item.className = "note-item";
-        item.textContent = n;
+        var text = typeof n === "string" ? n : n.text;
+        var when = typeof n === "object" && n ? formatShortDate(n.date) : null;
+        item.textContent = when ? text + " — " + when : text;
         memoryNotes.appendChild(item);
       });
     } else {
