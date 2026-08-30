@@ -45,29 +45,9 @@ router.post("/session/review", requireAuth, async (req, res) => {
   res.json(review);
 });
 
-// Opt-in view across ALL users' session reviews, for spotting patterns to
-// fold back into BASE_RULES. Disabled unless ADMIN_KEY is set in the
-// environment; pass it back as the x-admin-key header to use this.
-router.get("/admin/reviews", (req, res) => {
-  if (!process.env.ADMIN_KEY) return res.status(404).end();
-  if (req.get("x-admin-key") !== process.env.ADMIN_KEY) {
-    return res.status(403).json({ error: "Forbidden" });
-  }
-
-  const rows = db.prepare("SELECT * FROM session_reviews ORDER BY id DESC LIMIT 200").all();
-  const reviews = rows.map((r) => ({
-    id: r.id,
-    userId: r.user_id,
-    overallScore: r.overall_score,
-    dimensionScores: JSON.parse(r.dimension_scores),
-    strengths: JSON.parse(r.strengths),
-    concerns: JSON.parse(r.concerns),
-    missedOpportunities: JSON.parse(r.missed_opportunities),
-    suggestedPromptChanges: JSON.parse(r.suggested_prompt_changes),
-    messageCount: r.message_count,
-    createdAt: r.created_at
-  }));
-  res.json({ reviews });
-});
+// The old ADMIN_KEY-gated GET /admin/reviews used to live here. It's been
+// replaced by src/routes/admin.js's GET /api/admin/reviews, which sits
+// behind real admin login (see src/admin-auth.js) instead of a shared
+// secret in a URL/header. The ADMIN_KEY env var is no longer read anywhere.
 
 module.exports = router;

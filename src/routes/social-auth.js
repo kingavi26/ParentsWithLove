@@ -95,6 +95,9 @@ router.get("/auth/google/callback", async (req, res) => {
       email: profile.email,
       emailVerified: profile.emailVerified
     });
+    if (user.suspended) {
+      return redirectWithError(res, "This account has been suspended.");
+    }
     issueSession(res, user.id);
     res.redirect("/");
   } catch (err) {
@@ -127,6 +130,9 @@ router.get("/auth/facebook/callback", async (req, res) => {
       email: profile.email,
       emailVerified: profile.emailVerified
     });
+    if (user.suspended) {
+      return redirectWithError(res, "This account has been suspended.");
+    }
     issueSession(res, user.id);
     res.redirect("/");
   } catch (err) {
