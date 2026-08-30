@@ -7,12 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Karla:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Karla:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
+<!-- "pwl-app" scopes the Held Steady color palette (defined in styles.css)
+     to this page only, so the admin dashboard (admin.html) keeps its
+     original palette even though both pages share styles.css. -->
+<body class="pwl-app">
   <div class="wrap">
     <div class="page-head">
       <div class="eyebrow">pwl7 &middot; prototype</div>
@@ -109,17 +112,17 @@
 
           <div class="memory-section">
             <div class="memory-label">Children</div>
-            <div id="memory-children"><div class="memory-empty">Nothing yet</div></div>
+            <div id="memory-children" class="pill-row"><div class="memory-empty">Nothing yet</div></div>
           </div>
 
           <div class="memory-section">
             <div class="memory-label">Topics discussed</div>
-            <div id="memory-topics" class="chip-row"><div class="memory-empty">Nothing yet</div></div>
+            <div id="memory-topics" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
           </div>
 
           <div class="memory-section">
             <div class="memory-label">Notes</div>
-            <div id="memory-notes"><div class="memory-empty">Nothing yet</div></div>
+            <div id="memory-notes" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
           </div>
         </aside>
       </div>

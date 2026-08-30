@@ -15,6 +15,37 @@
   --shadow: 0 1px 2px rgba(30, 30, 20, 0.04), 0 8px 24px rgba(30, 30, 20, 0.06);
 }
 
+/* ==========================================================================
+   "Held Steady" — the parent-facing app's visual identity.
+   Scoped to <body class="pwl-app"> (index.html only) so every rule below
+   still just reads the tokens above by name (--bg, --text, --accent, ...) —
+   the admin dashboard (admin.html) has no .pwl-app body class, so it keeps
+   reading the plain :root values and is untouched by any of this.
+   To retune the palette later, edit ONLY the values in this block — every
+   component (auth card, chat bubbles, memory sidebar, buttons) is built on
+   top of these named tokens rather than hardcoded colors.
+   ========================================================================== */
+body.pwl-app {
+  --bg: #f5f0e3;              /* page ground: warm parchment, not cool grey */
+  --surface: #fffdf7;         /* cards: warm paper */
+  --surface-sunken: #efe7d4;  /* input rows, dividers: a shade deeper parchment */
+  --text: #283227;            /* ink: warm charcoal-green, never pure black */
+  --muted: #62705f;           /* soft ink: captions, labels, timestamps */
+  --border: #e3dac2;          /* hairlines: warm, not cool grey */
+  --accent: #4f7358;          /* sage: primary brand color */
+  --accent-contrast: #fdfbf3; /* warm white, for text on the sage buttons */
+  --bubble-user-bg: #fffdf7;  /* the parent's own words: quiet paper, bordered */
+  --bubble-user-text: #283227;
+  --bubble-bot-bg: #e6efe4;   /* the assistant's replies: a soft sage wash */
+  --bubble-bot-text: #283227;
+
+  /* new tokens, used only by the "corkboard" memory sidebar */
+  --honey: #c98a3a;
+  --honey-tint: #f3e2c4;
+  --plum: #93607b;
+  --note-bg: #fffce9;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -170,7 +201,7 @@ h1 {
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #fff;
-  color: var(--ink, #1f2420);
+  color: var(--text);
   font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
@@ -306,7 +337,7 @@ h1 {
 }
 
 .msg.bot { align-self: flex-start; background: var(--bubble-bot-bg); color: var(--bubble-bot-text); border-bottom-left-radius: 4px; }
-.msg.user { align-self: flex-end; background: var(--bubble-user-bg); color: var(--bubble-user-text); border-bottom-right-radius: 4px; }
+.msg.user { align-self: flex-end; background: var(--bubble-user-bg); color: var(--bubble-user-text); border: 1px solid var(--border); border-bottom-right-radius: 4px; }
 .msg.pending { opacity: 0.6; }
 
 .chat-inputrow {
@@ -319,6 +350,7 @@ h1 {
 
 .chat-input {
   flex: 1;
+  min-width: 0; /* lets the input actually shrink on narrow phones instead of pushing Send off the edge */
   padding: 0.65rem 0.9rem;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -393,12 +425,18 @@ h1 {
 
 .rate-session-link:hover { color: var(--text); }
 
-/* ---------- memory sidebar ---------- */
+/* ---------- memory sidebar: a corkboard, not a table ---------- */
+/* This is the one part of the redesign with a genuinely new layout idea:
+   each remembered topic/note is a small pinned card rather than a data
+   row, because what's here is closer to a family's own bulletin board
+   than a database export. */
 
 .memory-card {
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--surface);
+  background: var(--honey-tint);
+  background-image: radial-gradient(color-mix(in srgb, var(--text) 8%, transparent) 1px, transparent 1px);
+  background-size: 14px 14px;
   padding: 1.1rem;
   box-shadow: var(--shadow);
 }
@@ -413,18 +451,88 @@ h1 {
 }
 
 .memory-last-active {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin: -0.4rem 0 0.9rem;
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #5b4420;
+  background: color-mix(in srgb, var(--honey) 30%, var(--surface));
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  margin: -0.2rem 0 0.9rem;
 }
+
+/* Same recurring cascade bug this codebase has hit three times before
+   (.btn-social, .modal-backdrop, .modal-backdrop again): setting an
+   explicit `display` above beats the browser's default [hidden] rule
+   regardless of source order. Restore it explicitly. */
+.memory-last-active[hidden] { display: none; }
 
 .memory-section { margin-bottom: 0.9rem; }
 .memory-section:last-child { margin-bottom: 0; }
 
-.memory-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.35rem; }
+.memory-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
 
 .memory-empty { font-size: 0.83rem; color: var(--muted); font-style: italic; }
 
+.pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.kid-pill {
+  font-size: 0.83rem;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.pin-list { display: flex; flex-direction: column; gap: 0.55rem; }
+
+.pin-note {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  box-shadow: 0 6px 12px -8px rgba(40, 50, 39, 0.35);
+  transition: transform 0.15s ease;
+}
+
+.pin-note:hover { transform: rotate(0deg) !important; }
+
+.pin-note::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--plum);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.pin-list > :nth-child(odd) { transform: rotate(-1deg); }
+.pin-list > :nth-child(even) { transform: rotate(0.9deg); }
+
+.pin-note.note-pin {
+  background: var(--note-bg);
+  font-family: "Caveat", cursive;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: #4a3a1c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-note { transition: none; }
+}
+
+/* .chip-row/.chip/.child-row/.note-item below are the ORIGINAL (pre-Held
+   Steady) memory styles. The parent-facing app (app.js) no longer uses
+   them — it renders .pill-row/.kid-pill/.pin-list/.pin-note now — but the
+   admin dashboard's user-detail modal (admin.js) still builds this exact
+   markup for its read-only view of a family's data, so these stay as-is,
+   unscoped, reading the plain :root tokens admin.html was already using. */
 .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
 .chip {

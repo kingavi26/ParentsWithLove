@@ -256,10 +256,10 @@
     if (data.children && data.children.length) {
       memoryChildren.innerHTML = "";
       data.children.forEach(function (c) {
-        var row = document.createElement("div");
-        row.className = "child-row";
-        row.textContent = (c.name || "Unnamed child") + (c.age != null ? " — age " + c.age : "");
-        memoryChildren.appendChild(row);
+        var pill = document.createElement("span");
+        pill.className = "kid-pill";
+        pill.textContent = (c.name || "Unnamed child") + (c.age != null ? " · " + c.age : "");
+        memoryChildren.appendChild(pill);
       });
     } else {
       memoryChildren.innerHTML = '<div class="memory-empty">Nothing yet</div>';
@@ -268,12 +268,12 @@
     if (data.topics_discussed && data.topics_discussed.length) {
       memoryTopics.innerHTML = "";
       data.topics_discussed.forEach(function (t) {
-        var chip = document.createElement("span");
-        chip.className = "chip";
+        var pin = document.createElement("div");
+        pin.className = "pin-note";
         var topic = typeof t === "string" ? t : t.topic;
         var when = typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null;
-        chip.textContent = when ? topic + " (" + when + ")" : topic;
-        memoryTopics.appendChild(chip);
+        pin.textContent = when ? topic + " — last talked about " + when : topic;
+        memoryTopics.appendChild(pin);
       });
     } else {
       memoryTopics.innerHTML = '<div class="memory-empty">Nothing yet</div>';
@@ -282,12 +282,12 @@
     if (data.notes && data.notes.length) {
       memoryNotes.innerHTML = "";
       data.notes.forEach(function (n) {
-        var item = document.createElement("div");
-        item.className = "note-item";
+        var pin = document.createElement("div");
+        pin.className = "pin-note note-pin";
         var text = typeof n === "string" ? n : n.text;
         var when = typeof n === "object" && n ? formatShortDate(n.date) : null;
-        item.textContent = when ? text + " — " + when : text;
-        memoryNotes.appendChild(item);
+        pin.textContent = when ? text + " — " + when : text;
+        memoryNotes.appendChild(pin);
       });
     } else {
       memoryNotes.innerHTML = '<div class="memory-empty">Nothing yet</div>';
