@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pwl7 admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Karla:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="wrap admin-wrap">
+    <div class="page-head">
+      <div class="eyebrow">pwl7 &middot; admin</div>
+      <h1>Admin dashboard</h1>
+      <p>Not part of the parent-facing app &mdash; this page is for managing accounts and the assistant's framework.</p>
+    </div>
+
+    <!-- Not configured -->
+    <div id="admin-not-configured" class="demo-banner" hidden>
+      Admin isn't configured on this deploy yet. Set <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> as
+      environment variables on the server to enable this dashboard.
+    </div>
+
+    <!-- Login screen -->
+    <section id="admin-login-screen" hidden>
+      <div class="auth-card">
+        <div id="admin-login-error" class="form-error"></div>
+        <form id="admin-login-form">
+          <div class="field">
+            <label for="admin-email">Admin email</label>
+            <input id="admin-email" type="email" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label for="admin-password">Admin password</label>
+            <input id="admin-password" type="password" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn-primary" id="admin-login-submit">Log in</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="admin-dashboard" hidden>
+      <div class="app-header">
+        <span class="eyebrow">Signed in as admin</span>
+        <div class="app-header-actions">
+          <button type="button" class="logout-link" id="admin-logout-btn">Log out</button>
+        </div>
+      </div>
+
+      <div class="admin-tabs">
+        <button type="button" class="admin-tab active" data-tab="overview">Overview</button>
+        <button type="button" class="admin-tab" data-tab="users">Users</button>
+        <button type="button" class="admin-tab" data-tab="reviews">Reviews</button>
+        <button type="button" class="admin-tab" data-tab="prompt">Prompt</button>
+      </div>
+
+      <!-- Overview -->
+      <div class="admin-panel" id="admin-panel-overview">
+        <div class="admin-stat-grid" id="admin-stats"></div>
+        <div class="admin-card">
+          <h2>Recent signups</h2>
+          <div id="admin-recent-signups"></div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="admin-panel" id="admin-panel-users" hidden>
+        <div class="admin-card">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Joined</th>
+                  <th>Login</th>
+                  <th>Children</th>
+                  <th>Last chat</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="admin-panel" id="admin-panel-reviews" hidden>
+        <div class="admin-card">
+          <div class="admin-reviews-head">
+            <h2>Self-reviews</h2>
+            <button type="button" class="admin-link-btn" id="admin-reviews-clear-filter" hidden>Show all users</button>
+          </div>
+          <div id="admin-reviews-list"></div>
+        </div>
+      </div>
+
+      <!-- Prompt -->
+      <div class="admin-panel" id="admin-panel-prompt" hidden>
+        <div class="admin-card">
+          <div class="admin-prompt-head">
+            <h2>BASE_RULES (system prompt framework)</h2>
+            <span id="admin-prompt-badge" class="admin-badge">Default</span>
+          </div>
+          <p class="modal-danger-copy">
+            Saved changes take effect immediately for every new chat message &mdash; no redeploy needed. They're
+            stored on the persistent disk, so they survive a redeploy too. "Reset to default" reverts to the
+            version in <code>src/prompt.js</code>.
+          </p>
+          <div id="admin-prompt-error" class="form-error"></div>
+          <div id="admin-prompt-success" class="form-success" hidden>Saved. New chat replies use this immediately.</div>
+          <textarea id="admin-prompt-textarea" class="admin-prompt-textarea" spellcheck="false"></textarea>
+          <div class="admin-prompt-actions">
+            <button type="button" class="btn-primary" id="admin-prompt-save-btn">Save</button>
+            <button type="button" class="btn-danger-outline" id="admin-prompt-reset-btn">Reset to default&hellip;</button>
+          </div>
+          <div id="admin-prompt-reset-confirm" class="delete-confirm-block" hidden>
+            <p class="modal-danger-copy">This replaces the saved customization with the original framework text from <code>src/prompt.js</code>. This can't be undone.</p>
+            <button type="button" class="btn-danger" id="admin-prompt-reset-confirm-btn">Yes, reset to default</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User detail modal -->
+    <div id="admin-user-modal" class="modal-backdrop" hidden>
+      <div class="modal-card admin-user-modal-card">
+        <div class="modal-head">
+          <h2 id="admin-user-modal-email">&nbsp;</h2>
+          <button type="button" class="modal-close" id="admin-user-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div id="admin-user-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Delete confirm modal -->
+    <div id="admin-delete-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Delete this account?</h2>
+          <button type="button" class="modal-close" id="admin-delete-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <p class="modal-danger-copy" id="admin-delete-modal-copy"></p>
+        <div id="admin-delete-modal-error" class="form-error"></div>
+        <button type="button" class="btn-danger" id="admin-delete-modal-confirm-btn">Permanently delete this account</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>
