@@ -57,6 +57,7 @@
       <div class="app-header">
         <span id="account-email" style="font-size: 0.85rem; color: var(--muted)"></span>
         <div class="app-header-actions">
+          <button type="button" class="account-link" id="account-settings-btn">Account settings</button>
           <button type="button" class="logout-link" id="logout-btn">Log out</button>
         </div>
       </div>
@@ -123,6 +124,53 @@
         </aside>
       </div>
     </section>
+
+    <!-- Account settings modal -->
+    <div id="account-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Account settings</h2>
+          <button type="button" class="modal-close" id="account-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-label">Email</div>
+          <div id="account-modal-email" class="modal-static"></div>
+        </div>
+
+        <form id="account-password-form" class="modal-section">
+          <div class="modal-label" id="account-password-heading">Change password</div>
+          <div id="account-password-error" class="form-error"></div>
+          <div id="account-password-success" class="form-success" hidden>Password updated.</div>
+          <div class="field" id="current-password-field">
+            <label for="current-password">Current password</label>
+            <input id="current-password" type="password" autocomplete="current-password" />
+          </div>
+          <div class="field">
+            <label for="new-password" id="new-password-label">New password</label>
+            <input id="new-password" type="password" autocomplete="new-password" required minlength="8" />
+          </div>
+          <button type="submit" class="btn-primary" id="account-password-submit">Update password</button>
+        </form>
+
+        <div class="modal-danger-zone">
+          <div class="modal-label">Delete account</div>
+          <p class="modal-danger-copy">
+            This permanently deletes your account, your children's info, and everything the assistant remembers.
+            This can't be undone.
+          </p>
+          <div id="account-delete-error" class="form-error"></div>
+          <button type="button" class="btn-danger-outline" id="show-delete-confirm-btn">Delete my account&hellip;</button>
+          <div id="delete-confirm-block" class="delete-confirm-block" hidden>
+            <div class="field">
+              <label for="delete-confirm-email">Type your email (<span id="delete-confirm-email-hint"></span>) to confirm</label>
+              <input id="delete-confirm-email" type="email" autocomplete="off" />
+            </div>
+            <button type="button" class="btn-danger" id="confirm-delete-btn">Permanently delete my account</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="/app.js"></script>

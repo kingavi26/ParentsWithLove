@@ -18,6 +18,26 @@
   var logoutBtn = document.getElementById("logout-btn");
   var chatSubtitle = document.getElementById("chat-subtitle");
 
+  var accountSettingsBtn = document.getElementById("account-settings-btn");
+  var accountModal = document.getElementById("account-modal");
+  var accountModalCloseBtn = document.getElementById("account-modal-close-btn");
+  var accountModalEmail = document.getElementById("account-modal-email");
+  var accountPasswordForm = document.getElementById("account-password-form");
+  var accountPasswordHeading = document.getElementById("account-password-heading");
+  var accountPasswordError = document.getElementById("account-password-error");
+  var accountPasswordSuccess = document.getElementById("account-password-success");
+  var currentPasswordField = document.getElementById("current-password-field");
+  var currentPasswordInput = document.getElementById("current-password");
+  var newPasswordLabel = document.getElementById("new-password-label");
+  var newPasswordInput = document.getElementById("new-password");
+  var accountPasswordSubmit = document.getElementById("account-password-submit");
+  var accountDeleteError = document.getElementById("account-delete-error");
+  var showDeleteConfirmBtn = document.getElementById("show-delete-confirm-btn");
+  var deleteConfirmBlock = document.getElementById("delete-confirm-block");
+  var deleteConfirmEmailHint = document.getElementById("delete-confirm-email-hint");
+  var deleteConfirmEmailInput = document.getElementById("delete-confirm-email");
+  var confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+
   var chatLog = document.getElementById("chat-log");
   var chatForm = document.getElementById("chat-form");
   var chatInput = document.getElementById("chat-input");
@@ -39,6 +59,8 @@
 
   var authMode = "login"; // or "signup"
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
+  var currentEmail = "";
+  var accountHasPassword = false;
 
   var voiceAvailable = false; // set from /api/status — needs a real OpenAI key on the server
   var micSupported = Boolean(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -112,6 +134,7 @@
       appScreen.hidden = true;
       authScreen.hidden = false;
       passwordInput.value = "";
+      accountModal.hidden = true;
       stopRecording();
       voicePlayer.pause();
     });
@@ -170,6 +193,7 @@
     chatLog.innerHTML = "";
     reviewPanel.hidden = true;
     reviewBody.innerHTML = "";
+    accountModal.hidden = true;
     stopRecording();
     voicePlayer.pause();
     refreshMe();
@@ -185,6 +209,8 @@
         authScreen.hidden = true;
         appScreen.hidden = false;
         accountEmail.textContent = data.email;
+        currentEmail = data.email;
+        accountHasPassword = Boolean(data.hasPassword);
         renderMemory(data);
         if (chatLog.children.length === 0) {
           greet(data);
@@ -417,6 +443,136 @@
 
   reviewCloseBtn.addEventListener("click", function () {
     reviewPanel.hidden = true;
+  });
+
+  // ---------------- account settings ----------------
+
+  function updatePasswordFormUI() {
+    currentPasswordField.hidden = !accountHasPassword;
+    currentPasswordInput.required = accountHasPassword;
+    if (!accountHasPassword) currentPasswordInput.value = "";
+    accountPasswordHeading.textContent = accountHasPassword ? "Change password" : "Set a password";
+    newPasswordLabel.textContent = accountHasPassword ? "New password" : "Password";
+    accountPasswordSubmit.textContent = accountHasPassword ? "Update password" : "Set password";
+  }
+
+  function openAccountModal() {
+    accountModalEmail.textContent = currentEmail;
+    deleteConfirmEmailHint.textContent = currentEmail;
+    accountPasswordError.textContent = "";
+    accountPasswordError.classList.remove("visible");
+    accountPasswordSuccess.hidden = true;
+    accountDeleteError.textContent = "";
+    accountDeleteError.classList.remove("visible");
+    currentPasswordInput.value = "";
+    newPasswordInput.value = "";
+    deleteConfirmEmailInput.value = "";
+    deleteConfirmBlock.hidden = true;
+    updatePasswordFormUI();
+    accountModal.hidden = false;
+  }
+
+  function closeAccountModal() {
+    accountModal.hidden = true;
+  }
+
+  accountSettingsBtn.addEventListener("click", openAccountModal);
+  accountModalCloseBtn.addEventListener("click", closeAccountModal);
+
+  accountModal.addEventListener("click", function (e) {
+    if (e.target === accountModal) closeAccountModal();
+  });
+
+  accountPasswordForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    accountPasswordError.textContent = "";
+    accountPasswordError.classList.remove("visible");
+    accountPasswordSuccess.hidden = true;
+    accountPasswordSubmit.disabled = true;
+
+    fetch("/api/account/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentPassword: currentPasswordInput.value,
+        newPassword: newPasswordInput.value
+      })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        accountPasswordSubmit.disabled = false;
+        if (!result.ok) {
+          accountPasswordError.textContent = result.data.error || "Something went wrong. Please try again.";
+          accountPasswordError.classList.add("visible");
+          return;
+        }
+        accountHasPassword = true;
+        currentPasswordInput.value = "";
+        newPasswordInput.value = "";
+        updatePasswordFormUI();
+        accountPasswordSuccess.hidden = false;
+      })
+      .catch(function () {
+        accountPasswordSubmit.disabled = false;
+        accountPasswordError.textContent = "Couldn't reach the server. Please try again.";
+        accountPasswordError.classList.add("visible");
+      });
+  });
+
+  showDeleteConfirmBtn.addEventListener("click", function () {
+    deleteConfirmBlock.hidden = false;
+    deleteConfirmEmailInput.focus();
+  });
+
+  confirmDeleteBtn.addEventListener("click", function () {
+    accountDeleteError.textContent = "";
+    accountDeleteError.classList.remove("visible");
+
+    var typed = deleteConfirmEmailInput.value.trim().toLowerCase();
+    if (!typed || typed !== currentEmail.trim().toLowerCase()) {
+      accountDeleteError.textContent = "That doesn't match your account email.";
+      accountDeleteError.classList.add("visible");
+      return;
+    }
+
+    confirmDeleteBtn.disabled = true;
+
+    fetch("/api/account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmEmail: deleteConfirmEmailInput.value })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        confirmDeleteBtn.disabled = false;
+        if (!result.ok) {
+          accountDeleteError.textContent = result.data.error || "Something went wrong. Please try again.";
+          accountDeleteError.classList.add("visible");
+          return;
+        }
+        closeAccountModal();
+        conversation = [];
+        chatLog.innerHTML = "";
+        appScreen.hidden = true;
+        authScreen.hidden = false;
+        passwordInput.value = "";
+        stopRecording();
+        voicePlayer.pause();
+        showAuthError("Your account has been permanently deleted.");
+      })
+      .catch(function () {
+        confirmDeleteBtn.disabled = false;
+        accountDeleteError.textContent = "Couldn't reach the server. Please try again.";
+        accountDeleteError.classList.add("visible");
+      });
   });
 
   // ---------------- voice input & output ----------------
