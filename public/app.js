@@ -483,6 +483,28 @@
     if (e.target === accountModal) closeAccountModal();
   });
 
+  // Disclaimer modal — lives outside #auth-screen/#app-screen (see index.html)
+  // so the "read the full disclaimer" link in the footer works no matter
+  // which of those two screens is currently showing.
+  var disclaimerMoreBtn = document.getElementById("disclaimer-more-btn");
+  var disclaimerModal = document.getElementById("disclaimer-modal");
+  var disclaimerModalCloseBtn = document.getElementById("disclaimer-modal-close-btn");
+
+  function openDisclaimerModal() {
+    disclaimerModal.hidden = false;
+  }
+
+  function closeDisclaimerModal() {
+    disclaimerModal.hidden = true;
+  }
+
+  disclaimerMoreBtn.addEventListener("click", openDisclaimerModal);
+  disclaimerModalCloseBtn.addEventListener("click", closeDisclaimerModal);
+
+  disclaimerModal.addEventListener("click", function (e) {
+    if (e.target === disclaimerModal) closeDisclaimerModal();
+  });
+
   accountPasswordForm.addEventListener("submit", function (e) {
     e.preventDefault();
     accountPasswordError.textContent = "";

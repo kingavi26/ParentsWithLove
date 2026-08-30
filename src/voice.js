@@ -40,7 +40,15 @@ async function transcribeAudio(buffer, mimeType) {
   });
   const result = await client.audio.transcriptions.create({
     file,
-    model: TRANSCRIBE_MODEL
+    model: TRANSCRIBE_MODEL,
+    // Without this, Whisper auto-detects the spoken language from the audio
+    // and can misfire on short or unclear clips — mis-transcribing ordinary
+    // English speech as another language entirely (seen in testing: it
+    // returned Arabic text for an English utterance). The rest of the app
+    // (UI copy, index.html's lang="en", GPT's reply, TTS voice) is
+    // English-only, so pin transcription to English rather than trusting
+    // auto-detection.
+    language: process.env.TRANSCRIBE_LANGUAGE || "en"
   });
   return result.text;
 }

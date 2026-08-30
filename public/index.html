@@ -174,7 +174,49 @@
         </div>
       </div>
     </div>
+
+    <!-- Disclaimer modal -->
+    <div id="disclaimer-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Disclaimer</h2>
+          <button type="button" class="modal-close" id="disclaimer-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="disclaimer-body">
+          <p>
+            Parenting Help Chat uses an AI model to write its replies. AI-generated answers
+            can be incomplete, out of date, or simply wrong &mdash; even when they sound confident.
+            Always use your own judgment.
+          </p>
+          <p>
+            This bot doesn't provide medical, psychological, or legal advice, and talking to it
+            doesn't create a doctor&ndash;patient, therapist&ndash;client, or other professional
+            relationship. It's meant to help you think through everyday parenting questions,
+            not to diagnose, treat, or replace your child's pediatrician, a licensed therapist,
+            or another qualified professional. Check anything important with one before acting on it.
+          </p>
+          <p>
+            <strong>If your child &mdash; or anyone &mdash; is in immediate danger or a crisis,
+            don't use this chat.</strong> Call your local emergency number (911 in the US) or a
+            crisis line right away (in the US, call or text 988).
+          </p>
+          <p>
+            You're always the one responsible for decisions about your child. This tool is
+            provided as-is, with no warranty, and its creator isn't liable for actions taken
+            based on its replies.
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <footer class="site-disclaimer">
+    <p>
+      <strong>Heads up:</strong> this bot uses AI and can be wrong. It isn't medical,
+      psychological, or legal advice.
+      <button type="button" class="disclaimer-link" id="disclaimer-more-btn">Read the full disclaimer</button>
+    </p>
+  </footer>
 
   <script src="/app.js"></script>
 </body>

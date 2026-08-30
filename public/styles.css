@@ -731,6 +731,46 @@ h1 {
 
 .modal-static { font-size: 0.93rem; }
 
+.disclaimer-body p {
+  margin: 0 0 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.disclaimer-body p:last-child { margin-bottom: 0; }
+
+/* Always-visible AI/professional-advice disclaimer, in the page footer
+   rather than inside #auth-screen or #app-screen, so it shows no matter
+   which of those two is currently [hidden]. */
+.site-disclaimer {
+  width: 100%;
+  max-width: 880px;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.site-disclaimer p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.disclaimer-link {
+  display: inline;
+  margin-left: 0.35rem;
+  font: inherit;
+  font-size: inherit;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.disclaimer-link:hover { color: var(--text); }
+
 .form-success {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
