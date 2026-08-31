@@ -294,15 +294,145 @@ h1 {
   padding: 0;
 }
 
-.app-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 1.25rem;
-  align-items: start;
+/* ---------- app nav ---------- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 720px) {
-  .app-grid { grid-template-columns: 1fr; }
+.app-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-around;
+  gap: 0.25rem;
+  padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.3rem 0.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: 10px;
+}
+
+.nav-item svg { width: 21px; height: 21px; flex-shrink: 0; }
+
+.nav-item.active { color: var(--accent); }
+
+.app-main { padding-bottom: 5rem; } /* clears the fixed bottom nav */
+
+/* ---------- home screen ---------- */
+
+.home-greeting {
+  font-family: "Caveat", cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.home-kids { margin-bottom: 1.25rem; }
+
+.home-section-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.home-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.quick-action-card:hover { border-color: var(--accent); }
+
+.quick-action-emoji { font-size: 1.4rem; }
+
+.home-continue-btn { width: 100%; }
+
+@media (min-width: 721px) {
+  .app-shell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .app-nav {
+    position: sticky;
+    top: 1.5rem;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 190px;
+    flex-shrink: 0;
+    padding: 1rem 0.6rem;
+    border-top: none;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    gap: 0.35rem;
+  }
+
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    font-size: 0.88rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .nav-item svg { width: 19px; height: 19px; }
+
+  .app-main {
+    padding-bottom: 0;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .home-quick-actions { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .home-continue-btn { width: auto; }
 }
 
 /* ---------- chat ---------- */
@@ -487,6 +617,21 @@ h1 {
   background-size: 14px 14px;
   padding: 1.1rem;
   box-shadow: var(--shadow);
+}
+
+/* The pinned-note rotation (.pin-list > :nth-child) was tuned for the old
+   ~240px sidebar column. Now that Memory is its own full-width screen, the
+   same 1deg tilt on a much wider card visually overlaps adjacent notes
+   (rotation displacement scales with width) — cap the card so the notes
+   keep their original, intentional "pinned to a corkboard" look instead of
+   stretching edge-to-edge. */
+@media (min-width: 721px) {
+  .memory-card { max-width: 480px; }
+  /* the 1deg tilt still overlaps adjacent notes at this width unless the
+     stack gap comfortably clears the rotation's vertical displacement.
+     Extra-specific selector (rather than plain .pin-list) so it wins
+     regardless of source order against the base rule defined below. */
+  .memory-card .pin-list { gap: 1.15rem; }
 }
 
 .memory-card h2 {
@@ -846,6 +991,16 @@ h1 {
   border-top: 1px solid var(--border);
 }
 
+/* Below 721px #app-screen's nav is a fixed bottom bar (see .app-nav) that
+   would otherwise sit on top of this footer, since the footer is a sibling
+   of .wrap rather than a descendant of .app-main. Always reserve the space
+   on mobile widths — harmless extra whitespace under the footer on the
+   logged-out auth screen (no nav there), but keeps it from ever covering
+   the footer text once logged in. */
+@media (max-width: 720px) {
+  .site-disclaimer { padding-bottom: 5.5rem; }
+}
+
 .site-disclaimer p {
   margin: 0;
   font-size: 0.78rem;
@@ -1161,16 +1316,19 @@ body.pwl-app .disclaimer-link { color: var(--chalk-muted); }
 body.pwl-app .disclaimer-link:hover { color: var(--chalk); }
 
 /* the chat is the point of the page — give it more room and more visual
-   weight than a plain bordered box */
-body.pwl-app .wrap { max-width: 960px; }
-/* Desktop-only: keeps the unscoped mobile rule at ~line 305
-   (.app-grid { grid-template-columns: 1fr; } under max-width:720px)
-   in control on phones — this scoped, higher-specificity selector was
-   overriding it at every width before, squeezing the chat card into a
-   sliver on mobile. */
-@media (min-width: 721px) {
-  body.pwl-app .app-grid { grid-template-columns: minmax(0, 1fr) 240px; }
+   weight than a plain bordered box. The app shell (nav + one screen at a
+   time) replaced the old side-by-side .app-grid entirely, so there's no
+   longer a competing two-column rule to out-specificity on mobile. */
+body.pwl-app .wrap { max-width: 1040px; }
+body.pwl-app .app-nav {
+  background: var(--surface);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.32);
 }
+@media (min-width: 721px) {
+  body.pwl-app .app-nav { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28); }
+}
+body.pwl-app .home-greeting { color: var(--chalk); }
+body.pwl-app .quick-action-card { box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22); }
 body.pwl-app .chat-card {
   border: none;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.32), 0 0 0 6px rgba(244, 201, 93, 0.1);

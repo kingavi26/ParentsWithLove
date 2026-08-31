@@ -11,6 +11,9 @@
     rel="stylesheet"
   />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#2e4a3d" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 <!-- "pwl-app" scopes the Held Steady color palette (defined in styles.css)
      to this page only, so the admin dashboard (admin.html) keeps its
@@ -71,76 +74,130 @@
       </div>
     </section>
 
-    <!-- Chat screen -->
+    <!-- App screen: a real app shell (nav + screens) rather than one long page -->
     <section id="app-screen" hidden>
-      <div class="app-header">
-        <span id="account-email" style="font-size: 0.85rem; color: var(--chalk-muted)"></span>
-        <div class="app-header-actions">
-          <button type="button" class="account-link" id="account-settings-btn">Account settings</button>
-          <button type="button" class="logout-link" id="logout-btn">Log out</button>
-        </div>
-      </div>
+      <div class="app-shell">
+        <nav class="app-nav" id="app-nav" aria-label="Main">
+          <button type="button" class="nav-item active" data-screen="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" /></svg>
+            <span>Home</span>
+          </button>
+          <button type="button" class="nav-item" data-screen="chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5Z" /></svg>
+            <span>Chat</span>
+          </button>
+          <button type="button" class="nav-item" data-screen="memory">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="13" y2="16" /></svg>
+            <span>Memory</span>
+          </button>
+          <button type="button" class="nav-item" id="nav-settings-btn" data-screen="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
+            <span>Settings</span>
+          </button>
+        </nav>
 
-      <div class="app-grid">
-        <div class="chat-card">
-          <div class="chat-header">
-            <span class="chat-dot"></span>
-            <div>
-              <div class="chat-title">Parenting Help Chat</div>
-              <div class="chat-subtitle" id="chat-subtitle">Demo mode &mdash; scripted answers for now</div>
+        <div class="app-main">
+          <div class="app-header">
+            <span id="account-email" style="font-size: 0.85rem; color: var(--chalk-muted)"></span>
+            <div class="app-header-actions">
+              <button type="button" class="logout-link" id="logout-btn">Log out</button>
             </div>
-            <button type="button" class="voice-toggle" id="voice-toggle-btn" aria-pressed="false" hidden>
-              &#128264; Read replies aloud
-            </button>
           </div>
 
-          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+          <!-- Home screen -->
+          <div class="app-panel" id="screen-home">
+            <div class="home-greeting" id="home-greeting">Welcome back!</div>
+            <div id="home-kids" class="pill-row home-kids" hidden></div>
 
-          <form class="chat-inputrow" id="chat-form">
-            <button type="button" class="mic-btn" id="mic-btn" aria-label="Record a voice message" hidden>&#127908;</button>
-            <input
-              type="text"
-              id="chat-input"
-              class="chat-input"
-              placeholder="Type a question about your kid&hellip;"
-              autocomplete="off"
-            />
-            <button type="submit" class="chat-send" id="chat-send">Send</button>
-          </form>
-          <audio id="voice-player" hidden></audio>
-
-          <div class="chat-footer">
-            <button type="button" class="rate-session-link" id="rate-session-btn">Rate this session based on deep child development research</button>
-          </div>
-
-          <section id="review-panel" class="review-panel" hidden>
-            <div class="review-head">
-              <h2>Self-review</h2>
-              <button type="button" class="review-close" id="review-close-btn" aria-label="Close">&times;</button>
+            <div class="home-section-label">Ask about&hellip;</div>
+            <div class="home-quick-actions" id="home-quick-actions">
+              <button type="button" class="quick-action-card" data-prompt="My kids keep fighting with each other and I don't know how to handle it.">
+                <span class="quick-action-emoji" aria-hidden="true">&#129309;</span>
+                <span>Sibling conflict</span>
+              </button>
+              <button type="button" class="quick-action-card" data-prompt="Bedtime has turned into a nightly battle. What can I try?">
+                <span class="quick-action-emoji" aria-hidden="true">&#127769;</span>
+                <span>Bedtime battles</span>
+              </button>
+              <button type="button" class="quick-action-card" data-prompt="My kid is having a meltdown/tantrum and I'm not sure how to respond in the moment.">
+                <span class="quick-action-emoji" aria-hidden="true">&#128165;</span>
+                <span>Tantrums</span>
+              </button>
+              <button type="button" class="quick-action-card" data-prompt="I want to set healthier screen time limits without a huge fight.">
+                <span class="quick-action-emoji" aria-hidden="true">&#128241;</span>
+                <span>Screen time</span>
+              </button>
             </div>
-            <div id="review-body"></div>
-          </section>
+
+            <button type="button" class="btn-primary home-continue-btn" id="home-continue-btn">Continue chatting &rarr;</button>
+          </div>
+
+          <!-- Chat screen -->
+          <div class="app-panel" id="screen-chat" hidden>
+            <div class="chat-card">
+              <div class="chat-header">
+                <span class="chat-dot"></span>
+                <div>
+                  <div class="chat-title">Parenting Help Chat</div>
+                  <div class="chat-subtitle" id="chat-subtitle">Demo mode &mdash; scripted answers for now</div>
+                </div>
+                <button type="button" class="voice-toggle" id="voice-toggle-btn" aria-pressed="false" hidden>
+                  &#128264; Read replies aloud
+                </button>
+              </div>
+
+              <div class="chat-log" id="chat-log" aria-live="polite"></div>
+
+              <form class="chat-inputrow" id="chat-form">
+                <button type="button" class="mic-btn" id="mic-btn" aria-label="Record a voice message" hidden>&#127908;</button>
+                <input
+                  type="text"
+                  id="chat-input"
+                  class="chat-input"
+                  placeholder="Type a question about your kid&hellip;"
+                  autocomplete="off"
+                />
+                <button type="submit" class="chat-send" id="chat-send">Send</button>
+              </form>
+              <audio id="voice-player" hidden></audio>
+
+              <div class="chat-footer">
+                <button type="button" class="rate-session-link" id="rate-session-btn">Rate this session based on deep child development research</button>
+              </div>
+
+              <section id="review-panel" class="review-panel" hidden>
+                <div class="review-head">
+                  <h2>Self-review</h2>
+                  <button type="button" class="review-close" id="review-close-btn" aria-label="Close">&times;</button>
+                </div>
+                <div id="review-body"></div>
+              </section>
+            </div>
+          </div>
+
+          <!-- Memory screen -->
+          <div class="app-panel" id="screen-memory" hidden>
+            <aside class="memory-card">
+              <h2>What we remember</h2>
+              <div id="memory-last-active" class="memory-last-active" hidden></div>
+
+              <div class="memory-section">
+                <div class="memory-label">Children</div>
+                <div id="memory-children" class="pill-row"><div class="memory-empty">Nothing yet</div></div>
+              </div>
+
+              <div class="memory-section hanging">
+                <div class="memory-label">Topics discussed</div>
+                <div id="memory-topics" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
+              </div>
+
+              <div class="memory-section hanging">
+                <div class="memory-label">Notes</div>
+                <div id="memory-notes" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
+              </div>
+            </aside>
+          </div>
         </div>
-
-        <aside class="memory-card">
-          <h2>What we remember</h2>
-          <div id="memory-last-active" class="memory-last-active" hidden></div>
-
-          <div class="memory-section">
-            <div class="memory-label">Children</div>
-            <div id="memory-children" class="pill-row"><div class="memory-empty">Nothing yet</div></div>
-          </div>
-
-          <div class="memory-section hanging">
-            <div class="memory-label">Topics discussed</div>
-            <div id="memory-topics" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
-          </div>
-
-          <div class="memory-section hanging">
-            <div class="memory-label">Notes</div>
-            <div id="memory-notes" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
-          </div>
-        </aside>
       </div>
     </section>
 

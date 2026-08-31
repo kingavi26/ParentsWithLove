@@ -18,7 +18,6 @@
   var logoutBtn = document.getElementById("logout-btn");
   var chatSubtitle = document.getElementById("chat-subtitle");
 
-  var accountSettingsBtn = document.getElementById("account-settings-btn");
   var accountModal = document.getElementById("account-modal");
   var accountModalCloseBtn = document.getElementById("account-modal-close-btn");
   var accountModalEmail = document.getElementById("account-modal-email");
@@ -44,6 +43,16 @@
   var chatForm = document.getElementById("chat-form");
   var chatInput = document.getElementById("chat-input");
   var chatSend = document.getElementById("chat-send");
+
+  // ---------------- app nav / screens ----------------
+  var navItems = document.querySelectorAll(".nav-item");
+  var screenHome = document.getElementById("screen-home");
+  var screenChat = document.getElementById("screen-chat");
+  var screenMemory = document.getElementById("screen-memory");
+  var homeGreeting = document.getElementById("home-greeting");
+  var homeKids = document.getElementById("home-kids");
+  var homeContinueBtn = document.getElementById("home-continue-btn");
+  var quickActionCards = document.querySelectorAll(".quick-action-card");
 
   var memoryLastActive = document.getElementById("memory-last-active");
   var memoryChildren = document.getElementById("memory-children");
@@ -187,11 +196,80 @@
     }
   })();
 
+  // ---------------- app screen: nav + screens ----------------
+  // The app is a real shell with distinct screens (Home / Chat / Memory),
+  // switched by showScreen(), rather than one long page with everything
+  // stacked. "Settings" in the nav opens the existing account modal instead
+  // of switching screens, so whichever screen was behind it stays active
+  // when the modal closes.
+
+  function showScreen(name) {
+    screenHome.hidden = name !== "home";
+    screenChat.hidden = name !== "chat";
+    screenMemory.hidden = name !== "memory";
+    navItems.forEach(function (item) {
+      var screen = item.getAttribute("data-screen");
+      if (screen === "settings") return;
+      item.classList.toggle("active", screen === name);
+    });
+  }
+
+  navItems.forEach(function (item) {
+    item.addEventListener("click", function () {
+      var screen = item.getAttribute("data-screen");
+      if (screen === "settings") {
+        openAccountModal();
+        return;
+      }
+      showScreen(screen);
+    });
+  });
+
+  function goToChatWithPrompt(text) {
+    showScreen("chat");
+    if (text) {
+      chatInput.value = text;
+      chatInput.focus();
+    }
+  }
+
+  quickActionCards.forEach(function (card) {
+    card.addEventListener("click", function () {
+      goToChatWithPrompt(card.getAttribute("data-prompt"));
+    });
+  });
+
+  homeContinueBtn.addEventListener("click", function () {
+    showScreen("chat");
+  });
+
+  function renderHome(data) {
+    var hasHistory = (data.children && data.children.length) || (data.topics_discussed && data.topics_discussed.length) || (data.notes && data.notes.length);
+    var lastDate = formatShortDate(data.last_conversation_at);
+    homeGreeting.textContent = hasHistory
+      ? "Welcome back!" + (lastDate ? " We last talked on " + lastDate + "." : "")
+      : "Hi! Let's talk about your kids.";
+
+    if (data.children && data.children.length) {
+      homeKids.innerHTML = "";
+      data.children.forEach(function (c) {
+        var pill = document.createElement("span");
+        pill.className = "kid-pill";
+        pill.textContent = (c.name || "Unnamed child") + (c.age != null ? " · " + c.age : "");
+        homeKids.appendChild(pill);
+      });
+      homeKids.hidden = false;
+    } else {
+      homeKids.hidden = true;
+    }
+  }
+
   // ---------------- app screen ----------------
 
   function enterApp() {
     authScreen.hidden = true;
     appScreen.hidden = false;
+    showScreen("home");
     conversation = [];
     chatLog.innerHTML = "";
     reviewPanel.hidden = true;
@@ -214,6 +292,7 @@
         accountEmail.textContent = data.email;
         currentEmail = data.email;
         accountHasPassword = Boolean(data.hasPassword);
+        renderHome(data);
         renderMemory(data);
         if (!accountModal.hidden) renderAccountChildrenList();
         if (chatLog.children.length === 0) {
@@ -627,7 +706,6 @@
     accountModal.hidden = true;
   }
 
-  accountSettingsBtn.addEventListener("click", openAccountModal);
   accountModalCloseBtn.addEventListener("click", closeAccountModal);
 
   accountModal.addEventListener("click", function (e) {
