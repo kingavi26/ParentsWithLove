@@ -271,32 +271,59 @@
       memoryChildren.innerHTML = '<div class="memory-empty">Nothing yet</div>';
     }
 
-    if (data.topics_discussed && data.topics_discussed.length) {
-      memoryTopics.innerHTML = "";
-      data.topics_discussed.forEach(function (t) {
-        var pin = document.createElement("div");
-        pin.className = "pin-note";
-        var topic = typeof t === "string" ? t : t.topic;
-        var when = typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null;
-        pin.textContent = when ? topic + " — last talked about " + when : topic;
-        memoryTopics.appendChild(pin);
-      });
-    } else {
-      memoryTopics.innerHTML = '<div class="memory-empty">Nothing yet</div>';
-    }
+    renderCollapsiblePins(memoryTopics, data.topics_discussed, function (t) {
+      var pin = document.createElement("div");
+      pin.className = "pin-note";
+      var topic = typeof t === "string" ? t : t.topic;
+      var when = typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null;
+      pin.textContent = when ? topic + " — last talked about " + when : topic;
+      return pin;
+    });
 
-    if (data.notes && data.notes.length) {
-      memoryNotes.innerHTML = "";
-      data.notes.forEach(function (n) {
-        var pin = document.createElement("div");
-        pin.className = "pin-note note-pin";
-        var text = typeof n === "string" ? n : n.text;
-        var when = typeof n === "object" && n ? formatShortDate(n.date) : null;
-        pin.textContent = when ? text + " — " + when : text;
-        memoryNotes.appendChild(pin);
+    renderCollapsiblePins(memoryNotes, data.notes, function (n) {
+      var pin = document.createElement("div");
+      pin.className = "pin-note note-pin";
+      var text = typeof n === "string" ? n : n.text;
+      var when = typeof n === "object" && n ? formatShortDate(n.date) : null;
+      pin.textContent = when ? text + " — " + when : text;
+      return pin;
+    });
+  }
+
+  // Topics/notes lists can grow indefinitely (capped at 30 server-side), which
+  // makes the sidebar unusably long. Show the first few pinned notes and put
+  // the rest behind a "See N more" toggle instead of a hard cutoff that loses
+  // history, or an always-expanded list that pushes the chat card down.
+  var MEMORY_PREVIEW_COUNT = 3;
+
+  function renderCollapsiblePins(container, items, buildPin) {
+    container.innerHTML = "";
+    if (!items || !items.length) {
+      container.innerHTML = '<div class="memory-empty">Nothing yet</div>';
+      return;
+    }
+    items.forEach(function (item, i) {
+      var pin = buildPin(item);
+      pin.style.transform = i % 2 === 0 ? "rotate(-1deg)" : "rotate(0.9deg)";
+      if (i >= MEMORY_PREVIEW_COUNT) pin.hidden = true;
+      container.appendChild(pin);
+    });
+    if (items.length > MEMORY_PREVIEW_COUNT) {
+      var hiddenCount = items.length - MEMORY_PREVIEW_COUNT;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "memory-more-btn";
+      btn.setAttribute("aria-expanded", "false");
+      btn.textContent = "See " + hiddenCount + " more \u2193";
+      btn.addEventListener("click", function () {
+        var expanded = btn.getAttribute("aria-expanded") === "true";
+        Array.prototype.forEach.call(container.querySelectorAll(".pin-note"), function (pin, i) {
+          if (i >= MEMORY_PREVIEW_COUNT) pin.hidden = expanded;
+        });
+        btn.setAttribute("aria-expanded", String(!expanded));
+        btn.textContent = expanded ? "See " + hiddenCount + " more \u2193" : "Show fewer \u2191";
       });
-    } else {
-      memoryNotes.innerHTML = '<div class="memory-empty">Nothing yet</div>';
+      container.appendChild(btn);
     }
   }
 
