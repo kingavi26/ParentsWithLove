@@ -1238,7 +1238,9 @@ body.pwl-app .review-score-big { font-family: "Caveat", cursive; }
 
 /* background doodles: purely decorative, fixed behind the page content.
    Hidden on narrow/mobile widths so they never crowd the actual content. */
-.chalk-deco { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.chalk-deco { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+body.pwl-app .wrap,
+body.pwl-app .site-disclaimer { position: relative; z-index: 1; }
 .chalk-deco svg { position: absolute; opacity: 0.5; }
 .chalk-deco .star { width: 26px; height: 26px; animation: chalk-twinkle 3s ease-in-out infinite; }
 .chalk-deco .star-1 { top: 8%; left: 5%; animation-delay: 0.3s; }
