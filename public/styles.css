@@ -350,6 +350,15 @@ h1 {
   white-space: nowrap;
 }
 
+/* On very narrow phones (~320-360px) the dot + title + voice-toggle
+   don't fit on one row and the toggle was getting clipped off the
+   right edge by .chat-card's overflow:hidden. Let the header wrap
+   instead of clipping. */
+@media (max-width: 360px) {
+  .chat-header { flex-wrap: wrap; row-gap: 0.5rem; }
+  .voice-toggle { margin-left: 0; }
+}
+
 .voice-toggle[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
@@ -1154,7 +1163,14 @@ body.pwl-app .disclaimer-link:hover { color: var(--chalk); }
 /* the chat is the point of the page — give it more room and more visual
    weight than a plain bordered box */
 body.pwl-app .wrap { max-width: 960px; }
-body.pwl-app .app-grid { grid-template-columns: minmax(0, 1fr) 240px; }
+/* Desktop-only: keeps the unscoped mobile rule at ~line 305
+   (.app-grid { grid-template-columns: 1fr; } under max-width:720px)
+   in control on phones — this scoped, higher-specificity selector was
+   overriding it at every width before, squeezing the chat card into a
+   sliver on mobile. */
+@media (min-width: 721px) {
+  body.pwl-app .app-grid { grid-template-columns: minmax(0, 1fr) 240px; }
+}
 body.pwl-app .chat-card {
   border: none;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.32), 0 0 0 6px rgba(244, 201, 93, 0.1);
