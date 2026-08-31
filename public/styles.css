@@ -84,6 +84,29 @@ h1 {
 .page-head { margin-bottom: 1.75rem; }
 .page-head p { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.6rem;
+}
+.brand-mark { flex-shrink: 0; }
+.brand-wordmark {
+  display: flex;
+  align-items: baseline;
+  font-family: "Fraunces", Georgia, serif;
+}
+.brand-parents { font-size: 1.4rem; font-weight: 600; color: var(--text); }
+.brand-with {
+  font-family: "Karla", system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin: 0 0.14rem;
+  align-self: center;
+}
+.brand-love { font-size: 1.4rem; font-weight: 500; font-style: italic; color: var(--plum); }
+
 .demo-banner {
   background: var(--surface-sunken);
   border: 1px solid var(--border);
