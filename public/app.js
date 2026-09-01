@@ -586,18 +586,38 @@
 
     // Column titles above the list, once — the repeated inputs below only
     // had placeholders (which vanish once you type), so it wasn't always
-    // clear which box was which once a row had real values in it.
+    // clear which box was which once a row had real values in it. Deliberately
+    // its own class (not .account-child-row) rather than a 2-item version of
+    // the real row: a real row is 4 flex items (name, age, Save, Remove), and
+    // flexbox grows/shrinks each item based on how many siblings share the
+    // row, so a header with only 2 items would size its "Nickname" column
+    // wider than the real rows below and throw "Age" out of alignment. The
+    // two invisible spacers give this row the same 4 items, so it matches
+    // column-for-column at any width.
     var header = document.createElement("div");
-    header.className = "account-child-row account-children-header";
+    header.className = "account-children-header";
     header.setAttribute("aria-hidden", "true");
+
     var nameHeader = document.createElement("span");
     nameHeader.className = "account-child-name";
     nameHeader.textContent = "Nickname";
+
     var ageHeader = document.createElement("span");
     ageHeader.className = "account-child-age";
     ageHeader.textContent = "Age";
+
+    var saveSpacer = document.createElement("span");
+    saveSpacer.className = "account-child-save account-children-header-spacer";
+    saveSpacer.textContent = "Save";
+
+    var deleteSpacer = document.createElement("span");
+    deleteSpacer.className = "account-child-delete account-children-header-spacer";
+    deleteSpacer.textContent = "Remove";
+
     header.appendChild(nameHeader);
     header.appendChild(ageHeader);
+    header.appendChild(saveSpacer);
+    header.appendChild(deleteSpacer);
     accountChildrenList.appendChild(header);
 
     latestChildren.forEach(function (child) {
