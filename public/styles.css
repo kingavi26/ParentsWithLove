@@ -955,6 +955,20 @@ h1 {
 
 .account-child-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* Column titles above the repeated child rows (see renderAccountChildrenList
+   in app.js) — the inputs below only had placeholders, which vanish once a
+   row has a real value, so it wasn't always obvious which box was which. */
+.account-children-header { padding: 0 0.1rem; margin-bottom: -0.1rem; }
+.account-children-header span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.account-children-header span.account-child-name { flex: 1 1 8rem; }
+.account-children-header span.account-child-age { flex: 0 1 4.5rem; }
+
 .account-child-save,
 .account-child-delete {
   padding: 0.45rem 0.7rem;

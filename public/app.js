@@ -583,6 +583,23 @@
     }
 
     accountChildrenList.innerHTML = "";
+
+    // Column titles above the list, once — the repeated inputs below only
+    // had placeholders (which vanish once you type), so it wasn't always
+    // clear which box was which once a row had real values in it.
+    var header = document.createElement("div");
+    header.className = "account-child-row account-children-header";
+    header.setAttribute("aria-hidden", "true");
+    var nameHeader = document.createElement("span");
+    nameHeader.className = "account-child-name";
+    nameHeader.textContent = "Nickname";
+    var ageHeader = document.createElement("span");
+    ageHeader.className = "account-child-age";
+    ageHeader.textContent = "Age";
+    header.appendChild(nameHeader);
+    header.appendChild(ageHeader);
+    accountChildrenList.appendChild(header);
+
     latestChildren.forEach(function (child) {
       var row = document.createElement("div");
       row.className = "account-child-row";
@@ -592,12 +609,14 @@
       nameInput.type = "text";
       nameInput.className = "account-child-name";
       nameInput.placeholder = "Name or nickname";
+      nameInput.setAttribute("aria-label", "Nickname or name");
       nameInput.value = child.name || "";
 
       var ageInput = document.createElement("input");
       ageInput.type = "number";
       ageInput.className = "account-child-age";
       ageInput.placeholder = "Age";
+      ageInput.setAttribute("aria-label", "Age");
       ageInput.min = "0";
       ageInput.max = "17";
       ageInput.value = child.age != null ? child.age : "";
