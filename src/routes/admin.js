@@ -8,6 +8,7 @@ const {
   hasValidAdminSession,
   requireAdminAuth
 } = require("../admin-auth");
+const { rateLimit, byIp } = require("../rate-limit");
 const {
   DEFAULT_BASE_RULES,
   getActiveBaseRules,
@@ -30,7 +31,18 @@ router.get("/admin/status", (req, res) => {
   });
 });
 
-router.post("/admin/login", (req, res) => {
+// Stricter than the parent-facing login limiter (src/routes/auth.js) — this
+// is the single account that can see every family's data at once, so it's
+// worth being more conservative here even though only Avi is expected to
+// use it.
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 6,
+  keyFn: byIp,
+  message: "Too many admin login attempts from this connection. Please try again later."
+});
+
+router.post("/admin/login", adminLoginLimiter, (req, res) => {
   if (!isAdminAvailable) return res.status(404).end();
   const email = (req.body && req.body.email) || "";
   const password = (req.body && req.body.password) || "";

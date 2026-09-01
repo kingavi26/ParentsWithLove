@@ -110,7 +110,12 @@ async function realReply(history, familyState) {
         {
           role: "system",
           content:
-            'You extract structured facts from one exchange in a parenting chat. Return ONLY JSON of the shape {"children":[{"name":string|null,"age":number|null}],"topics":[string],"notes":[string]}. Only include facts newly stated in THIS exchange that are not already in "Already known". Never guess or invent. If nothing new, return empty arrays for all three fields.'
+            'You extract structured facts from one exchange in a parenting chat, to be stored long-term against this family\'s account. Return ONLY JSON of the shape {"children":[{"name":string|null,"age":number|null}],"topics":[string],"notes":[string]}. Only include facts newly stated in THIS exchange that are not already in "Already known". Never guess or invent. If nothing new, return empty arrays for all three fields.\n\n' +
+            'Privacy rules for what gets stored — these matter because this is a real, permanent record about a real child:\n' +
+            '- For "name", use whatever the parent called the child (nickname, first name, etc.) — never expand or guess a fuller/formal name than what was actually said.\n' +
+            '- Never put a school name, address, phone number, or other identifying detail (beyond the child\'s stated name/nickname and age) into "name", "topics", or "notes".\n' +
+            '- Never store a medical or mental-health diagnosis, medication name, or clinical label (e.g. "ADHD", "anxiety disorder", "on Ritalin") verbatim in "notes" or "topics". If the underlying context is useful to remember, generalize it into a plain behavioral/functional description instead (e.g. "sometimes needs extra help with transitions" rather than the diagnosis itself).\n' +
+            '- Never create a "notes" entry about self-harm, abuse, or a safety crisis. That kind of disclosure should stay in the live conversation only, not become a permanent record tied to a specific named child — leave it out of the extracted facts entirely.'
         },
         {
           role: "user",

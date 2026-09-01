@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const { db } = require("../db");
 const { requireAuth, issueSession, clearSession } = require("../auth-middleware");
 const { loadFamilyState } = require("../family-state");
+const { rateLimit, byIp, byIpAndEmail } = require("../rate-limit");
 
 const router = express.Router();
 
@@ -10,7 +11,33 @@ function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
-router.post("/signup", async (req, res) => {
+// Login/signup rate limiting: a per-IP limit blunts scripted abuse from one
+// source in general, and a tighter per-IP+email limit specifically slows
+// credential-stuffing/brute-force against one parent account (which holds
+// real facts about real kids) without locking out everyone behind a shared
+// IP (e.g. a school or office network) just because of one bad actor.
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 12,
+  keyFn: byIp,
+  message: "Too many accounts created from this connection recently. Please try again later."
+});
+
+const loginIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  keyFn: byIp,
+  message: "Too many login attempts from this connection. Please try again in a few minutes."
+});
+
+const loginEmailLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  keyFn: byIpAndEmail,
+  message: "Too many failed attempts for this account. Please wait a few minutes and try again."
+});
+
+router.post("/signup", signupLimiter, async (req, res) => {
   const email = normalizeEmail(req.body && req.body.email);
   const password = (req.body && req.body.password) || "";
 
@@ -34,7 +61,7 @@ router.post("/signup", async (req, res) => {
   res.json({ ok: true, email });
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginIpLimiter, loginEmailLimiter, async (req, res) => {
   const email = normalizeEmail(req.body && req.body.email);
   const password = (req.body && req.body.password) || "";
 

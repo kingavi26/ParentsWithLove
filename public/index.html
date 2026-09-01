@@ -231,9 +231,15 @@
 
         <div class="modal-section">
           <div class="modal-label">Children we remember</div>
-          <p class="modal-hint">Fix a name or age the assistant got wrong, or remove a duplicate entry.</p>
+          <p class="modal-hint">Fix a name or age the assistant got wrong, or remove a duplicate entry. A nickname or first name works just as well as a full name — use whatever you're comfortable storing here.</p>
           <div id="account-children-error" class="form-error"></div>
           <div id="account-children-list" class="account-children-list"></div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-label">Your data</div>
+          <p class="modal-hint">Download a copy of everything remembered about your family &mdash; children, topics, notes, and self-review history &mdash; as a file you can keep.</p>
+          <button type="button" class="btn-secondary-outline" id="export-data-btn">Download what we remember</button>
         </div>
 
         <div class="modal-danger-zone">
@@ -281,6 +287,16 @@
             crisis line right away (in the US, call or text 988).
           </p>
           <p>
+            <strong>How your data is handled:</strong> what you type, and the facts this app
+            remembers about your family (like a child's name/nickname and age), are sent to
+            OpenAI's API to generate replies and to figure out what to remember. OpenAI doesn't
+            use this to train its models, but does retain it briefly (per its own policy) for
+            abuse monitoring. Only your own account can see your family's data day-to-day; the
+            site's administrator can also view account data through an internal dashboard for
+            support and moderation. See the <a href="/privacy.html" target="_blank" rel="noopener">privacy policy</a>
+            for the full picture, including how to edit or delete what's remembered.
+          </p>
+          <p>
             You're always the one responsible for decisions about your child. This tool is
             provided as-is, with no warranty, and its creator isn't liable for actions taken
             based on its replies.
@@ -295,6 +311,8 @@
       <strong>Heads up:</strong> this bot uses AI and can be wrong. It isn't medical,
       psychological, or legal advice.
       <button type="button" class="disclaimer-link" id="disclaimer-more-btn">Read the full disclaimer</button>
+      &middot;
+      <a class="disclaimer-link" href="/privacy.html" target="_blank" rel="noopener">Privacy policy</a>
     </p>
   </footer>
 

@@ -2,8 +2,53 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const { db } = require("../db");
 const { requireAuth, clearSession } = require("../auth-middleware");
+const { loadFamilyState } = require("../family-state");
 
 const router = express.Router();
+
+// "Download what we remember" — lets a parent verify nothing's hidden
+// rather than take it on faith, and gives them a portable copy before
+// deleting anything. Deliberately mirrors exactly what the "What we
+// remember" sidebar and the account-settings children list already show
+// them — this isn't a raw database dump, just the same family-scoped facts
+// in a downloadable form, plus their own self-review history.
+router.get("/account/export", requireAuth, (req, res) => {
+  const user = db.prepare("SELECT id, email, created_at FROM users WHERE id = ?").get(req.userId);
+  if (!user) {
+    clearSession(res);
+    return res.status(401).json({ error: "Account no longer exists." });
+  }
+
+  const familyState = loadFamilyState(req.userId);
+
+  const reviews = db
+    .prepare(
+      "SELECT id, overall_score, dimension_scores, strengths, concerns, missed_opportunities, suggested_prompt_changes, message_count, created_at FROM session_reviews WHERE user_id = ? ORDER BY id"
+    )
+    .all(req.userId)
+    .map((r) => ({
+      id: r.id,
+      overallScore: r.overall_score,
+      dimensionScores: JSON.parse(r.dimension_scores),
+      strengths: JSON.parse(r.strengths),
+      concerns: JSON.parse(r.concerns),
+      missedOpportunities: JSON.parse(r.missed_opportunities),
+      suggestedPromptChanges: JSON.parse(r.suggested_prompt_changes),
+      messageCount: r.message_count,
+      createdAt: r.created_at
+    }));
+
+  res.setHeader("Content-Disposition", 'attachment; filename="parentswithlove-my-data.json"');
+  res.json({
+    exportedAt: new Date().toISOString(),
+    account: { email: user.email, createdAt: user.created_at },
+    children: familyState.children,
+    topicsDiscussed: familyState.topics_discussed,
+    notes: familyState.notes,
+    lastConversationAt: familyState.last_conversation_at,
+    sessionReviews: reviews
+  });
+});
 
 // Change password (or set one for the first time, if this account was
 // created via Google/Facebook and has no password_hash yet). When there's

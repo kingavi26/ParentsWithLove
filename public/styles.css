@@ -1022,6 +1022,23 @@ h1 {
 }
 .disclaimer-link:hover { color: var(--text); }
 
+/* Standalone privacy policy page (public/privacy.html) — reuses .auth-card's
+   "pinned paper" look and .disclaimer-body's paragraph styling, just wider
+   and left-aligned since this is a long-form read rather than a login form. */
+.privacy-card { max-width: 720px; text-align: left; }
+.disclaimer-body h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.4rem 0 0.5rem;
+  color: var(--text);
+}
+.disclaimer-body h2:first-child { margin-top: 0; }
+.privacy-back { margin-top: 1.5rem; }
+.privacy-back a { color: var(--chalk-muted); font-size: 0.85rem; text-decoration: none; }
+.privacy-back a:hover { text-decoration: underline; }
+body.pwl-app .privacy-back a:hover { color: var(--chalk); }
+
 .form-success {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
@@ -1057,6 +1074,22 @@ h1 {
 }
 
 .btn-danger-outline:hover { background: color-mix(in srgb, var(--error) 8%, transparent); }
+
+.btn-secondary-outline {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn-secondary-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-secondary-outline:disabled { opacity: 0.6; cursor: default; }
 
 .btn-danger {
   width: 100%;

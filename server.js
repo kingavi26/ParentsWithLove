@@ -19,6 +19,13 @@ const { isGoogleAvailable, isFacebookAvailable } = require("./src/oauth");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render (and most hosts) put the app behind a reverse proxy, so without
+// this, req.ip/req.secure would reflect the proxy, not the real visitor —
+// which would make IP-based rate limiting (src/rate-limit.js) key everyone
+// to the same bucket and silently do nothing. `1` trusts exactly one hop
+// (the platform's own proxy), which matches Render's setup.
+app.set("trust proxy", 1);
+
 initDb();
 
 app.use(express.json());

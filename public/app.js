@@ -32,6 +32,7 @@
   var accountPasswordSubmit = document.getElementById("account-password-submit");
   var accountChildrenError = document.getElementById("account-children-error");
   var accountChildrenList = document.getElementById("account-children-list");
+  var exportDataBtn = document.getElementById("export-data-btn");
   var accountDeleteError = document.getElementById("account-delete-error");
   var showDeleteConfirmBtn = document.getElementById("show-delete-confirm-btn");
   var deleteConfirmBlock = document.getElementById("delete-confirm-block");
@@ -590,7 +591,7 @@
       var nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.className = "account-child-name";
-      nameInput.placeholder = "Name";
+      nameInput.placeholder = "Name or nickname";
       nameInput.value = child.name || "";
 
       var ageInput = document.createElement("input");
@@ -683,6 +684,38 @@
           accountChildrenError.classList.add("visible");
         });
     }
+  });
+
+  // "Download what we remember" — fetches the same family-scoped export the
+  // server builds in GET /api/account/export and saves it as a local file,
+  // so a parent can verify nothing's hidden without having to ask.
+  exportDataBtn.addEventListener("click", function () {
+    exportDataBtn.disabled = true;
+    var originalText = exportDataBtn.textContent;
+    exportDataBtn.textContent = "Preparing download…";
+
+    fetch("/api/account/export")
+      .then(function (r) {
+        if (!r.ok) throw new Error("export failed");
+        return r.blob();
+      })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "parentswithlove-my-data.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      })
+      .catch(function () {
+        window.alert("Couldn't download your data right now. Please try again.");
+      })
+      .finally(function () {
+        exportDataBtn.disabled = false;
+        exportDataBtn.textContent = originalText;
+      });
   });
 
   function openAccountModal() {
