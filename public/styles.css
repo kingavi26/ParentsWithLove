@@ -32,7 +32,7 @@ html, body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: "Karla", system-ui, -apple-system, sans-serif;
+  font-family: "Barlow", system-ui, -apple-system, sans-serif;
 }
 
 body {
@@ -53,7 +53,7 @@ body {
 }
 
 h1 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-weight: 600;
   font-size: clamp(1.5rem, 4vw, 2rem);
   margin: 0.3rem 0 0.4rem;
@@ -73,11 +73,11 @@ h1 {
 .brand-wordmark {
   display: flex;
   align-items: baseline;
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
 }
 .brand-parents { font-size: 1.4rem; font-weight: 600; color: var(--text); }
 .brand-with {
-  font-family: "Karla", system-ui, sans-serif;
+  font-family: "Barlow", system-ui, sans-serif;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--accent);
@@ -305,7 +305,7 @@ h1 {
 /* ---------- home screen ---------- */
 
 .home-greeting {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-weight: 600;
   font-size: 1.5rem;
   margin-bottom: 0.6rem;
@@ -599,7 +599,7 @@ h1 {
 }
 
 .memory-card h2 {
-  font-family: "Karla", sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -674,7 +674,7 @@ h1 {
 
 .pin-note.note-pin {
   background: var(--note-bg);
-  font-family: "Karla", sans-serif;
+  font-family: "Barlow", sans-serif;
   font-style: italic;
   font-size: 0.85rem;
   line-height: 1.45;
@@ -729,7 +729,7 @@ h1 {
 }
 
 .review-head h2 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0;
@@ -758,7 +758,7 @@ h1 {
 }
 
 .review-score-big {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.9rem;
   font-weight: 600;
   color: var(--accent);
@@ -861,7 +861,7 @@ h1 {
 }
 
 .modal-head h2 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.15rem;
   font-weight: 600;
   margin: 0;
@@ -1018,7 +1018,7 @@ h1 {
    and left-aligned since this is a long-form read rather than a login form. */
 .privacy-card { max-width: 720px; text-align: left; }
 .disclaimer-body h2 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   margin: 1.4rem 0 0.5rem;
@@ -1138,7 +1138,7 @@ h1 {
 }
 
 .admin-card h2 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0 0 0.9rem;
@@ -1160,7 +1160,7 @@ h1 {
 }
 
 .admin-stat-value {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Barlow Condensed", Arial Narrow, sans-serif;
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--accent);
