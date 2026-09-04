@@ -32,6 +32,9 @@
   var accountPasswordSubmit = document.getElementById("account-password-submit");
   var accountChildrenError = document.getElementById("account-children-error");
   var accountChildrenList = document.getElementById("account-children-list");
+  var accountTopicsError = document.getElementById("account-topics-error");
+  var accountTopicsList = document.getElementById("account-topics-list");
+  var accountNotesList = document.getElementById("account-notes-list");
   var exportDataBtn = document.getElementById("export-data-btn");
   var accountDeleteError = document.getElementById("account-delete-error");
   var showDeleteConfirmBtn = document.getElementById("show-delete-confirm-btn");
@@ -74,6 +77,8 @@
   var currentEmail = "";
   var accountHasPassword = false;
   var latestChildren = []; // kept in sync with renderMemory(), used to fill the account modal's edit list
+  var latestTopics = []; // same idea, for the account modal's "Topics discussed" delete list
+  var latestNotes = []; // same idea, for the account modal's "Notes" delete list
 
   var voiceAvailable = false; // set from /api/status — needs a real OpenAI key on the server
   var micSupported = Boolean(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -295,7 +300,11 @@
         accountHasPassword = Boolean(data.hasPassword);
         renderHome(data);
         renderMemory(data);
-        if (!accountModal.hidden) renderAccountChildrenList();
+        if (!accountModal.hidden) {
+          renderAccountChildrenList();
+          renderAccountTopicsList();
+          renderAccountNotesList();
+        }
         if (chatLog.children.length === 0) {
           greet(data);
         }
@@ -338,6 +347,8 @@
     }
 
     latestChildren = data.children || [];
+    latestTopics = data.topics_discussed || [];
+    latestNotes = data.notes || [];
 
     if (data.children && data.children.length) {
       memoryChildren.innerHTML = "";
@@ -725,6 +736,101 @@
     }
   });
 
+  // Builds one row per remembered topic/note in the account modal, each with
+  // just a Remove button — unlike children, there's nothing here to edit in
+  // place, only to forget. Shared by both lists since a topic pin and a note
+  // pin render identically except for their text; getText/formatWhen pick
+  // out the right fields for whichever list this is.
+  function renderAccountMemoryList(container, items, getText, formatWhen) {
+    container.innerHTML = "";
+    if (!items || !items.length) {
+      container.innerHTML = '<div class="memory-empty">Nothing remembered yet.</div>';
+      return;
+    }
+
+    items.forEach(function (item) {
+      var text = getText(item);
+      var when = formatWhen(item);
+
+      var row = document.createElement("div");
+      row.className = "account-memory-row";
+      row.dataset.text = text;
+
+      var span = document.createElement("span");
+      span.className = "account-memory-text";
+      span.textContent = when ? text + " — " + when : text;
+
+      var deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "account-memory-delete";
+      deleteBtn.setAttribute("aria-label", "Forget this");
+      deleteBtn.textContent = "Remove";
+
+      row.appendChild(span);
+      row.appendChild(deleteBtn);
+      container.appendChild(row);
+    });
+  }
+
+  function renderAccountTopicsList() {
+    accountTopicsError.textContent = "";
+    accountTopicsError.classList.remove("visible");
+    renderAccountMemoryList(
+      accountTopicsList,
+      latestTopics,
+      function (t) { return typeof t === "string" ? t : t.topic; },
+      function (t) { return typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null; }
+    );
+  }
+
+  function renderAccountNotesList() {
+    renderAccountMemoryList(
+      accountNotesList,
+      latestNotes,
+      function (n) { return typeof n === "string" ? n : n.text; },
+      function (n) { return typeof n === "object" && n ? formatShortDate(n.date) : null; }
+    );
+  }
+
+  function deleteAccountMemoryEntry(kind, text, button) {
+    accountTopicsError.textContent = "";
+    accountTopicsError.classList.remove("visible");
+    button.disabled = true;
+
+    fetch("/api/account/" + kind + "/" + encodeURIComponent(text), { method: "DELETE" })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        button.disabled = false;
+        if (!result.ok) {
+          accountTopicsError.textContent = result.data.error || "Couldn't remove that entry.";
+          accountTopicsError.classList.add("visible");
+          return;
+        }
+        refreshMe();
+      })
+      .catch(function () {
+        button.disabled = false;
+        accountTopicsError.textContent = "Couldn't reach the server. Please try again.";
+        accountTopicsError.classList.add("visible");
+      });
+  }
+
+  accountTopicsList.addEventListener("click", function (e) {
+    var row = e.target.closest(".account-memory-row");
+    if (!row || !e.target.classList.contains("account-memory-delete")) return;
+    deleteAccountMemoryEntry("topics", row.dataset.text, e.target);
+  });
+
+  accountNotesList.addEventListener("click", function (e) {
+    var row = e.target.closest(".account-memory-row");
+    if (!row || !e.target.classList.contains("account-memory-delete")) return;
+    deleteAccountMemoryEntry("notes", row.dataset.text, e.target);
+  });
+
   // "Download what we remember" — fetches the same family-scoped export the
   // server builds in GET /api/account/export and saves it as a local file,
   // so a parent can verify nothing's hidden without having to ask.
@@ -771,6 +877,8 @@
     deleteConfirmBlock.hidden = true;
     updatePasswordFormUI();
     renderAccountChildrenList();
+    renderAccountTopicsList();
+    renderAccountNotesList();
     accountModal.hidden = false;
   }
 

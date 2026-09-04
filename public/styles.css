@@ -963,6 +963,45 @@ h1 {
 .account-child-save:disabled,
 .account-child-delete:disabled { opacity: 0.6; cursor: default; }
 
+.account-memory-group { margin-bottom: 0.9rem; }
+.account-memory-group:last-child { margin-bottom: 0; }
+
+.account-memory-subhead {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.account-memory-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.account-memory-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.account-memory-text { font-size: 0.88rem; flex: 1 1 12rem; min-width: 0; }
+
+.account-memory-delete {
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.account-memory-delete:hover { border-color: var(--error); color: var(--error); }
+.account-memory-delete:disabled { opacity: 0.6; cursor: default; }
+
 .disclaimer-body p {
   margin: 0 0 0.95rem;
   font-size: 0.9rem;
