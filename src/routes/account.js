@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const { db } = require("../db");
 const { requireAuth, clearSession } = require("../auth-middleware");
-const { loadFamilyState } = require("../family-state");
+const { loadFamilyState, normalizeTopics, normalizeNotes } = require("../family-state");
 
 const router = express.Router();
 
@@ -178,6 +178,55 @@ router.delete("/account/children/:id", requireAuth, (req, res) => {
   if (result.changes === 0) {
     return res.status(404).json({ error: "No remembered child with that id." });
   }
+
+  res.json({ ok: true });
+});
+
+// Forget one remembered topic or note, rather than only being able to clear
+// everything via full account deletion. Unlike children, topics/notes have
+// no id column — they live as a single JSON array per family (family_notes,
+// see src/db.js) — so the entry to remove is identified by its own exact
+// text. That's safe because mergeTopics/mergeNotes (src/routes/chat.js)
+// already dedupe on that same text before ever writing a row, so within one
+// family's array a given topic or note string can only ever appear once.
+router.delete("/account/topics/:topic", requireAuth, (req, res) => {
+  const topic = req.params.topic;
+  if (!topic) {
+    return res.status(400).json({ error: "Invalid topic." });
+  }
+
+  const row = db.prepare("SELECT topics_discussed FROM family_notes WHERE user_id = ?").get(req.userId);
+  const topics = row ? normalizeTopics(JSON.parse(row.topics_discussed)) : [];
+  const next = topics.filter((t) => t.topic !== topic);
+  if (next.length === topics.length) {
+    return res.status(404).json({ error: "No remembered topic with that text." });
+  }
+
+  db.prepare("UPDATE family_notes SET topics_discussed = ?, updated_at = datetime('now') WHERE user_id = ?").run(
+    JSON.stringify(next),
+    req.userId
+  );
+
+  res.json({ ok: true });
+});
+
+router.delete("/account/notes/:text", requireAuth, (req, res) => {
+  const text = req.params.text;
+  if (!text) {
+    return res.status(400).json({ error: "Invalid note." });
+  }
+
+  const row = db.prepare("SELECT notes FROM family_notes WHERE user_id = ?").get(req.userId);
+  const notes = row ? normalizeNotes(JSON.parse(row.notes)) : [];
+  const next = notes.filter((n) => n.text !== text);
+  if (next.length === notes.length) {
+    return res.status(404).json({ error: "No remembered note with that text." });
+  }
+
+  db.prepare("UPDATE family_notes SET notes = ?, updated_at = datetime('now') WHERE user_id = ?").run(
+    JSON.stringify(next),
+    req.userId
+  );
 
   res.json({ ok: true });
 });
