@@ -1,8 +1,27 @@
 const express = require("express");
 const { requireAuth } = require("../auth-middleware");
 const { transcribeAudio, synthesizeSpeech, isVoiceAvailable } = require("../voice");
+const { rateLimit, byUserId } = require("../rate-limit");
 
 const router = express.Router();
+
+// Tighter than the chat limiter — Whisper/TTS cost more per call than a
+// chat message, and neither is something a real conversation needs dozens
+// of per 15 minutes. Separate buckets per endpoint since they're billed
+// and used independently.
+const transcribeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyFn: byUserId,
+  message: "You've used voice input a lot in a short time. Please wait a few minutes and try again."
+});
+
+const speakLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyFn: byUserId,
+  message: "You've used read-aloud a lot in a short time. Please wait a few minutes and try again."
+});
 
 // The global express.json() middleware in server.js only parses bodies whose
 // Content-Type is application/json, so it silently skips these audio
@@ -12,7 +31,7 @@ const router = express.Router();
 // audio/mp4 in Safari, etc).
 const rawAudio = express.raw({ type: () => true, limit: "10mb" });
 
-router.post("/voice/transcribe", requireAuth, rawAudio, async (req, res) => {
+router.post("/voice/transcribe", requireAuth, transcribeLimiter, rawAudio, async (req, res) => {
   if (!isVoiceAvailable) {
     return res.status(503).json({
       error: "Voice input needs a real OpenAI connection — this app is running in demo mode."
@@ -31,7 +50,7 @@ router.post("/voice/transcribe", requireAuth, rawAudio, async (req, res) => {
   }
 });
 
-router.post("/voice/speak", requireAuth, async (req, res) => {
+router.post("/voice/speak", requireAuth, speakLimiter, async (req, res) => {
   if (!isVoiceAvailable) {
     return res.status(503).json({
       error: "Voice replies need a real OpenAI connection — this app is running in demo mode."

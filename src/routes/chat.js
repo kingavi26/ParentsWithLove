@@ -3,8 +3,22 @@ const { db } = require("../db");
 const { requireAuth } = require("../auth-middleware");
 const { getReply, isDemoMode } = require("../reply-engine");
 const { loadFamilyState } = require("../family-state");
+const { rateLimit, byUserId } = require("../rate-limit");
 
 const router = express.Router();
+
+// Per-account ceiling on the endpoint that costs real OpenAI money on every
+// call (as of this pipeline, up to 5 calls per message: router, generator,
+// validator, and up to one automatic regenerate+revalidate). Signing up is
+// free and fast, so without this a single account could otherwise run up
+// an unbounded bill. 25/15min is generous for a real conversation while
+// stopping a runaway script cold.
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 25,
+  keyFn: byUserId,
+  message: "You've sent a lot of messages in a short time. Please wait a few minutes and try again."
+});
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD, server time
@@ -102,7 +116,7 @@ function mergeChildren(userId, existingChildren, newChildren) {
   }
 }
 
-router.post("/chat", requireAuth, async (req, res) => {
+router.post("/chat", requireAuth, chatLimiter, async (req, res) => {
   const history = req.body && req.body.history;
   if (!Array.isArray(history) || history.length === 0) {
     return res.status(400).json({ error: "Missing conversation history." });

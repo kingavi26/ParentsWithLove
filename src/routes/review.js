@@ -2,14 +2,25 @@ const express = require("express");
 const { db } = require("../db");
 const { requireAuth } = require("../auth-middleware");
 const { reviewSession } = require("../reply-engine");
+const { rateLimit, byUserId } = require("../rate-limit");
 
 const router = express.Router();
+
+// This is a "rate this session" button a parent clicks occasionally, not
+// something a normal flow calls repeatedly — 10/hour per account is plenty
+// of headroom for real use while capping the cost of someone mashing it.
+const reviewLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  keyFn: byUserId,
+  message: "You've requested a lot of session reviews recently. Please wait a bit and try again."
+});
 
 // Run after a chat session, on demand from the "Rate this session" button.
 // Grades the assistant's OWN replies in this conversation against the
 // framework + general child development research, and stores the result
 // so patterns across many sessions can inform future edits to BASE_RULES.
-router.post("/session/review", requireAuth, async (req, res) => {
+router.post("/session/review", requireAuth, reviewLimiter, async (req, res) => {
   const history = req.body && req.body.history;
   if (!Array.isArray(history) || history.length === 0) {
     return res.status(400).json({ error: "Nothing to review yet — chat a bit first." });
