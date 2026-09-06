@@ -64,7 +64,9 @@ router.post("/session/review", requireAuth, reviewLimiter, async (req, res) => {
     (review.concerns && review.concerns.length) ||
     (review.missedOpportunities && review.missedOpportunities.length);
 
-  if (hasSomethingToConsider) {
+  if (!hasSomethingToConsider) {
+    console.log(`[pwl7] learned-patterns: review ${insertResult.lastInsertRowid} had nothing to consider (no concerns/missed-opportunities/suggested-changes) — skipped the drafting call entirely.`);
+  } else {
     try {
       const draft = await draftLearnedPatternsUpdate({
         coreBaseRules: getCoreBaseRules(),
@@ -73,6 +75,9 @@ router.post("/session/review", requireAuth, reviewLimiter, async (req, res) => {
       });
       if (draft.meaningfulChange) {
         savePendingLearnedPatternsUpdate(draft.updatedLearnedPatterns, draft.changeSummary, insertResult.lastInsertRowid);
+        console.log(`[pwl7] learned-patterns: review ${insertResult.lastInsertRowid} produced a MEANINGFUL update, now pending admin approval. Summary: ${draft.changeSummary}`);
+      } else {
+        console.log(`[pwl7] learned-patterns: review ${insertResult.lastInsertRowid} was considered but judged NOT meaningful (likely already covered by the core framework, or too session-specific). Summary: ${draft.changeSummary}`);
       }
     } catch (err) {
       console.error("[pwl7] learned-patterns draft failed (review itself still succeeded):", err.message);
