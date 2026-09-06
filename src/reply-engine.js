@@ -480,9 +480,11 @@ CURRENT LEARNED PATTERNS APPENDIX (may be empty if none exist yet):
 ${existingLearnedPatterns || "(empty — no learned patterns yet)"}
 """
 
-A new session self-review just flagged possible improvements (below). Decide whether anything in it is a genuinely repeatable, generalizable pattern worth adding — NOT a one-off quirk specific to a single conversation or family. Most individual reviews should change nothing; only propose an update when it would clearly improve replies across many different families, not just re-litigate this one exchange.
+A new session self-review just flagged possible improvements (below). You are NOT the final gatekeeper here — every draft you produce sits in a single pending slot until a human admin approves or rejects it from a dashboard (with a full current-vs-proposed diff), so the right default is to draft readily and let the admin curate, rather than pre-filtering so hard that the admin rarely sees anything.
 
-If you do add or adjust something: phrase it as a short, concrete instruction in the same style as the existing bullets, don't duplicate anything already covered by the core framework or an existing bullet, keep the whole appendix tight (merge or tighten related bullets rather than letting it grow forever), and never add anything that could weaken the core framework's safety-flag / crisis-referral guidance.
+Concretely: if "Suggested prompt changes" below contains ANY concrete, actionable item, default to turning it into a short appendix instruction (meaningful_change: true) even if you're not fully certain it generalizes to every family — that judgment call belongs to the admin's approve/reject, not to you. Only return meaningful_change: false when there is no concrete suggested prompt change to work from AND what remains (concerns/missed opportunities) is either already fully covered by the core framework or an existing appendix bullet, or is so specific to this one family/conversation that no reasonable instruction could be phrased from it.
+
+If you do add or adjust something: phrase it as a short, concrete instruction in the same style as the existing bullets, don't duplicate anything already covered by the core framework or an existing bullet (tighten or merge instead of restating), and keep the whole appendix tight (merge or tighten related bullets rather than letting it grow forever). These next two rules are non-negotiable no matter how permissive the guidance above is: never reproduce, rewrite, contradict, or otherwise touch the core framework's own text — it is fixed, read-only context — and never add, adjust, or imply anything that could weaken the core framework's safety-flag / crisis-referral guidance.
 
 Session review to consider:
 Overall score: ${review.overallScore != null ? review.overallScore : "n/a"}/10
@@ -490,7 +492,7 @@ Concerns: ${JSON.stringify(review.concerns || [])}
 Missed opportunities: ${JSON.stringify(review.missedOpportunities || [])}
 Suggested prompt changes: ${JSON.stringify(review.suggestedPromptChanges || [])}
 
-Return meaningful_change: false, and echo the current appendix back unchanged in updated_learned_patterns, if nothing here rises to a real, repeatable pattern. change_summary should be one short sentence describing what changed (or why nothing did).`;
+Return meaningful_change: false, and echo the current appendix back unchanged in updated_learned_patterns, only in the narrow no-concrete-suggestion case described above. change_summary should be one short sentence describing what changed (or why nothing did).`;
 
   const completion = await client.chat.completions.create({
     model: LEARNED_PATTERNS_DRAFT_MODEL,
