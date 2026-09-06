@@ -104,6 +104,34 @@
 
       <!-- Prompt -->
       <div class="admin-panel" id="admin-panel-prompt" hidden>
+        <div class="admin-card admin-pending-update-card" id="admin-pending-update-card" hidden>
+          <div class="admin-prompt-head">
+            <h2>Pending BASE_RULES update</h2>
+            <span class="admin-badge admin-badge-warn">Auto-drafted</span>
+          </div>
+          <p class="modal-danger-copy">
+            Drafted automatically from session self-reviews. This only ever touches the "Learned patterns" appendix
+            &mdash; never the core framework steps above it. Nothing here takes effect until you approve it.
+          </p>
+          <p class="admin-muted" id="admin-pending-update-meta"></p>
+          <p class="admin-pending-update-summary" id="admin-pending-update-summary"></p>
+          <div class="admin-pending-update-diff">
+            <div>
+              <div class="admin-pending-update-col-label">Current learned patterns</div>
+              <pre class="admin-pending-update-pre" id="admin-pending-update-current"></pre>
+            </div>
+            <div>
+              <div class="admin-pending-update-col-label">Proposed</div>
+              <pre class="admin-pending-update-pre is-proposed" id="admin-pending-update-proposed"></pre>
+            </div>
+          </div>
+          <div id="admin-pending-update-error" class="form-error"></div>
+          <div class="admin-pending-update-actions">
+            <button type="button" class="btn-primary" id="admin-pending-update-approve-btn">Approve &amp; apply</button>
+            <button type="button" class="btn-danger-outline" id="admin-pending-update-reject-btn">Reject</button>
+          </div>
+        </div>
+
         <div class="admin-card">
           <div class="admin-prompt-head">
             <h2>BASE_RULES (system prompt framework)</h2>

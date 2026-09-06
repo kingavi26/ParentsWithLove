@@ -1436,6 +1436,44 @@ h1 {
 .admin-prompt-actions .btn-primary { width: auto; padding: 0.6rem 1.3rem; }
 .admin-prompt-actions .btn-danger-outline { width: auto; padding: 0.6rem 1.3rem; }
 
+.admin-pending-update-card { border-color: var(--accent); margin-bottom: 1.25rem; }
+.admin-pending-update-summary { margin: 0 0 0.9rem; }
+.admin-pending-update-diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+@media (max-width: 720px) {
+  .admin-pending-update-diff { grid-template-columns: 1fr; }
+}
+.admin-pending-update-col-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+.admin-pending-update-pre {
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+}
+.admin-pending-update-pre.is-proposed { border-color: var(--accent); }
+.admin-pending-update-actions { display: flex; gap: 0.75rem; }
+.admin-pending-update-actions .btn-primary { width: auto; padding: 0.6rem 1.3rem; }
+.admin-pending-update-actions .btn-danger-outline { width: auto; padding: 0.6rem 1.3rem; }
+.admin-stat-card.is-actionable { cursor: pointer; border-color: var(--accent); }
+
 /* ---------- motion: reduced-motion overrides ----------
    Kept at the END of the file on purpose: several rules above this
    point (.modal-card, .msg, etc.) set `animation`/`transform` at the

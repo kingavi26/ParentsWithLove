@@ -36,6 +36,15 @@
   var promptResetConfirm = document.getElementById("admin-prompt-reset-confirm");
   var promptResetConfirmBtn = document.getElementById("admin-prompt-reset-confirm-btn");
 
+  var pendingUpdateCard = document.getElementById("admin-pending-update-card");
+  var pendingUpdateMeta = document.getElementById("admin-pending-update-meta");
+  var pendingUpdateSummary = document.getElementById("admin-pending-update-summary");
+  var pendingUpdateCurrent = document.getElementById("admin-pending-update-current");
+  var pendingUpdateProposed = document.getElementById("admin-pending-update-proposed");
+  var pendingUpdateError = document.getElementById("admin-pending-update-error");
+  var pendingUpdateApproveBtn = document.getElementById("admin-pending-update-approve-btn");
+  var pendingUpdateRejectBtn = document.getElementById("admin-pending-update-reject-btn");
+
   var userModal = document.getElementById("admin-user-modal");
   var userModalEmail = document.getElementById("admin-user-modal-email");
   var userModalBody = document.getElementById("admin-user-modal-body");
@@ -131,7 +140,7 @@
       if (name === "overview") loadOverview();
       if (name === "users") loadUsers();
       if (name === "reviews") loadReviews(reviewsFilterUserId);
-      if (name === "prompt") loadPrompt();
+      if (name === "prompt") { loadPrompt(); loadPendingUpdate(); }
     });
   });
 
@@ -159,7 +168,21 @@
         statCard("Suspended", d.suspended) +
         statCard("Children tracked", d.totalChildren) +
         statCard("Self-reviews", d.totalReviews) +
-        statCard("Avg review score", d.avgOverallScore != null ? d.avgOverallScore + "/10" : "—");
+        statCard("Avg review score", d.avgOverallScore != null ? d.avgOverallScore + "/10" : "—") +
+        (d.pendingBaseRulesUpdateCount
+          ? '<div class="admin-stat-card is-actionable" id="admin-stat-pending-update">' +
+            '<div class="admin-stat-value">' + d.pendingBaseRulesUpdateCount + "</div>" +
+            '<div class="admin-stat-label">BASE_RULES update awaiting review &rarr;</div></div>'
+          : "");
+
+      var pendingStatCard = document.getElementById("admin-stat-pending-update");
+      if (pendingStatCard) {
+        pendingStatCard.addEventListener("click", function () {
+          switchToTab("prompt");
+          loadPrompt();
+          loadPendingUpdate();
+        });
+      }
 
       if (d.recentSignups && d.recentSignups.length) {
         recentSignupsEl.innerHTML = d.recentSignups
@@ -451,6 +474,61 @@
       promptBadge.className = "admin-badge admin-badge-ok";
       promptResetConfirm.hidden = true;
       promptSuccess.hidden = false;
+    });
+  });
+
+  // ---------------- pending BASE_RULES update (auto-drafted from reviews) ----------------
+
+  function loadPendingUpdate() {
+    pendingUpdateError.textContent = "";
+    pendingUpdateError.classList.remove("visible");
+
+    j("/api/admin/base-rules/pending-update").then(function (result) {
+      if (!result.ok) return;
+      var pending = result.data.pending;
+      if (!pending) {
+        pendingUpdateCard.hidden = true;
+        return;
+      }
+      pendingUpdateCard.hidden = false;
+      pendingUpdateMeta.textContent =
+        "Drafted from " + pending.reviewCount + " session review" + (pending.reviewCount === 1 ? "" : "s") +
+        " — last updated " + formatDate(pending.updatedAt) + ".";
+      pendingUpdateSummary.textContent = pending.changeSummary || "";
+      pendingUpdateCurrent.textContent = result.data.currentLearnedPatterns || "(none yet)";
+      pendingUpdateProposed.textContent = pending.learnedPatternsText || "(none)";
+    });
+  }
+
+  pendingUpdateApproveBtn.addEventListener("click", function () {
+    pendingUpdateError.textContent = "";
+    pendingUpdateError.classList.remove("visible");
+    pendingUpdateApproveBtn.disabled = true;
+
+    j("/api/admin/base-rules/pending-update/approve", { method: "POST" }).then(function (result) {
+      pendingUpdateApproveBtn.disabled = false;
+      if (!result.ok) {
+        pendingUpdateError.textContent = (result.data && result.data.error) || "Something went wrong.";
+        pendingUpdateError.classList.add("visible");
+        return;
+      }
+      pendingUpdateCard.hidden = true;
+      // The approved text is now the live BASE_RULES override — refresh
+      // the textarea/badge below so they don't show the stale pre-approval
+      // version.
+      loadPrompt();
+    });
+  });
+
+  pendingUpdateRejectBtn.addEventListener("click", function () {
+    pendingUpdateError.textContent = "";
+    pendingUpdateError.classList.remove("visible");
+    pendingUpdateRejectBtn.disabled = true;
+
+    j("/api/admin/base-rules/pending-update/reject", { method: "POST" }).then(function (result) {
+      pendingUpdateRejectBtn.disabled = false;
+      if (!result.ok) return;
+      pendingUpdateCard.hidden = true;
     });
   });
 
