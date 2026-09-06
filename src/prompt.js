@@ -170,6 +170,94 @@ function clearBaseRulesOverride() {
   db.prepare("DELETE FROM app_settings WHERE key = ?").run(BASE_RULES_KEY);
 }
 
+/* ------------------------------------------------------------------ *
+ * "Learned patterns" appendix: the ONE part of BASE_RULES that
+ * automation (see reviewSession/draftLearnedPatternsUpdate in
+ * reply-engine.js) is allowed to touch. It always lives as a clearly
+ * marked block at the end of the active BASE_RULES text; everything
+ * before that marker is the hand-written core framework (the 12 steps,
+ * safety-flag language, etc.) and automation never rewrites it —
+ * splitLearnedPatterns/composeBaseRules just carve the marker out and
+ * put it back so an approved update can never accidentally clobber the
+ * core, even if an admin has customized it.
+ * ------------------------------------------------------------------ */
+
+const LEARNED_PATTERNS_HEADER = "LEARNED PATTERNS (from session self-reviews — admin-approved)";
+
+function splitLearnedPatterns(fullText) {
+  const idx = fullText.indexOf(LEARNED_PATTERNS_HEADER);
+  if (idx === -1) return { core: fullText.trim(), learnedPatterns: "" };
+  return {
+    core: fullText.slice(0, idx).trim(),
+    learnedPatterns: fullText.slice(idx + LEARNED_PATTERNS_HEADER.length).trim()
+  };
+}
+
+function composeBaseRules(core, learnedPatterns) {
+  if (!learnedPatterns || !learnedPatterns.trim()) return core;
+  return `${core}\n\n${LEARNED_PATTERNS_HEADER}\n${learnedPatterns.trim()}`;
+}
+
+function getCoreBaseRules() {
+  return splitLearnedPatterns(getActiveBaseRules()).core;
+}
+
+function getLearnedPatternsText() {
+  return splitLearnedPatterns(getActiveBaseRules()).learnedPatterns;
+}
+
+const PENDING_UPDATE_ROW_ID = 1;
+
+// The one queued-but-not-yet-applied draft, or null if there isn't one.
+function getPendingLearnedPatternsUpdate() {
+  const row = db.prepare("SELECT * FROM base_rules_pending_update WHERE id = ?").get(PENDING_UPDATE_ROW_ID);
+  if (!row) return null;
+  return {
+    learnedPatternsText: row.learned_patterns_text,
+    changeSummary: row.change_summary,
+    sourceReviewIds: JSON.parse(row.source_review_ids || "[]"),
+    reviewCount: row.review_count,
+    updatedAt: row.updated_at
+  };
+}
+
+// Called after a session review produces a genuinely new, generalizable
+// pattern. Folds the new reviewId into whatever's already queued rather
+// than replacing it, so the admin always sees one running draft instead
+// of a growing list to sift through.
+function savePendingLearnedPatternsUpdate(learnedPatternsText, changeSummary, reviewId) {
+  const existing = getPendingLearnedPatternsUpdate();
+  const sourceReviewIds = existing ? existing.sourceReviewIds.concat([reviewId]) : [reviewId];
+  db.prepare(
+    `INSERT INTO base_rules_pending_update (id, learned_patterns_text, change_summary, source_review_ids, review_count, updated_at)
+     VALUES (?, ?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(id) DO UPDATE SET
+       learned_patterns_text = excluded.learned_patterns_text,
+       change_summary = excluded.change_summary,
+       source_review_ids = excluded.source_review_ids,
+       review_count = excluded.review_count,
+       updated_at = excluded.updated_at`
+  ).run(PENDING_UPDATE_ROW_ID, learnedPatternsText, changeSummary || "", JSON.stringify(sourceReviewIds), sourceReviewIds.length);
+}
+
+function clearPendingLearnedPatternsUpdate() {
+  db.prepare("DELETE FROM base_rules_pending_update WHERE id = ?").run(PENDING_UPDATE_ROW_ID);
+}
+
+// Applies the queued draft to the live BASE_RULES override (core text
+// untouched, learned-patterns block replaced with the approved draft)
+// and clears the queue. Returns the new full text, or null if there was
+// nothing pending (e.g. a stale approve click after someone else already
+// rejected it).
+function approvePendingLearnedPatternsUpdate() {
+  const pending = getPendingLearnedPatternsUpdate();
+  if (!pending) return null;
+  const composed = composeBaseRules(getCoreBaseRules(), pending.learnedPatternsText);
+  setBaseRulesOverride(composed);
+  clearPendingLearnedPatternsUpdate();
+  return composed;
+}
+
 // Formats a stored timestamp ("YYYY-MM-DD" or a SQLite "YYYY-MM-DD HH:MM:SS")
 // as a readable date. Returns null for anything missing/unparseable so
 // callers can just skip the date rather than printing "Invalid Date".
@@ -233,5 +321,12 @@ module.exports = {
   setBaseRulesOverride,
   clearBaseRulesOverride,
   buildSystemPrompt,
-  buildFamilyContext
+  buildFamilyContext,
+  LEARNED_PATTERNS_HEADER,
+  getCoreBaseRules,
+  getLearnedPatternsText,
+  getPendingLearnedPatternsUpdate,
+  savePendingLearnedPatternsUpdate,
+  clearPendingLearnedPatternsUpdate,
+  approvePendingLearnedPatternsUpdate
 };

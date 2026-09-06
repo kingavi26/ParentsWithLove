@@ -434,6 +434,78 @@ Each array should have 0-4 short, specific items (empty array if genuinely none)
   return Object.assign({ available: true }, review);
 }
 
+/* ------------------------------------------------------------------ *
+ * Learned-patterns drafting: runs right after a session review, and
+ * ONLY ever proposes changes to the "Learned patterns" appendix (see
+ * src/prompt.js) — never the hand-written core framework above it. The
+ * result is a draft that sits in base_rules_pending_update until an
+ * admin approves or rejects it (src/routes/admin.js); nothing here ever
+ * touches the live prompt directly.
+ * ------------------------------------------------------------------ */
+
+const LEARNED_PATTERNS_DRAFT_MODEL = process.env.LEARNED_PATTERNS_DRAFT_MODEL || REVIEW_MODEL;
+
+const LEARNED_PATTERNS_SCHEMA = {
+  name: "learned_patterns_update",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      meaningful_change: { type: "boolean" },
+      updated_learned_patterns: { type: "string" },
+      change_summary: { type: "string" }
+    },
+    required: ["meaningful_change", "updated_learned_patterns", "change_summary"]
+  }
+};
+
+// coreBaseRules/existingLearnedPatterns come from src/prompt.js
+// (getCoreBaseRules/getLearnedPatternsText); review is whatever
+// reviewSession() just returned for this conversation.
+async function draftLearnedPatternsUpdate({ coreBaseRules, existingLearnedPatterns, review }) {
+  if (!client) {
+    return { meaningfulChange: false, updatedLearnedPatterns: existingLearnedPatterns || "", changeSummary: "" };
+  }
+
+  const systemPrompt = `You maintain a "Learned patterns" appendix to pwl7's parenting-assistant framework. This appendix is the ONLY part of the framework that gets updated from session self-reviews — you must never contradict, duplicate, restate, or rewrite the core framework below; treat it as fixed, read-only context.
+
+CORE FRAMEWORK (read-only — do not reproduce or edit):
+"""
+${coreBaseRules}
+"""
+
+CURRENT LEARNED PATTERNS APPENDIX (may be empty if none exist yet):
+"""
+${existingLearnedPatterns || "(empty — no learned patterns yet)"}
+"""
+
+A new session self-review just flagged possible improvements (below). Decide whether anything in it is a genuinely repeatable, generalizable pattern worth adding — NOT a one-off quirk specific to a single conversation or family. Most individual reviews should change nothing; only propose an update when it would clearly improve replies across many different families, not just re-litigate this one exchange.
+
+If you do add or adjust something: phrase it as a short, concrete instruction in the same style as the existing bullets, don't duplicate anything already covered by the core framework or an existing bullet, keep the whole appendix tight (merge or tighten related bullets rather than letting it grow forever), and never add anything that could weaken the core framework's safety-flag / crisis-referral guidance.
+
+Session review to consider:
+Overall score: ${review.overallScore != null ? review.overallScore : "n/a"}/10
+Concerns: ${JSON.stringify(review.concerns || [])}
+Missed opportunities: ${JSON.stringify(review.missedOpportunities || [])}
+Suggested prompt changes: ${JSON.stringify(review.suggestedPromptChanges || [])}
+
+Return meaningful_change: false, and echo the current appendix back unchanged in updated_learned_patterns, if nothing here rises to a real, repeatable pattern. change_summary should be one short sentence describing what changed (or why nothing did).`;
+
+  const completion = await client.chat.completions.create({
+    model: LEARNED_PATTERNS_DRAFT_MODEL,
+    response_format: { type: "json_schema", json_schema: LEARNED_PATTERNS_SCHEMA },
+    messages: [{ role: "system", content: systemPrompt }]
+  });
+
+  const parsed = JSON.parse(completion.choices[0].message.content);
+  return {
+    meaningfulChange: Boolean(parsed.meaningful_change),
+    updatedLearnedPatterns: parsed.updated_learned_patterns || existingLearnedPatterns || "",
+    changeSummary: parsed.change_summary || ""
+  };
+}
+
 /**
  * @param {Array<{role: 'user'|'assistant', content: string}>} history - this browser session's conversation so far (oldest first)
  * @param {{children: Array<{name:string|null, age:number|null}>, topics_discussed: string[], notes: string[]}} familyState - everything stored about this user
@@ -450,4 +522,4 @@ async function getReply({ history, familyState }) {
   return { reply, extracted };
 }
 
-module.exports = { getReply, reviewSession, isDemoMode: !hasRealKey };
+module.exports = { getReply, reviewSession, draftLearnedPatternsUpdate, isDemoMode: !hasRealKey };

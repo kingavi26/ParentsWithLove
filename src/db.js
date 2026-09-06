@@ -69,6 +69,23 @@ function initDb() {
       value TEXT,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- A single-row (id always 1) queue of ONE auto-drafted update to the
+    -- "Learned patterns" appendix of BASE_RULES (see src/prompt.js), built
+    -- from session_reviews. This is a DRAFT only — it never touches the
+    -- live prompt until an admin approves it via
+    -- POST /api/admin/base-rules/pending-update/approve. Each new review
+    -- with something worth folding in regenerates this row (merging into
+    -- whatever's already pending) rather than queuing a growing list, so
+    -- there's always at most one thing for the admin to review.
+    CREATE TABLE IF NOT EXISTS base_rules_pending_update (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      learned_patterns_text TEXT NOT NULL DEFAULT '',
+      change_summary TEXT NOT NULL DEFAULT '',
+      source_review_ids TEXT NOT NULL DEFAULT '[]',
+      review_count INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Migration path for a users table created before social login existed
