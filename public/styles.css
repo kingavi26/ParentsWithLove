@@ -985,6 +985,17 @@ h1 {
   justify-content: space-between;
 }
 
+/* Without this, the [hidden] attribute set on rows past
+   MEMORY_PREVIEW_COUNT (app.js, renderAccountMemoryList) does nothing —
+   this rule's own `display: flex` above beats the browser's default
+   `[hidden] { display: none }` since author styles always win over the
+   UA stylesheet regardless of source order. `.pin-note` (the read-only
+   sidebar's equivalent row) never hit this because it has no `display`
+   of its own to conflict. */
+.account-memory-row[hidden] {
+  display: none;
+}
+
 .account-memory-text { font-size: 0.88rem; flex: 1 1 12rem; min-width: 0; }
 
 .account-memory-delete {

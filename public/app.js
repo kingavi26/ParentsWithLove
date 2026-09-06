@@ -741,6 +741,12 @@
   // place, only to forget. Shared by both lists since a topic pin and a note
   // pin render identically except for their text; getText/formatWhen pick
   // out the right fields for whichever list this is.
+  // Topics/notes can grow to 20-30 entries (server-side cap — see
+  // mergeTopics/mergeNotes in src/routes/chat.js), which made this list a
+  // long wall of Remove buttons in Account settings. Reuses the same
+  // preview-count-plus-toggle pattern as the read-only "What we remember"
+  // sidebar (MEMORY_PREVIEW_COUNT / .memory-more-btn above) so a long
+  // history stays skimmable instead of dominating the modal.
   function renderAccountMemoryList(container, items, getText, formatWhen) {
     container.innerHTML = "";
     if (!items || !items.length) {
@@ -748,13 +754,14 @@
       return;
     }
 
-    items.forEach(function (item) {
+    items.forEach(function (item, i) {
       var text = getText(item);
       var when = formatWhen(item);
 
       var row = document.createElement("div");
       row.className = "account-memory-row";
       row.dataset.text = text;
+      if (i >= MEMORY_PREVIEW_COUNT) row.hidden = true;
 
       var span = document.createElement("span");
       span.className = "account-memory-text";
@@ -770,6 +777,24 @@
       row.appendChild(deleteBtn);
       container.appendChild(row);
     });
+
+    if (items.length > MEMORY_PREVIEW_COUNT) {
+      var hiddenCount = items.length - MEMORY_PREVIEW_COUNT;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "memory-more-btn";
+      btn.setAttribute("aria-expanded", "false");
+      btn.textContent = "See " + hiddenCount + " more ↓";
+      btn.addEventListener("click", function () {
+        var expanded = btn.getAttribute("aria-expanded") === "true";
+        Array.prototype.forEach.call(container.querySelectorAll(".account-memory-row"), function (row, i) {
+          if (i >= MEMORY_PREVIEW_COUNT) row.hidden = expanded;
+        });
+        btn.setAttribute("aria-expanded", String(!expanded));
+        btn.textContent = expanded ? "See " + hiddenCount + " more ↓" : "Show fewer ↑";
+      });
+      container.appendChild(btn);
+    }
   }
 
   function renderAccountTopicsList() {
