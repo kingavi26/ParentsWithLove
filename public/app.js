@@ -427,6 +427,26 @@
     return el;
   }
 
+  // Animated "assistant is typing" bubble (three bouncing dots, CSS-driven —
+  // see .typing-dots / @keyframes typing-bounce in styles.css) shown while a
+  // /api/chat request is in flight. Built with createElement rather than the
+  // el.textContent used by addMessage() above, since this one needs child
+  // elements to animate individually rather than a plain text node; nothing
+  // here comes from user or server input, so no escaping is needed.
+  function addTypingIndicator() {
+    var el = document.createElement("div");
+    el.className = "msg bot pending";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-label", "Assistant is typing");
+    var dots = document.createElement("span");
+    dots.className = "typing-dots";
+    for (var i = 0; i < 3; i++) dots.appendChild(document.createElement("span"));
+    el.appendChild(dots);
+    chatLog.appendChild(el);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return el;
+  }
+
   chatForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var text = chatInput.value.trim();
@@ -438,7 +458,7 @@
     chatInput.disabled = true;
     chatSend.disabled = true;
 
-    var pending = addMessage("...", "bot pending");
+    var pending = addTypingIndicator();
 
     fetch("/api/chat", {
       method: "POST",
