@@ -215,7 +215,7 @@ Return:
 - requirement_status: "optional" | "required_eventually_flexible_timing" | "required_now"
 - relevant_protocol: the specific pwl7 framework step(s)/protocol that apply here
 - developmental_barriers_to_check: skills, needs, or developmental limits worth considering (hunger, fatigue, impulse control, language, temperament, sensory needs, etc. — empty array if none stand out)
-- must_include_in_answer: things the final answer must cover
+- must_include_in_answer: AT MOST the 2 most important things the final answer must cover right now, ranked by priority — not a complete list of everything that could be said. The reply this feeds has a hard length limit, so a long checklist here directly causes an overlong, essay-like reply. Anything else worth addressing is a follow-up message's job, not this one's.
 - must_not_assume: assumptions the final answer must NOT make (e.g. "equal blame", "older child guilty", a diagnosis, a motive)
 - safety_flags: anything indicating danger, self-harm, abuse, or a crisis that needs a professional/crisis-line mention (empty array if none)
 
@@ -252,7 +252,8 @@ async function generateReply(history, familyState, routerResult, failureNote) {
     systemPrompt +=
       `\n\nINTERNAL ROUTER ANALYSIS FOR THIS MESSAGE (already determined — do not ignore it, do not repeat it back to the parent, and never mention that a "router" or analysis step exists):\n${JSON.stringify(forGenerator, null, 2)}\n\n` +
       `Use this analysis to write the reply: cover must_include_in_answer, honor must_not_assume, and follow relevant_protocol using the framework above. Use only whichever parts of the framework are relevant to this specific situation. Write in natural wording an ordinary parent can actually use — do not sound clinical, do not add assumptions the analysis doesn't support, and give concrete next steps.\n\n` +
-      `The analysis above is internal guidance, not an outline to reproduce. must_include_in_answer having several items is NOT a reason to write a longer or more structured reply — the framework's RESPONSE STYLE rule (short, warm, natural, no headers, no numbered/bulleted lists, not an essay) still applies at full strength no matter how many items there are. Weave everything into a few short paragraphs or 1-3 example lines a parent could actually say, the way a warm, experienced friend would text back — never a multi-section document with headers or a numbered procedure. If you genuinely cannot cover the essentials in that length, cover only the single most important thing right now and leave the rest for a follow-up message.`;
+      `The analysis above is internal guidance, not an outline to reproduce. must_include_in_answer having multiple items is NOT a reason to write a longer reply — cover the single most important item well; touch the second only if it fits naturally in one added sentence.\n\n` +
+      `HARD LENGTH LIMIT: the entire reply must be under 80 words — roughly 3-5 sentences. This is not a soft target, it's a ceiling: count as you write, and cut before you exceed it. One short paragraph, optionally plus one quoted example line a parent could say, is the whole reply — never multiple paragraphs, never a paragraph-per-topic structure, no headers, no numbered or bulleted lists. If the real situation needs more than one message's worth of guidance, say the most important thing now and let the parent's next message pull the rest out of you — do not front-load it all into one long reply.`;
   }
 
   if (failureNote) {
@@ -279,25 +280,25 @@ ${getActiveBaseRules()}
 ROUTER ANALYSIS FOR THIS MESSAGE:
 ${JSON.stringify(routerResult, null, 2)}
 
-Check:
-- FORMAT (check this first, and FAIL on it regardless of how good the content is): is it a few short, warm, natural sentences or concrete tips — the way a caring, experienced friend would text back? Or is it a long structured document: markdown headers (### ...), a numbered procedure, bullet lists, multiple named sections? The master framework's RESPONSE STYLE rule ("not an essay", "never recite step names, numbers, or headers") is a real, enforceable requirement, not a minor stylistic preference — a well-organized but long/headered/numbered reply FAILS this check even if every fact in it is correct.
-- Did it separate facts from possibilities?
+Check these two FIRST, and FAIL on either regardless of how good the content is — a reply can be substantively excellent and still fail on length or format:
+- LENGTH: is the whole reply under roughly 80 words (about 3-5 sentences, one short paragraph plus at most one quoted example line)? A reply of multiple paragraphs, or one long paragraph covering several separate points, FAILS this even if every sentence in it is well-written and correct. pwl7 replies say the single most important thing now, not everything that could eventually be said.
+- FORMAT: no markdown headers (### ...), no numbered procedure, no bullet lists, no named sections. A caring friend's text message, not a handout.
+
+Then check substance — but weigh these against the length limit above: a good reply picks ONE clear next step and executes it well, rather than trying to complete an entire multi-step protocol in one message. Do not FAIL a short reply merely for not covering every sub-step of a protocol in a single message — that's what follow-up messages are for.
+- Did it separate facts from possibilities, where relevant to what it actually said?
 - Did it avoid inventing motives, feelings, diagnoses, family rules, or requirements?
 - Did the child's age/stage actually affect the advice?
 - Did it preserve appropriate autonomy?
 - Did it maintain genuinely necessary responsibilities/boundaries?
-- Did it use the correct specific protocol for this situation?
-- Did it give exact, usable wording where that would help (a line or two, not a script for every phase of the interaction)?
-- Did it explain what happens if the first attempt doesn't work, where relevant?
+- Was the step it chose to take actually the right first/next step for this situation and protocol (not necessarily the whole protocol)?
 - Did it avoid shame and unnecessary control?
 - Did it avoid unsupported research claims (e.g. "this will cause...")?
-- Did it help build competence and independence?
 - Did it preserve love, dignity, and connection?
-- Did it honor must_include_in_answer and avoid must_not_assume from the router analysis, without turning the checklist into an outline the parent can see?
-- If relevant_protocol involves sibling conflict: did it establish what happened, aim to hear both children's perspectives, avoid automatic equal blame, include responsibility where appropriate, and involve the children in generating the solution?
+- Did it address must_include_in_answer's top priority item and avoid must_not_assume from the router analysis, without turning the checklist into an outline the parent can see?
+- If relevant_protocol involves sibling conflict and the parent doesn't yet know what happened: did the reply's chosen step move toward hearing both sides / establishing facts, rather than jumping straight to a parent-imposed solution or assigning blame? (Hearing both children and building a child-generated solution can validly happen across this and later messages, not all in one.)
 - If safety_flags is non-empty: did the answer appropriately encourage contacting a professional or crisis resource rather than trying to resolve it alone?
 
-Return "FAIL" when the answer clearly fails to execute the relevant protocol, violates the framework in a way that matters for this family, or fails the FORMAT check above. Do not FAIL for genuinely minor word-choice preferences that don't affect either substance or format.`;
+Return "FAIL" when the answer fails the LENGTH or FORMAT check, clearly fails to execute the relevant protocol's right-now step, or violates the framework in a way that matters for this family. Do not FAIL for genuinely minor word-choice preferences, and do not FAIL a short, well-chosen single step just because it doesn't also finish the whole protocol.`;
 }
 
 async function validateReply(history, routerResult, proposedReply) {
