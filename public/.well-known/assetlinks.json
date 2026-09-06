@@ -1,0 +1,8 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+          "namespace": "android_app",
+          "package_name": "com.parentswithlove.app",
+          "sha256_cert_fingerprints": ["C8:E6:08:A2:3D:6F:1D:08:85:6B:32:C1:48:9B:88:DF:16:2D:49:CE:04:04:5E:C4:F3:B6:35:20:BD:79:31:01"]
+    }
+}]
