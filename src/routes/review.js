@@ -1,7 +1,8 @@
 const express = require("express");
 const { db } = require("../db");
 const { requireAuth } = require("../auth-middleware");
-const { reviewSession } = require("../reply-engine");
+const { reviewSession, draftLearnedPatternsUpdate } = require("../reply-engine");
+const { getCoreBaseRules, getLearnedPatternsText, savePendingLearnedPatternsUpdate } = require("../prompt");
 const { rateLimit, byUserId } = require("../rate-limit");
 
 const router = express.Router();
@@ -38,7 +39,7 @@ router.post("/session/review", requireAuth, reviewLimiter, async (req, res) => {
     return res.json(review);
   }
 
-  db.prepare(
+  const insertResult = db.prepare(
     `INSERT INTO session_reviews
       (user_id, overall_score, dimension_scores, strengths, concerns, missed_opportunities, suggested_prompt_changes, message_count)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
@@ -52,6 +53,31 @@ router.post("/session/review", requireAuth, reviewLimiter, async (req, res) => {
     JSON.stringify(review.suggestedPromptChanges || []),
     history.length
   );
+
+  // Best-effort: draft an update to the BASE_RULES "Learned patterns"
+  // appendix from this review, for an admin to approve or reject later
+  // (see src/prompt.js and the admin dashboard's Prompt tab). This never
+  // touches the live prompt itself and must never fail or slow down the
+  // review a parent is waiting on.
+  const hasSomethingToConsider =
+    (review.suggestedPromptChanges && review.suggestedPromptChanges.length) ||
+    (review.concerns && review.concerns.length) ||
+    (review.missedOpportunities && review.missedOpportunities.length);
+
+  if (hasSomethingToConsider) {
+    try {
+      const draft = await draftLearnedPatternsUpdate({
+        coreBaseRules: getCoreBaseRules(),
+        existingLearnedPatterns: getLearnedPatternsText(),
+        review
+      });
+      if (draft.meaningfulChange) {
+        savePendingLearnedPatternsUpdate(draft.updatedLearnedPatterns, draft.changeSummary, insertResult.lastInsertRowid);
+      }
+    } catch (err) {
+      console.error("[pwl7] learned-patterns draft failed (review itself still succeeded):", err.message);
+    }
+  }
 
   res.json(review);
 });

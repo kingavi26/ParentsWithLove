@@ -14,7 +14,11 @@ const {
   getActiveBaseRules,
   isBaseRulesCustomized,
   setBaseRulesOverride,
-  clearBaseRulesOverride
+  clearBaseRulesOverride,
+  getLearnedPatternsText,
+  getPendingLearnedPatternsUpdate,
+  approvePendingLearnedPatternsUpdate,
+  clearPendingLearnedPatternsUpdate
 } = require("../prompt");
 
 const router = express.Router();
@@ -76,6 +80,7 @@ router.get("/admin/overview", requireAdminAuth, (req, res) => {
   const recentSignups = db
     .prepare("SELECT email, created_at FROM users ORDER BY created_at DESC LIMIT 10")
     .all();
+  const pendingBaseRulesUpdate = getPendingLearnedPatternsUpdate();
 
   res.json({
     totalUsers,
@@ -86,7 +91,8 @@ router.get("/admin/overview", requireAdminAuth, (req, res) => {
     totalChildren,
     totalReviews,
     avgOverallScore: avgScoreRow.avg != null ? Math.round(avgScoreRow.avg * 10) / 10 : null,
-    recentSignups
+    recentSignups,
+    pendingBaseRulesUpdateCount: pendingBaseRulesUpdate ? pendingBaseRulesUpdate.reviewCount : 0
   });
 });
 
@@ -219,6 +225,33 @@ router.post("/admin/prompt", requireAdminAuth, (req, res) => {
 router.post("/admin/prompt/reset", requireAdminAuth, (req, res) => {
   clearBaseRulesOverride();
   res.json({ ok: true, isCustomized: false, current: DEFAULT_BASE_RULES });
+});
+
+// ---------------- learned-patterns auto-draft (pending BASE_RULES update) ----------------
+//
+// Session reviews (src/routes/review.js) can queue at most one draft update
+// to BASE_RULES's "Learned patterns" appendix — never the hand-written core
+// framework above it (see src/prompt.js). Nothing here ever changes live
+// behavior by itself; an admin has to explicitly approve it below.
+
+router.get("/admin/base-rules/pending-update", requireAdminAuth, (req, res) => {
+  res.json({
+    pending: getPendingLearnedPatternsUpdate(),
+    currentLearnedPatterns: getLearnedPatternsText()
+  });
+});
+
+router.post("/admin/base-rules/pending-update/approve", requireAdminAuth, (req, res) => {
+  const applied = approvePendingLearnedPatternsUpdate();
+  if (!applied) {
+    return res.status(404).json({ error: "No pending update to approve — it may have already been handled." });
+  }
+  res.json({ ok: true, current: applied, isCustomized: true });
+});
+
+router.post("/admin/base-rules/pending-update/reject", requireAdminAuth, (req, res) => {
+  clearPendingLearnedPatternsUpdate();
+  res.json({ ok: true });
 });
 
 module.exports = router;
