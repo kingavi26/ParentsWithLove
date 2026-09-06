@@ -77,4 +77,12 @@ function byIpAndEmail(req) {
   return `${req.ip || "unknown"}:${email || "no-email"}`;
 }
 
-module.exports = { rateLimit, byIp, byIpAndEmail };
+// For routes gated by requireAuth (which sets req.userId before this ever
+// runs). Keyed by account rather than IP so the limit follows the parent,
+// not the network — a household or office sharing one IP doesn't get
+// throttled together, and a bucket can't be dodged by switching networks.
+function byUserId(req) {
+  return req.userId != null ? String(req.userId) : (req.ip || "unknown");
+}
+
+module.exports = { rateLimit, byIp, byIpAndEmail, byUserId };
