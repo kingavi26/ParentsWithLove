@@ -30,6 +30,15 @@ initDb();
 
 app.use(express.json());
 app.use(cookieParser());
+// express.static ignores dotfiles/dot-directories by default (serve-static's
+// `dotfiles: "ignore"`), which would silently 404 /.well-known/* — so this
+// needs its own route rather than just dropping the file in public/.
+// Required for the Android TWA app to verify it owns this site (Digital
+// Asset Links) and open without a browser URL bar.
+app.get("/.well-known/assetlinks.json", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", ".well-known", "assetlinks.json"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", authRoutes);
