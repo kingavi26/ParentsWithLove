@@ -23,6 +23,13 @@
   --honey-tint: #edf0f4;
   --plum: #57678a;
   --note-bg: #f1f3f6;
+
+  /* Typography as variables (not just literals) so the live Design Mode
+     editor (public/design.js, src/design.js) can swap fonts app-wide by
+     setting these two custom properties — every font-family rule below
+     references one of these two instead of hardcoding a family name. */
+  --font-body: 'Work Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Lora', Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -32,7 +39,7 @@ html, body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 body {
@@ -90,7 +97,7 @@ body {
 }
 
 h1 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.5rem, 4vw, 2rem);
   margin: 0.3rem 0 0.4rem;
@@ -110,11 +117,11 @@ h1 {
 .brand-wordmark {
   display: flex;
   align-items: baseline;
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
 }
 .brand-parents { font-size: 1.4rem; font-weight: 600; color: var(--text); }
 .brand-with {
-  font-family: 'Work Sans', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--accent);
@@ -342,7 +349,7 @@ h1 {
 /* ---------- home screen ---------- */
 
 .home-greeting {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.5rem;
   margin-bottom: 0.6rem;
@@ -665,7 +672,7 @@ h1 {
 }
 
 .memory-card h2 {
-  font-family: 'Work Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -740,7 +747,7 @@ h1 {
 
 .pin-note.note-pin {
   background: var(--note-bg);
-  font-family: 'Work Sans', sans-serif;
+  font-family: var(--font-body);
   font-style: italic;
   font-size: 0.85rem;
   line-height: 1.45;
@@ -791,7 +798,7 @@ h1 {
 }
 
 .review-head h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0;
@@ -820,7 +827,7 @@ h1 {
 }
 
 .review-score-big {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.9rem;
   font-weight: 600;
   color: var(--accent);
@@ -940,7 +947,7 @@ h1 {
 }
 
 .modal-head h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 600;
   margin: 0;
@@ -1147,7 +1154,7 @@ h1 {
    and left-aligned since this is a long-form read rather than a login form. */
 .privacy-card { max-width: 720px; text-align: left; }
 .disclaimer-body h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
   margin: 1.4rem 0 0.5rem;
@@ -1267,7 +1274,7 @@ h1 {
 }
 
 .admin-card h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0 0 0.9rem;
@@ -1289,7 +1296,7 @@ h1 {
 }
 
 .admin-stat-value {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--accent);
@@ -1473,6 +1480,170 @@ h1 {
 .admin-pending-update-actions .btn-primary { width: auto; padding: 0.6rem 1.3rem; }
 .admin-pending-update-actions .btn-danger-outline { width: auto; padding: 0.6rem 1.3rem; }
 .admin-stat-card.is-actionable { cursor: pointer; border-color: var(--accent); }
+
+/* ---------- design mode (live visual editor, public/design.js) ----------
+   Only ever activated for a logged-in admin viewing the real parent-facing
+   pages (index.html) — see design.js for the loggedIn check. Regular
+   visitors never see any of this; they only get the *result* of saved
+   theme/content/order overrides, applied as plain inline CSS
+   custom-properties/textContent, no extra markup or classes. */
+
+.design-mode-toggle {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px -4px rgba(20, 30, 45, 0.4);
+}
+.design-mode-toggle.is-active { background: var(--accent); }
+
+body.design-mode-active {
+  outline: 3px dashed var(--accent);
+  outline-offset: -3px;
+}
+
+/* Editable text: a dashed box on hover only while design mode is on, so
+   the ordinary read-only page is never visually cluttered. */
+body.design-mode-active [data-editable] {
+  cursor: text;
+  border-radius: 3px;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+}
+body.design-mode-active [data-editable]:hover,
+body.design-mode-active [data-editable]:focus {
+  outline-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Reorderable blocks: a visible grab affordance plus a drop-target
+   indicator, both scoped to design mode only. */
+body.design-mode-active [data-reorder-group] > [data-reorder-id] {
+  cursor: grab;
+  outline: 1px dashed transparent;
+  outline-offset: 3px;
+}
+body.design-mode-active [data-reorder-group] > [data-reorder-id]:hover {
+  outline-color: var(--muted);
+}
+body.design-mode-active [data-reorder-group] > [data-reorder-id].is-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+.design-mode-panel {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 4.2rem;
+  z-index: 500;
+  width: min(320px, calc(100vw - 2.2rem));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 32px -8px rgba(20, 30, 45, 0.35);
+  padding: 1rem;
+  font-family: var(--font-body);
+}
+.design-mode-panel[hidden] { display: none; }
+
+.design-mode-panel h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin: 0 0 0.6rem;
+}
+.design-mode-panel .design-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  line-height: 1.4;
+}
+
+.design-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+}
+.design-field-row label {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.design-field-row input[type="color"] {
+  width: 2.1rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+.design-field-row select {
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  max-width: 11.5rem;
+}
+
+.design-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.design-panel-actions button {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.design-panel-actions button.design-reset-btn {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.design-mode-status {
+  font-size: 0.72rem;
+  color: var(--muted);
+  min-height: 1em;
+  margin-top: 0.5rem;
+}
+
+/* Below 721px, #app-screen's own nav becomes a fixed ~5.5rem bottom bar
+   (see the .site-disclaimer comment above) that this floating toggle/panel
+   would otherwise sit on top of — lift both above it on narrow widths. */
+@media (max-width: 720px) {
+  .design-mode-toggle { bottom: 5.6rem; }
+  .design-mode-panel { bottom: 8.7rem; }
+}
 
 /* ---------- motion: reduced-motion overrides ----------
    Kept at the END of the file on purpose: several rules above this

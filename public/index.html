@@ -28,9 +28,9 @@
           <span class="brand-parents">Parents</span><span class="brand-with">with</span><span class="brand-love">Love</span>
         </div>
       </div>
-      <div class="eyebrow">pwl7 &middot; prototype</div>
-      <h1>Parenting help chat</h1>
-      <p>Log in and it remembers your kids and what you've already talked about, so the conversation picks up where it left off.</p>
+      <div class="eyebrow" data-editable="hero-eyebrow">pwl7 &middot; prototype</div>
+      <h1 data-editable="hero-title">Parenting help chat</h1>
+      <p data-editable="hero-subtitle">Log in and it remembers your kids and what you've already talked about, so the conversation picks up where it left off.</p>
     </div>
 
     <div id="demo-banner" class="demo-banner" hidden></div>
@@ -68,20 +68,20 @@
     <!-- App screen: a real app shell (nav + screens) rather than one long page -->
     <section id="app-screen" hidden>
       <div class="app-shell">
-        <nav class="app-nav" id="app-nav" aria-label="Main">
-          <button type="button" class="nav-item active" data-screen="home">
+        <nav class="app-nav" id="app-nav" aria-label="Main" data-reorder-group="app-nav">
+          <button type="button" class="nav-item active" data-screen="home" data-reorder-id="home">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" /></svg>
             <span>Home</span>
           </button>
-          <button type="button" class="nav-item" data-screen="chat">
+          <button type="button" class="nav-item" data-screen="chat" data-reorder-id="chat">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5Z" /></svg>
             <span>Chat</span>
           </button>
-          <button type="button" class="nav-item" data-screen="memory">
+          <button type="button" class="nav-item" data-screen="memory" data-reorder-id="memory">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="13" y2="16" /></svg>
             <span>Memory</span>
           </button>
-          <button type="button" class="nav-item" id="nav-settings-btn" data-screen="settings">
+          <button type="button" class="nav-item" id="nav-settings-btn" data-screen="settings" data-reorder-id="settings">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
             <span>Settings</span>
           </button>
@@ -100,27 +100,27 @@
             <div class="home-greeting" id="home-greeting">Welcome back!</div>
             <div id="home-kids" class="pill-row home-kids" hidden></div>
 
-            <div class="home-section-label">Ask about&hellip;</div>
-            <div class="home-quick-actions" id="home-quick-actions">
-              <button type="button" class="quick-action-card" data-prompt="My kids keep fighting with each other and I don't know how to handle it.">
+            <div class="home-section-label" data-editable="home-section-label">Ask about&hellip;</div>
+            <div class="home-quick-actions" id="home-quick-actions" data-reorder-group="home-quick-actions">
+              <button type="button" class="quick-action-card" data-prompt="My kids keep fighting with each other and I don't know how to handle it." data-reorder-id="sibling">
                 <span class="quick-action-emoji" aria-hidden="true">&#129309;</span>
-                <span>Sibling conflict</span>
+                <span data-editable="quick-action-sibling-label">Sibling conflict</span>
               </button>
-              <button type="button" class="quick-action-card" data-prompt="Bedtime has turned into a nightly battle. What can I try?">
+              <button type="button" class="quick-action-card" data-prompt="Bedtime has turned into a nightly battle. What can I try?" data-reorder-id="bedtime">
                 <span class="quick-action-emoji" aria-hidden="true">&#127769;</span>
-                <span>Bedtime battles</span>
+                <span data-editable="quick-action-bedtime-label">Bedtime battles</span>
               </button>
-              <button type="button" class="quick-action-card" data-prompt="My kid is having a meltdown/tantrum and I'm not sure how to respond in the moment.">
+              <button type="button" class="quick-action-card" data-prompt="My kid is having a meltdown/tantrum and I'm not sure how to respond in the moment." data-reorder-id="tantrums">
                 <span class="quick-action-emoji" aria-hidden="true">&#128165;</span>
-                <span>Tantrums</span>
+                <span data-editable="quick-action-tantrums-label">Tantrums</span>
               </button>
-              <button type="button" class="quick-action-card" data-prompt="I want to set healthier screen time limits without a huge fight.">
+              <button type="button" class="quick-action-card" data-prompt="I want to set healthier screen time limits without a huge fight." data-reorder-id="screen-time">
                 <span class="quick-action-emoji" aria-hidden="true">&#128241;</span>
-                <span>Screen time</span>
+                <span data-editable="quick-action-screen-time-label">Screen time</span>
               </button>
             </div>
 
-            <button type="button" class="btn-primary home-continue-btn" id="home-continue-btn">Continue chatting &rarr;</button>
+            <button type="button" class="btn-primary home-continue-btn" id="home-continue-btn" data-editable="home-continue-btn">Continue chatting &rarr;</button>
           </div>
 
           <!-- Chat screen -->
@@ -313,8 +313,9 @@
 
   <footer class="site-disclaimer">
     <p>
-      <strong>Heads up:</strong> this bot uses AI and can be wrong. It isn't medical,
-      psychological, or legal advice.
+      <strong data-editable="footer-heads-up-label">Heads up:</strong>
+      <span data-editable="footer-disclaimer-text">this bot uses AI and can be wrong. It isn't medical,
+      psychological, or legal advice.</span>
       <button type="button" class="disclaimer-link" id="disclaimer-more-btn">Read the full disclaimer</button>
       &middot;
       <a class="disclaimer-link" href="/privacy.html" target="_blank" rel="noopener">Privacy policy</a>
@@ -322,5 +323,6 @@
   </footer>
 
   <script src="/app.js"></script>
+  <script src="/design.js"></script>
 </body>
 </html>

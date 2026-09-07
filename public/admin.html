@@ -58,6 +58,7 @@
         <button type="button" class="admin-tab" data-tab="users">Users</button>
         <button type="button" class="admin-tab" data-tab="reviews">Reviews</button>
         <button type="button" class="admin-tab" data-tab="prompt">Prompt</button>
+        <button type="button" class="admin-tab" data-tab="design">Design</button>
       </div>
 
       <!-- Overview -->
@@ -152,6 +153,46 @@
           <div id="admin-prompt-reset-confirm" class="delete-confirm-block" hidden>
             <p class="modal-danger-copy">This replaces the saved customization with the original framework text from <code>src/prompt.js</code>. This can't be undone.</p>
             <button type="button" class="btn-danger" id="admin-prompt-reset-confirm-btn">Yes, reset to default</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design -->
+      <div class="admin-panel" id="admin-panel-design" hidden>
+        <div class="admin-card">
+          <h2>Live design editor</h2>
+          <p class="modal-danger-copy">
+            Restyle colors, fonts, a handful of text labels, and the order of a couple of
+            repeated blocks &mdash; directly on the real app, no redeploy needed. Open the site
+            while logged in here as admin and a "Edit design" button appears in the bottom-right
+            corner. Click any dashed text to retype it; drag any dashed card or nav item to
+            reorder it; use the panel for colors and fonts.
+          </p>
+          <a class="btn-secondary-outline" href="/" target="_blank" rel="noopener" style="display: inline-block; width: auto; padding: 0.6rem 1.2rem; text-decoration: none; text-align: center;">Open site to edit design &rarr;</a>
+        </div>
+
+        <div class="admin-card">
+          <h2>Current overrides</h2>
+          <div class="admin-stat-grid" id="admin-design-stats"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-prompt-head">
+            <h2>Reset</h2>
+          </div>
+          <p class="modal-danger-copy">Reverts saved overrides back to what's shipped in the code. This can't be undone.</p>
+          <div id="admin-design-reset-error" class="form-error"></div>
+          <div class="admin-pending-update-actions">
+            <button type="button" class="btn-danger-outline" data-design-reset-scope="theme">Reset colors &amp; fonts</button>
+            <button type="button" class="btn-danger-outline" data-design-reset-scope="content">Reset edited text</button>
+            <button type="button" class="btn-danger-outline" data-design-reset-scope="order">Reset layout order</button>
+          </div>
+          <div class="admin-pending-update-actions" style="margin-top: 0.6rem;">
+            <button type="button" class="btn-danger" data-design-reset-scope="all">Reset everything&hellip;</button>
+          </div>
+          <div id="admin-design-reset-confirm" class="delete-confirm-block" hidden>
+            <p class="modal-danger-copy">This clears every saved color, font, text edit, and layout order change. This can't be undone.</p>
+            <button type="button" class="btn-danger" id="admin-design-reset-confirm-btn">Yes, reset everything</button>
           </div>
         </div>
       </div>

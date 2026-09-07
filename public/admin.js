@@ -16,7 +16,8 @@
     overview: document.getElementById("admin-panel-overview"),
     users: document.getElementById("admin-panel-users"),
     reviews: document.getElementById("admin-panel-reviews"),
-    prompt: document.getElementById("admin-panel-prompt")
+    prompt: document.getElementById("admin-panel-prompt"),
+    design: document.getElementById("admin-panel-design")
   };
 
   var statsEl = document.getElementById("admin-stats");
@@ -141,6 +142,7 @@
       if (name === "users") loadUsers();
       if (name === "reviews") loadReviews(reviewsFilterUserId);
       if (name === "prompt") { loadPrompt(); loadPendingUpdate(); }
+      if (name === "design") loadDesign();
     });
   });
 
@@ -529,6 +531,74 @@
       pendingUpdateRejectBtn.disabled = false;
       if (!result.ok) return;
       pendingUpdateCard.hidden = true;
+    });
+  });
+
+  // ---------------- design ----------------
+
+  var designStatsEl = document.getElementById("admin-design-stats");
+  var designResetError = document.getElementById("admin-design-reset-error");
+  var designResetConfirm = document.getElementById("admin-design-reset-confirm");
+  var designResetConfirmBtn = document.getElementById("admin-design-reset-confirm-btn");
+  var designResetButtons = document.querySelectorAll("[data-design-reset-scope]");
+
+  function loadDesign() {
+    designResetError.textContent = "";
+    designResetError.classList.remove("visible");
+    designResetConfirm.hidden = true;
+
+    j("/api/design").then(function (result) {
+      if (!result.ok) return;
+      var settings = result.data.settings || { theme: {}, content: {}, order: {} };
+      var themeCount = Object.keys(settings.theme || {}).length;
+      var contentCount = Object.keys(settings.content || {}).length;
+      var orderCount = Object.keys(settings.order || {}).length;
+
+      designStatsEl.innerHTML =
+        statCard("Colors/fonts changed", themeCount) +
+        statCard("Text fields edited", contentCount) +
+        statCard("Layouts reordered", orderCount);
+    });
+  }
+
+  var pendingDesignResetScope = null;
+
+  designResetButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var scope = btn.getAttribute("data-design-reset-scope");
+      designResetError.textContent = "";
+      designResetError.classList.remove("visible");
+
+      if (scope === "all") {
+        pendingDesignResetScope = "all";
+        designResetConfirm.hidden = false;
+        return;
+      }
+
+      j("/api/design/reset", { method: "POST", body: JSON.stringify({ scope: scope }) }).then(function (result) {
+        if (!result.ok) {
+          designResetError.textContent = (result.data && result.data.error) || "Something went wrong.";
+          designResetError.classList.add("visible");
+          return;
+        }
+        loadDesign();
+      });
+    });
+  });
+
+  designResetConfirmBtn.addEventListener("click", function () {
+    if (!pendingDesignResetScope) return;
+    designResetConfirmBtn.disabled = true;
+    j("/api/design/reset", { method: "POST", body: JSON.stringify({ scope: pendingDesignResetScope }) }).then(function (result) {
+      designResetConfirmBtn.disabled = false;
+      pendingDesignResetScope = null;
+      if (!result.ok) {
+        designResetError.textContent = (result.data && result.data.error) || "Something went wrong.";
+        designResetError.classList.add("visible");
+        return;
+      }
+      designResetConfirm.hidden = true;
+      loadDesign();
     });
   });
 
