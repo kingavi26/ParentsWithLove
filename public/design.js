@@ -40,7 +40,12 @@
   function applyContent(content) {
     Object.keys(content || {}).forEach(function (id) {
       document.querySelectorAll('[data-editable="' + id + '"]').forEach(function (el) {
-        el.textContent = content[id];
+        var attr = el.getAttribute("data-editable-attr");
+        if (attr) {
+          el.setAttribute(attr, content[id]);
+        } else {
+          el.textContent = content[id];
+        }
       });
     });
   }
@@ -201,7 +206,11 @@
     designModeActive = active;
     document.body.classList.toggle("design-mode-active", active);
 
-    document.querySelectorAll("[data-editable]").forEach(function (el) {
+    // Only elements editable in place via textContent get contenteditable —
+    // an attr-backed field (e.g. an <input placeholder>) isn't a text node
+    // a browser can usefully make contenteditable, so those are edited via
+    // the panel's own text inputs instead (see buildAttrFieldRow).
+    document.querySelectorAll("[data-editable]:not([data-editable-attr])").forEach(function (el) {
       el.setAttribute("contenteditable", active ? "true" : "false");
     });
     document.querySelectorAll("[data-reorder-group] > [data-reorder-id]").forEach(function (el) {
@@ -284,8 +293,109 @@
         saveThemeVar(field.name, select.value);
       });
       row.appendChild(select);
+    } else if (field.type === "range") {
+      var wrap = document.createElement("span");
+      wrap.style.display = "inline-flex";
+      wrap.style.alignItems = "center";
+      wrap.style.gap = "0.4rem";
+
+      var range = document.createElement("input");
+      range.type = "range";
+      range.id = labelId;
+      range.min = field.min;
+      range.max = field.max;
+      range.step = field.step;
+      var currentRaw = currentThemeValue(field.name);
+      var currentNum = parseFloat(String(currentRaw).replace(field.unit || "", ""));
+      range.value = Number.isFinite(currentNum) ? currentNum : field.min;
+
+      var readout = document.createElement("span");
+      readout.style.fontSize = "0.72rem";
+      readout.style.color = "var(--muted)";
+      readout.style.minWidth = "2.4rem";
+      readout.style.textAlign = "right";
+      readout.textContent = range.value + field.unit;
+
+      range.addEventListener("input", function () {
+        readout.textContent = range.value + field.unit;
+        document.documentElement.style.setProperty(field.name, range.value + field.unit); // live preview
+      });
+      range.addEventListener("change", function () {
+        saveThemeVar(field.name, range.value + field.unit);
+      });
+
+      wrap.appendChild(range);
+      wrap.appendChild(readout);
+      row.appendChild(wrap);
     }
 
+    return row;
+  }
+
+  // ---------------- panel: attr-backed content fields (e.g. placeholders) ----------------
+  //
+  // Fields like an <input placeholder> can't be edited in place with
+  // contenteditable, so they get a plain text input here instead, saved on
+  // blur/Enter the same way an inline field saves on blur.
+
+  function saveContentField(id, text, onSaved, onError) {
+    j("/api/design/content", { method: "PUT", body: JSON.stringify({ id: id, text: text }) }).then(function (result) {
+      if (!result.ok) {
+        onError((result.data && result.data.error) || "Couldn't save that change.");
+        return;
+      }
+      currentSettings = result.data.settings;
+      onSaved();
+    });
+  }
+
+  function buildAttrFieldRow(field) {
+    var row = document.createElement("div");
+    row.className = "design-field-row is-stacked";
+
+    var label = document.createElement("label");
+    label.textContent = field.label;
+    var inputId = "design-content-" + field.id.replace(/[^a-z0-9]+/gi, "-");
+    label.setAttribute("for", inputId);
+    row.appendChild(label);
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.id = inputId;
+    input.maxLength = field.maxLen;
+    input.value = (currentSettings.content && currentSettings.content[field.id]) || "";
+
+    var original = input.value;
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+    input.addEventListener("blur", function () {
+      var text = input.value.trim();
+      if (text === original.trim()) return;
+
+      var patch = {};
+      patch[field.id] = text;
+      applyContent(patch); // live preview on the actual page element(s)
+
+      setStatus("Saving…");
+      saveContentField(
+        field.id,
+        text,
+        function () {
+          original = text;
+          setStatus("Saved.");
+        },
+        function (err) {
+          setStatus(err, true);
+          input.value = original;
+        }
+      );
+    });
+
+    row.appendChild(input);
     return row;
   }
 
@@ -366,12 +476,32 @@
 
     var hint = document.createElement("p");
     hint.className = "design-hint";
-    hint.textContent = "Click any dashed text on the page to edit it. Drag a dashed card or nav item to reorder it. Colors and fonts here apply site-wide.";
+    hint.textContent = "Click any dashed text on the page to edit it. Drag a dashed card or nav item to reorder it. Everything below applies site-wide.";
     panel.appendChild(hint);
 
+    var themeGroups = [];
     schema.themeVars.forEach(function (field) {
-      panel.appendChild(buildThemeFieldRow(field));
+      var group = field.group || "Theme";
+      if (themeGroups.indexOf(group) === -1) themeGroups.push(group);
     });
+    themeGroups.forEach(function (group) {
+      var sectionLabel = document.createElement("div");
+      sectionLabel.className = "design-section-label";
+      sectionLabel.textContent = group;
+      panel.appendChild(sectionLabel);
+      schema.themeVars
+        .filter(function (f) { return (f.group || "Theme") === group; })
+        .forEach(function (field) { panel.appendChild(buildThemeFieldRow(field)); });
+    });
+
+    var attrFields = schema.editableFields.filter(function (f) { return f.attr && f.attr !== "textContent"; });
+    if (attrFields.length) {
+      var attrSectionLabel = document.createElement("div");
+      attrSectionLabel.className = "design-section-label";
+      attrSectionLabel.textContent = "Form fields";
+      panel.appendChild(attrSectionLabel);
+      attrFields.forEach(function (field) { panel.appendChild(buildAttrFieldRow(field)); });
+    }
 
     panel.appendChild(buildResetControl());
 
@@ -386,7 +516,7 @@
   // ---------------- boot ----------------
 
   function initEditingHooks() {
-    document.querySelectorAll("[data-editable]").forEach(wireEditable);
+    document.querySelectorAll("[data-editable]:not([data-editable-attr])").forEach(wireEditable);
     document.querySelectorAll("[data-reorder-group]").forEach(wireReorderGroup);
   }
 

@@ -12,9 +12,21 @@
   --bubble-user-text: #f4f5f7;
   --bubble-bot-bg: #eaedf1;
   --bubble-bot-text: #1a2530;
-  --shadow: 0 1px 2px rgba(20, 30, 45, 0.06);
+  /* --shadow-opacity is its own variable (not just baked into --shadow)
+     so Design Mode can offer a single "elevation" slider that darkens or
+     flattens every card's shadow at once, without needing to know the
+     rest of the shadow's shape. */
+  --shadow-opacity: 0.06;
+  --shadow: 0 1px 2px rgba(20, 30, 45, var(--shadow-opacity));
   --chalk: #1a2530;
-  --chalk-muted: #6b7480;
+  --chalk-muted: var(--muted);
+  /* A single knob that scales every border-radius in the app at once
+     (see the calc(Npx * var(--radius-scale)) rules below) — 1 = the
+     shipped look, 0 = sharp corners, 2 = noticeably rounder. */
+  --radius-scale: 1;
+  /* Overall content width — the same var everything below already reads
+     via .wrap, so a Design Mode "page width" slider is a single edit. */
+  --content-max-width: 880px;
 
   /* small secondary accents: the logo mark's spark + heart outline, and the
      "pin" dot on each remembered note. Used sparingly, never as a primary
@@ -86,7 +98,7 @@ body {
 .btn-danger:active:not(:disabled),
 .chat-send:active:not(:disabled) { transform: scale(0.98); }
 
-.wrap { width: 100%; max-width: 880px; }
+.wrap { width: 100%; max-width: var(--content-max-width); }
 
 .eyebrow {
   font-size: 0.72rem;
@@ -133,7 +145,7 @@ h1 {
 .demo-banner {
   background: var(--surface-sunken);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   padding: 0.65rem 0.9rem;
   font-size: 0.83rem;
   color: var(--muted);
@@ -147,7 +159,7 @@ h1 {
   margin: 0 auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   padding: 1.75rem;
   box-shadow: var(--shadow);
 }
@@ -162,7 +174,7 @@ h1 {
   flex: 1;
   padding: 0.55rem;
   text-align: center;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--muted);
@@ -191,7 +203,7 @@ h1 {
 .field input {
   width: 100%;
   padding: 0.6rem 0.75rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--border);
   font-size: 0.93rem;
   font-family: inherit;
@@ -204,7 +216,7 @@ h1 {
 .btn-primary {
   width: 100%;
   padding: 0.7rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: none;
   background: var(--accent);
   color: var(--accent-contrast);
@@ -244,7 +256,7 @@ h1 {
   width: 100%;
   box-sizing: border-box;
   padding: 0.65rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -271,7 +283,7 @@ h1 {
 .form-error {
   background: color-mix(in srgb, var(--error) 12%, transparent);
   color: var(--error);
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   padding: 0.55rem 0.75rem;
   font-size: 0.83rem;
   margin-bottom: 0.9rem;
@@ -337,7 +349,7 @@ h1 {
   font-size: 0.68rem;
   font-weight: 600;
   color: var(--muted);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
 }
 
 .nav-item svg { width: 21px; height: 21px; flex-shrink: 0; }
@@ -379,7 +391,7 @@ h1 {
   align-items: flex-start;
   gap: 0.4rem;
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -418,7 +430,7 @@ h1 {
     padding: 1rem 0.6rem;
     border-top: none;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: calc(6px * var(--radius-scale));
     box-shadow: var(--shadow);
     gap: 0.35rem;
   }
@@ -447,7 +459,7 @@ h1 {
 
 .chat-card {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--radius-scale));
   overflow: hidden;
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -483,7 +495,7 @@ h1 {
   font-size: 0.72rem;
   font-family: inherit;
   padding: 0.35rem 0.7rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   cursor: pointer;
   white-space: nowrap;
 }
@@ -516,7 +528,7 @@ h1 {
 .msg {
   max-width: 82%;
   padding: 0.6rem 0.9rem;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   font-size: 0.93rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -567,7 +579,7 @@ h1 {
   flex: 1;
   min-width: 0; /* lets the input actually shrink on narrow phones instead of pushing Send off the edge */
   padding: 0.65rem 0.9rem;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   border: 1px solid var(--border);
   font-size: 0.93rem;
   font-family: inherit;
@@ -577,7 +589,7 @@ h1 {
 
 .chat-send {
   padding: 0.65rem 1.15rem;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   border: none;
   background: var(--accent);
   color: var(--accent-contrast);
@@ -593,7 +605,7 @@ h1 {
   flex-shrink: 0;
   width: 42px;
   height: 42px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -648,7 +660,7 @@ h1 {
 
 .memory-card {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   background: var(--honey-tint);
   background-image: radial-gradient(color-mix(in srgb, var(--text) 8%, transparent) 1px, transparent 1px);
   background-size: 14px 14px;
@@ -686,7 +698,7 @@ h1 {
   font-weight: 700;
   color: var(--text);
   background: color-mix(in srgb, var(--honey) 30%, var(--surface));
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   padding: 0.2rem 0.65rem;
   margin: -0.2rem 0 0.9rem;
 }
@@ -709,7 +721,7 @@ h1 {
 .kid-pill {
   font-size: 0.83rem;
   padding: 0.22rem 0.7rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   background: var(--surface);
   border: 1px solid var(--border);
 }
@@ -720,7 +732,7 @@ h1 {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: calc(3px * var(--radius-scale));
   padding: 0.5rem 0.65rem;
   font-size: 0.82rem;
   color: var(--text);
@@ -765,7 +777,7 @@ h1 {
 .chip {
   font-size: 0.78rem;
   padding: 0.25rem 0.6rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   background: var(--surface-sunken);
   border: 1px solid var(--border);
 }
@@ -845,7 +857,7 @@ h1 {
 .review-dim-chip {
   font-size: 0.76rem;
   padding: 0.25rem 0.55rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   color: var(--text);
@@ -933,7 +945,7 @@ h1 {
   max-width: 440px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   padding: 1.5rem 1.5rem 1.65rem;
   box-shadow: var(--shadow);
   animation: modal-card-in 0.18s ease;
@@ -992,7 +1004,7 @@ h1 {
 
 .account-child-row input {
   padding: 0.5rem 0.6rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--border);
   font-size: 0.88rem;
   font-family: inherit;
@@ -1035,7 +1047,7 @@ h1 {
 .account-child-save,
 .account-child-delete {
   padding: 0.45rem 0.7rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   font-size: 0.82rem;
   font-family: inherit;
   cursor: pointer;
@@ -1086,7 +1098,7 @@ h1 {
 
 .account-memory-delete {
   padding: 0.45rem 0.7rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   font-size: 0.82rem;
   font-family: inherit;
   cursor: pointer;
@@ -1168,7 +1180,7 @@ h1 {
 .form-success {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   padding: 0.55rem 0.75rem;
   font-size: 0.83rem;
   margin-bottom: 0.9rem;
@@ -1189,7 +1201,7 @@ h1 {
 .btn-danger-outline {
   width: 100%;
   padding: 0.6rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--error);
   background: var(--surface);
   color: var(--error);
@@ -1204,7 +1216,7 @@ h1 {
 .btn-secondary-outline {
   width: 100%;
   padding: 0.6rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -1220,7 +1232,7 @@ h1 {
 .btn-danger {
   width: 100%;
   padding: 0.65rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
   border: none;
   background: var(--error);
   color: #fff;
@@ -1266,7 +1278,7 @@ h1 {
 
 .admin-card {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   background: var(--surface);
   padding: 1.1rem 1.25rem;
   box-shadow: var(--shadow);
@@ -1289,7 +1301,7 @@ h1 {
 
 .admin-stat-card {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--radius-scale));
   background: var(--surface);
   padding: 0.9rem 1rem;
   box-shadow: var(--shadow);
@@ -1362,7 +1374,7 @@ h1 {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.2rem 0.55rem;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--radius-scale));
 }
 
 .admin-badge-ok { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
@@ -1393,7 +1405,7 @@ h1 {
 
 .admin-review-card {
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   margin-bottom: 0.7rem;
   overflow: hidden;
 }
@@ -1428,7 +1440,7 @@ h1 {
   width: 100%;
   min-height: 420px;
   padding: 0.9rem;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   border: 1px solid var(--border);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.82rem;
@@ -1468,7 +1480,7 @@ h1 {
   font-size: 0.8rem;
   line-height: 1.5;
   padding: 0.8rem;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--radius-scale));
   border: 1px solid var(--border);
   background: var(--surface-sunken);
   margin: 0;
@@ -1606,6 +1618,38 @@ body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target 
   color: var(--text);
   max-width: 11.5rem;
 }
+.design-field-row input[type="range"] {
+  width: 6.5rem;
+  accent-color: var(--accent);
+}
+.design-field-row input[type="text"] {
+  width: 9.5rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.design-field-row.is-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+.design-field-row.is-stacked input[type="text"] { width: 100%; }
+
+.design-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0.9rem 0 0.5rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+}
+.design-section-label:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
 
 .design-panel-actions {
   display: flex;
