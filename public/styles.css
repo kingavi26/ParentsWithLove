@@ -82,7 +82,8 @@ body {
 .account-memory-delete,
 .modal-close,
 .rate-session-link,
-.disclaimer-link {
+.disclaimer-link,
+.settings-row {
   transition: filter 0.15s ease, background-color 0.15s ease,
     border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
     transform 0.12s ease;
@@ -355,6 +356,12 @@ h1 {
 .nav-item svg { width: 21px; height: 21px; flex-shrink: 0; }
 
 .nav-item.active { color: var(--accent); }
+
+@media (max-width: 720px) {
+  .nav-item.active {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+}
 
 .app-main { padding-bottom: 5rem; } /* clears the fixed bottom nav */
 
@@ -1689,6 +1696,270 @@ body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target 
   .design-mode-panel { bottom: 8.7rem; }
 }
 
+/* ---------- mobile app shell: native-app treatment ----------
+   Everything below is scoped to body.app-active (added by app.js the
+   moment a parent is actually logged into the real app screen — see
+   enterApp()/refreshMe()/doLogout() in app.js — and removed the moment
+   they log out) crossed with phone widths, so the desktop sidebar layout
+   defined earlier in this file is completely untouched.
+
+   The goal: once you're logged in, the marketing hero/footer disappear,
+   the page stops being a scrolling document, and the whole thing becomes
+   a fixed-height shell — a slim top bar, then whichever screen is active,
+   then the existing bottom tab bar — the way an installed app looks
+   rather than a website with a chat widget on it. Chat in particular
+   becomes a real full-screen window: header and input never move, only
+   the transcript itself scrolls. */
+@media (max-width: 720px) {
+  body.app-active {
+    padding: 0;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Marketing chrome and the always-on footer only make sense on the
+     logged-out marketing/auth screen — hide them the instant the real
+     app takes over. The old email+logout row above every screen is
+     replaced by the top bar (title) and the settings sheet (email,
+     log out) below, so it goes too. */
+  body.app-active .page-head,
+  body.app-active #demo-banner,
+  body.app-active .site-disclaimer,
+  body.app-active .app-header {
+    display: none;
+  }
+
+  body.app-active .wrap {
+    max-width: none;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.app-active #app-screen:not([hidden]) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+
+  body.app-active .app-shell {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- top bar ---- */
+  .app-topbar { display: none; }
+
+  body.app-active .app-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    order: 1;
+    flex: 0 0 auto;
+    height: calc(2.75rem + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-topbar-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: -0.005em;
+  }
+
+  .app-topbar-badge {
+    position: absolute;
+    right: 1.1rem;
+    font-size: 0.63rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--honey);
+    background: var(--honey-tint);
+    border-radius: 999px;
+    padding: 0.22rem 0.6rem;
+  }
+  .app-topbar-badge[hidden] { display: none; }
+
+  /* ---- main content: Home/Memory scroll normally, Chat fills the rest ---- */
+  body.app-active .app-main {
+    order: 2;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding: 0;
+  }
+
+  body.app-active #screen-home,
+  body.app-active #screen-memory {
+    padding: 1.1rem 1.1rem 1.5rem;
+  }
+
+  body.app-active #screen-chat.app-panel:not([hidden]) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  body.app-active .chat-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  body.app-active .chat-log {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    padding: 1rem 1.1rem 1.2rem;
+  }
+
+  /* The self-review panel can get fairly long (score + dimensions +
+     several list sections). It's a flex sibling of .chat-log inside the
+     now fixed-height .chat-card, so cap it and let it scroll on its own
+     rather than pushing the transcript to zero height or overflowing the
+     screen. */
+  body.app-active .review-panel:not([hidden]) {
+    flex: 0 1 auto;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* ---- bottom tab bar: now a normal flex child of the fixed-height
+     shell (not position:fixed) so its real height is exactly whatever
+     the browser computes — no guessing, nothing can drift out of sync
+     with the chat panel's own bottom edge. ---- */
+  body.app-active .app-nav {
+    order: 3;
+    position: static;
+    box-shadow: none;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* Native tap feel everywhere at phone widths: no gray flash on tap, no
+   300ms double-tap delay on the controls people actually tap a lot. */
+@media (max-width: 720px) {
+  .nav-item,
+  .quick-action-card,
+  .chat-send,
+  .mic-btn,
+  .voice-toggle,
+  .btn-primary,
+  .btn-secondary-outline,
+  .btn-danger,
+  .btn-danger-outline,
+  .settings-row,
+  .modal-close {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* A modal/sheet open (account settings or the disclaimer) locks background
+   scroll at any width — previously the page behind a modal could still
+   scroll, which read as a web overlay rather than a native pushed screen. */
+body.modal-open { overflow: hidden; }
+
+/* ---------- settings sheet: full-screen native "Settings" screen ----------
+   .modal-backdrop/.modal-card already back both the account-settings modal
+   and the disclaimer modal — turning both into edge-to-edge sheets here
+   covers both at once instead of special-casing one. Desktop keeps the
+   original centered card (rules earlier in this file), untouched. */
+@media (max-width: 720px) {
+  .modal-backdrop {
+    padding: 0;
+    align-items: stretch;
+    overflow: hidden; /* the card scrolls itself now, see below */
+  }
+
+  /* A definite `height` (not min-height) so the card's own opaque
+     background always covers exactly the viewport box, with its own
+     overflow-y handling the scroll — rather than relying on the
+     flex-stretch box to grow with content, which left the *painted*
+     background clipped to the first viewport-height while the content
+     kept flowing (and being laid out, just unpainted) below it, letting
+     the page behind show through once scrolled. Sheet's own scroll
+     container instead of the backdrop's, full stop. */
+  .modal-card {
+    max-width: none;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1.25rem
+      calc(env(safe-area-inset-bottom, 0px) + 1.5rem);
+  }
+
+  .modal-head { flex: 0 0 auto; }
+}
+
+/* Grouped list rows (Legal, Log out) styled like a native Settings screen —
+   used inside the account-settings sheet, works at any width. */
+.settings-list {
+  border: 1px solid var(--border);
+  border-radius: calc(8px * var(--radius-scale));
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.8rem 0.95rem;
+  background: var(--surface);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+}
+.settings-list .settings-row:last-child { border-bottom: none; }
+
+.settings-row:active { background: var(--surface-sunken); }
+
+.settings-row-chevron {
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.settings-row-danger {
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: calc(8px * var(--radius-scale));
+  color: var(--error);
+  font-weight: 700;
+}
+.settings-row-danger:active { background: color-mix(in srgb, var(--error) 10%, var(--surface)); }
+
 /* ---------- motion: reduced-motion overrides ----------
    Kept at the END of the file on purpose: several rules above this
    point (.modal-card, .msg, etc.) set `animation`/`transform` at the
@@ -1713,7 +1984,8 @@ body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target 
   .account-memory-delete,
   .modal-close,
   .rate-session-link,
-  .disclaimer-link {
+  .disclaimer-link,
+  .settings-row {
     transition: none;
   }
 

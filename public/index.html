@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Parenting Help Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -68,6 +68,11 @@
     <!-- App screen: a real app shell (nav + screens) rather than one long page -->
     <section id="app-screen" hidden>
       <div class="app-shell">
+        <header class="app-topbar" id="app-topbar">
+          <span class="app-topbar-title" id="app-topbar-title">Home</span>
+          <span class="app-topbar-badge" id="app-topbar-badge" hidden>Demo</span>
+        </header>
+
         <nav class="app-nav" id="app-nav" aria-label="Main" data-reorder-group="app-nav">
           <button type="button" class="nav-item active" data-screen="home" data-reorder-id="home">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" /></svg>
@@ -247,6 +252,24 @@
           <div class="modal-label" data-editable="account-data-label">Your data</div>
           <p class="modal-hint" data-editable="account-data-hint">Download a copy of everything remembered about your family &mdash; children, topics, notes, and self-review history &mdash; as a file you can keep.</p>
           <button type="button" class="btn-secondary-outline" id="export-data-btn" data-editable="account-export-btn">Download what we remember</button>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-label">Legal</div>
+          <div class="settings-list">
+            <button type="button" class="settings-row" id="settings-disclaimer-btn">
+              <span>Disclaimer</span>
+              <span class="settings-row-chevron" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <a class="settings-row" href="/privacy.html" target="_blank" rel="noopener">
+              <span>Privacy policy</span>
+              <span class="settings-row-chevron" aria-hidden="true">&rsaquo;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <button type="button" class="settings-row settings-row-danger" id="settings-logout-btn">Log out</button>
         </div>
 
         <div class="modal-danger-zone">

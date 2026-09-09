@@ -18,6 +18,11 @@
   var logoutBtn = document.getElementById("logout-btn");
   var chatSubtitle = document.getElementById("chat-subtitle");
 
+  var appTopbarTitle = document.getElementById("app-topbar-title");
+  var appTopbarBadge = document.getElementById("app-topbar-badge");
+  var settingsDisclaimerBtn = document.getElementById("settings-disclaimer-btn");
+  var settingsLogoutBtn = document.getElementById("settings-logout-btn");
+
   var accountModal = document.getElementById("account-modal");
   var accountModalCloseBtn = document.getElementById("account-modal-close-btn");
   var accountModalEmail = document.getElementById("account-modal-email");
@@ -146,16 +151,7 @@
   });
 
   logoutBtn.addEventListener("click", function () {
-    fetch("/api/logout", { method: "POST" }).finally(function () {
-      conversation = [];
-      chatLog.innerHTML = "";
-      appScreen.hidden = true;
-      authScreen.hidden = false;
-      passwordInput.value = "";
-      accountModal.hidden = true;
-      stopRecording();
-      voicePlayer.pause();
-    });
+    doLogout();
   });
 
   // ---------------- demo banner ----------------
@@ -168,6 +164,7 @@
         demoBanner.textContent =
           "Running in demo mode: replies are scripted, not from a real AI, until an OpenAI API key is configured on the server. Login and memory are fully real.";
         chatSubtitle.textContent = "Demo mode — scripted answers for now";
+        if (appTopbarBadge) appTopbarBadge.hidden = false;
       } else {
         chatSubtitle.textContent = "Connected to OpenAI";
       }
@@ -209,10 +206,20 @@
   // of switching screens, so whichever screen was behind it stays active
   // when the modal closes.
 
+  var SCREEN_TITLES = { home: "Home", chat: "Chat", memory: "Memory", settings: "Settings" };
+
+  function setTopbarTitle(name) {
+    if (appTopbarTitle) appTopbarTitle.textContent = SCREEN_TITLES[name] || "";
+  }
+
+  var currentScreen = "home";
+
   function showScreen(name) {
     screenHome.hidden = name !== "home";
     screenChat.hidden = name !== "chat";
     screenMemory.hidden = name !== "memory";
+    currentScreen = name;
+    setTopbarTitle(name);
     navItems.forEach(function (item) {
       var screen = item.getAttribute("data-screen");
       if (screen === "settings") return;
@@ -275,6 +282,7 @@
   function enterApp() {
     authScreen.hidden = true;
     appScreen.hidden = false;
+    document.body.classList.add("app-active");
     showScreen("home");
     conversation = [];
     chatLog.innerHTML = "";
@@ -295,6 +303,7 @@
       .then(function (data) {
         authScreen.hidden = true;
         appScreen.hidden = false;
+        document.body.classList.add("app-active");
         accountEmail.textContent = data.email;
         currentEmail = data.email;
         accountHasPassword = Boolean(data.hasPassword);
@@ -312,6 +321,7 @@
       .catch(function () {
         appScreen.hidden = true;
         authScreen.hidden = false;
+        document.body.classList.remove("app-active");
       });
   }
 
@@ -925,10 +935,14 @@
     renderAccountTopicsList();
     renderAccountNotesList();
     accountModal.hidden = false;
+    document.body.classList.add("modal-open");
+    setTopbarTitle("settings");
   }
 
   function closeAccountModal() {
     accountModal.hidden = true;
+    document.body.classList.remove("modal-open");
+    setTopbarTitle(currentScreen);
   }
 
   accountModalCloseBtn.addEventListener("click", closeAccountModal);
@@ -936,6 +950,28 @@
   accountModal.addEventListener("click", function (e) {
     if (e.target === accountModal) closeAccountModal();
   });
+
+  function doLogout() {
+    fetch("/api/logout", { method: "POST" }).finally(function () {
+      conversation = [];
+      chatLog.innerHTML = "";
+      appScreen.hidden = true;
+      authScreen.hidden = false;
+      passwordInput.value = "";
+      accountModal.hidden = true;
+      document.body.classList.remove("modal-open");
+      document.body.classList.remove("app-active");
+      stopRecording();
+      voicePlayer.pause();
+    });
+  }
+
+  if (settingsLogoutBtn) settingsLogoutBtn.addEventListener("click", doLogout);
+  if (settingsDisclaimerBtn) {
+    settingsDisclaimerBtn.addEventListener("click", function () {
+      openDisclaimerModal();
+    });
+  }
 
   // Disclaimer modal — lives outside #auth-screen/#app-screen (see index.html)
   // so the "read the full disclaimer" link in the footer works no matter
@@ -946,10 +982,12 @@
 
   function openDisclaimerModal() {
     disclaimerModal.hidden = false;
+    document.body.classList.add("modal-open");
   }
 
   function closeDisclaimerModal() {
     disclaimerModal.hidden = true;
+    document.body.classList.remove("modal-open");
   }
 
   disclaimerMoreBtn.addEventListener("click", openDisclaimerModal);
@@ -1039,6 +1077,7 @@
         chatLog.innerHTML = "";
         appScreen.hidden = true;
         authScreen.hidden = false;
+        document.body.classList.remove("app-active");
         passwordInput.value = "";
         stopRecording();
         voicePlayer.pause();
