@@ -66,6 +66,7 @@
   var memoryLastActive = document.getElementById("memory-last-active");
   var memoryChildren = document.getElementById("memory-children");
   var memoryTopics = document.getElementById("memory-topics");
+  var memoryTopicsError = document.getElementById("memory-topics-error");
   var memoryNotes = document.getElementById("memory-notes");
 
   var rateSessionBtn = document.getElementById("rate-session-btn");
@@ -377,7 +378,25 @@
       pin.className = "pin-note";
       var topic = typeof t === "string" ? t : t.topic;
       var when = typeof t === "object" && t ? formatShortDate(t.lastDiscussedAt) : null;
-      pin.textContent = when ? topic + " — last talked about " + when : topic;
+
+      var text = document.createElement("span");
+      text.className = "pin-text";
+      text.textContent = when ? topic + " — last talked about " + when : topic;
+      pin.appendChild(text);
+
+      // Lets a parent forget one remembered topic right from the sidebar
+      // they're already looking at, instead of only through Account
+      // settings — same DELETE /api/account/topics/:topic endpoint and
+      // deleteAccountMemoryEntry() helper as the settings modal's "Remove"
+      // buttons use, just styled as an inline link to fit the pin.
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "pin-delete-link";
+      del.dataset.topic = topic;
+      del.setAttribute("aria-label", 'Delete "' + topic + '" from what we remember');
+      del.textContent = "Delete";
+      pin.appendChild(del);
+
       return pin;
     });
 
@@ -919,9 +938,16 @@
     );
   }
 
-  function deleteAccountMemoryEntry(kind, text, button) {
-    accountTopicsError.textContent = "";
-    accountTopicsError.classList.remove("visible");
+  // errorEl defaults to the Account-settings error slot (accountTopicsError
+  // has always doubled up for both the topics and notes lists there) so the
+  // two existing call sites below don't need to change; the Memory-sidebar
+  // "Delete" link (renderMemory's topics buildPin) passes memoryTopicsError
+  // instead, since that error needs to show next to the sidebar, not inside
+  // a settings modal that may not even be open.
+  function deleteAccountMemoryEntry(kind, text, button, errorEl) {
+    errorEl = errorEl || accountTopicsError;
+    errorEl.textContent = "";
+    errorEl.classList.remove("visible");
     button.disabled = true;
 
     fetch("/api/account/" + kind + "/" + encodeURIComponent(text), { method: "DELETE" })
@@ -933,16 +959,16 @@
       .then(function (result) {
         button.disabled = false;
         if (!result.ok) {
-          accountTopicsError.textContent = result.data.error || "Couldn't remove that entry.";
-          accountTopicsError.classList.add("visible");
+          errorEl.textContent = result.data.error || "Couldn't remove that entry.";
+          errorEl.classList.add("visible");
           return;
         }
         refreshMe();
       })
       .catch(function () {
         button.disabled = false;
-        accountTopicsError.textContent = "Couldn't reach the server. Please try again.";
-        accountTopicsError.classList.add("visible");
+        errorEl.textContent = "Couldn't reach the server. Please try again.";
+        errorEl.classList.add("visible");
       });
   }
 
@@ -956,6 +982,11 @@
     var row = e.target.closest(".account-memory-row");
     if (!row || !e.target.classList.contains("account-memory-delete")) return;
     deleteAccountMemoryEntry("notes", row.dataset.text, e.target);
+  });
+
+  memoryTopics.addEventListener("click", function (e) {
+    if (!e.target.classList.contains("pin-delete-link")) return;
+    deleteAccountMemoryEntry("topics", e.target.dataset.topic, e.target, memoryTopicsError);
   });
 
   // "Download what we remember" — fetches the same family-scoped export the

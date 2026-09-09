@@ -787,6 +787,29 @@ h1 {
 
 .pin-note:hover { transform: rotate(0deg) !important; }
 
+.pin-text { display: block; }
+
+/* A plain text link (not a bordered button like Account settings' "Remove")
+   so a single topic can be forgotten right from the sidebar without the
+   pin looking like a form control. Muted until hovered/focused so a list
+   of topics doesn't read as a wall of delete actions. */
+.pin-delete-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pin-delete-link:hover,
+.pin-delete-link:focus-visible { color: var(--error); }
+.pin-delete-link:disabled { opacity: 0.6; cursor: default; }
+
 .pin-note::before {
   content: "";
   position: absolute;
