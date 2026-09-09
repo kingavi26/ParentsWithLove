@@ -443,40 +443,44 @@
       return el;
     }
 
-    // Wrap bubble + "Based on" caption together so the caption stays
-    // pinned under this one reply, left-aligned and width-matched like a
-    // normal bot bubble (see .msg-group-bot in styles.css).
+    // Wrap bubble + sources control together so it stays pinned under this
+    // one reply, left-aligned and width-matched like a normal bot bubble
+    // (see .msg-group-bot in styles.css). The org names themselves stay
+    // hidden behind a "See sources" toggle rather than showing by default
+    // on every reply — expanding reveals them right here in the chat
+    // (same pattern as the memory sidebar's "See N more" toggle above).
     var group = document.createElement("div");
     group.className = "msg-group-bot";
     group.appendChild(el);
 
-    var caption = document.createElement("div");
-    caption.className = "msg-sources";
+    var detail = document.createElement("div");
+    detail.className = "msg-sources";
+    detail.hidden = true;
 
     var label = document.createElement("span");
     label.className = "msg-sources-label";
     label.textContent = "Based on: ";
-    caption.appendChild(label);
+    detail.appendChild(label);
 
     sources.forEach(function (s, i) {
       if (i > 0) {
         var sep = document.createElement("span");
         sep.className = "msg-sources-sep";
         sep.textContent = "·";
-        caption.appendChild(sep);
+        detail.appendChild(sep);
       }
       var link = document.createElement("a");
       link.href = s.url;
       link.target = "_blank";
       link.rel = "noopener";
       link.textContent = s.org;
-      caption.appendChild(link);
+      detail.appendChild(link);
     });
 
     var allSep = document.createElement("span");
     allSep.className = "msg-sources-sep";
     allSep.textContent = "—";
-    caption.appendChild(allSep);
+    detail.appendChild(allSep);
 
     var allLink = document.createElement("a");
     allLink.className = "msg-sources-all";
@@ -484,9 +488,22 @@
     allLink.target = "_blank";
     allLink.rel = "noopener";
     allLink.textContent = "See all sources";
-    caption.appendChild(allLink);
+    detail.appendChild(allLink);
 
-    group.appendChild(caption);
+    var toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "msg-sources-toggle";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.textContent = "See sources";
+    toggle.addEventListener("click", function () {
+      var expanded = toggle.getAttribute("aria-expanded") === "true";
+      detail.hidden = expanded;
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      toggle.textContent = expanded ? "See sources" : "Hide sources";
+    });
+
+    group.appendChild(toggle);
+    group.appendChild(detail);
     chatLog.appendChild(group);
     chatLog.scrollTop = chatLog.scrollHeight;
     return el;

@@ -563,6 +563,23 @@ h1 {
 .msg-group-bot { display: flex; flex-direction: column; align-self: flex-start; max-width: 82%; gap: 0.3rem; }
 .msg-group-bot .msg.bot { max-width: none; } /* width now comes from the group wrapper */
 
+/* Collapsed by default — clicking reveals the .msg-sources detail row
+   right below it (see addMessage() in app.js), rather than showing the
+   org names on every single reply. */
+.msg-sources-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: underline;
+  padding: 0 0.3rem;
+}
+.msg-sources-toggle:hover { color: var(--text); }
+
 .msg-sources {
   font-size: 0.72rem;
   line-height: 1.4;
