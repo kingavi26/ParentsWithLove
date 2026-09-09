@@ -1,5 +1,6 @@
 const { buildSystemPrompt, getActiveBaseRules } = require("./prompt");
 const { mentionsSexualTopic, SEXUAL_TOPIC_REPLY } = require("./sexual-content-guard");
+const { sourcesForHints } = require("./research-sources");
 
 const hasRealKey = Boolean(process.env.OPENAI_API_KEY);
 
@@ -326,7 +327,9 @@ async function realReply(history, familyState) {
     // get extracted this turn (extraction now lives inside the router).
     console.error("[pwl7] router analysis failed, falling back to a direct reply:", err.message);
     const reply = await generateReply(history, familyState, null, null);
-    return { reply, extracted: { children: [], topics: [], notes: [] } };
+    // No router analysis means no topic classification to hang a source
+    // recommendation on — better to show nothing than guess.
+    return { reply, extracted: { children: [], topics: [], notes: [] }, sources: [] };
   }
 
   let reply = await generateReply(history, familyState, routerResult, null);
@@ -365,7 +368,23 @@ async function realReply(history, familyState) {
   }
 
   const extracted = routerResult.extracted_facts || { children: [], topics: [], notes: [] };
-  return { reply, extracted };
+
+  // A safety-flagged reply is a "please talk to a professional/crisis
+  // line" redirect, not research-informed parenting guidance — showing
+  // research orgs alongside that would read as endorsing a DIY approach
+  // to something that shouldn't be one. Otherwise, tag the reply with
+  // orgs matching the router's own topic classification (never the raw
+  // parent message) for a real, non-fabricated "based on" pointer.
+  const hasSafetyFlags = Array.isArray(routerResult.safety_flags) && routerResult.safety_flags.length > 0;
+  const sources = hasSafetyFlags
+    ? []
+    : sourcesForHints([
+        routerResult.primary_situation,
+        ...(routerResult.secondary_situations || []),
+        routerResult.relevant_protocol
+      ]);
+
+  return { reply, extracted, sources };
 }
 
 /* ------------------------------------------------------------------ *
@@ -512,7 +531,7 @@ Return meaningful_change: false, and echo the current appendix back unchanged in
 /**
  * @param {Array<{role: 'user'|'assistant', content: string}>} history - this browser session's conversation so far (oldest first)
  * @param {{children: Array<{name:string|null, age:number|null}>, topics_discussed: string[], notes: string[]}} familyState - everything stored about this user
- * @returns {Promise<{reply: string, extracted: {children: Array, topics: string[], notes: string[]}}>}
+ * @returns {Promise<{reply: string, extracted: {children: Array, topics: string[], notes: string[]}, sources: Array<{id: string, org: string, title: string, url: string}>}>}
  */
 async function getReply({ history, familyState }) {
   const lastUserMessage = history[history.length - 1].content;
@@ -520,9 +539,11 @@ async function getReply({ history, familyState }) {
   // Deterministic backstop, checked first — before demo mode, before the
   // router, before any OpenAI call — so this never depends on a model
   // call succeeding or judging correctly. See sexual-content-guard.js.
-  // Nothing gets extracted/stored for a message that trips this.
+  // Nothing gets extracted/stored for a message that trips this, and this
+  // is a professional-referral redirect, not research-based guidance, so
+  // no sources are attached.
   if (mentionsSexualTopic(lastUserMessage)) {
-    return { reply: SEXUAL_TOPIC_REPLY, extracted: { children: [], topics: [], notes: [] } };
+    return { reply: SEXUAL_TOPIC_REPLY, extracted: { children: [], topics: [], notes: [] }, sources: [] };
   }
 
   if (client) {
@@ -531,7 +552,10 @@ async function getReply({ history, familyState }) {
 
   const { reply, matchedTopic } = demoReply(lastUserMessage);
   const extracted = demoExtractFacts(lastUserMessage, matchedTopic);
-  return { reply, extracted };
+  // matchedTopic is null for the generic "I don't have a scripted answer"
+  // fallback — nothing to attribute a source to in that case.
+  const sources = matchedTopic ? sourcesForHints([matchedTopic]) : [];
+  return { reply, extracted, sources };
 }
 
 module.exports = { getReply, reviewSession, draftLearnedPatternsUpdate, isDemoMode: !hasRealKey };
