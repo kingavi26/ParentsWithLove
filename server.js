@@ -16,6 +16,7 @@ const designRoutes = require("./src/routes/design");
 const { isDemoMode } = require("./src/reply-engine");
 const { isVoiceAvailable } = require("./src/voice");
 const { isGoogleAvailable, isFacebookAvailable } = require("./src/oauth");
+const { allSources } = require("./src/research-sources");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +60,14 @@ app.get("/api/status", (req, res) => {
     googleLoginAvailable: isGoogleAvailable,
     facebookLoginAvailable: isFacebookAvailable
   });
+});
+
+// Unauthenticated, static, and public on purpose — this is the same fixed
+// library that reply-engine.js tags individual chat replies from (see
+// src/research-sources.js), served here so public/sources.html can render
+// the full list from one source of truth instead of a second hand-kept copy.
+app.get("/api/sources", (req, res) => {
+  res.json({ sources: allSources() });
 });
 
 app.listen(PORT, () => {
