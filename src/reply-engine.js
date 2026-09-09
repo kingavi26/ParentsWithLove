@@ -1,4 +1,5 @@
 const { buildSystemPrompt, getActiveBaseRules } = require("./prompt");
+const { mentionsSexualTopic, SEXUAL_TOPIC_REPLY } = require("./sexual-content-guard");
 
 const hasRealKey = Boolean(process.env.OPENAI_API_KEY);
 
@@ -514,11 +515,20 @@ Return meaningful_change: false, and echo the current appendix back unchanged in
  * @returns {Promise<{reply: string, extracted: {children: Array, topics: string[], notes: string[]}}>}
  */
 async function getReply({ history, familyState }) {
+  const lastUserMessage = history[history.length - 1].content;
+
+  // Deterministic backstop, checked first — before demo mode, before the
+  // router, before any OpenAI call — so this never depends on a model
+  // call succeeding or judging correctly. See sexual-content-guard.js.
+  // Nothing gets extracted/stored for a message that trips this.
+  if (mentionsSexualTopic(lastUserMessage)) {
+    return { reply: SEXUAL_TOPIC_REPLY, extracted: { children: [], topics: [], notes: [] } };
+  }
+
   if (client) {
     return realReply(history, familyState);
   }
 
-  const lastUserMessage = history[history.length - 1].content;
   const { reply, matchedTopic } = demoReply(lastUserMessage);
   const extracted = demoExtractFacts(lastUserMessage, matchedTopic);
   return { reply, extracted };
