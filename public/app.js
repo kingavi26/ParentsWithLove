@@ -8,6 +8,7 @@
   var authSubmit = document.getElementById("auth-submit");
   var authTabs = document.querySelectorAll(".auth-tab");
   var socialAuthWrap = document.getElementById("social-auth");
+  var appleLoginBtn = document.getElementById("apple-login-btn");
   var googleLoginBtn = document.getElementById("google-login-btn");
   var facebookLoginBtn = document.getElementById("facebook-login-btn");
   var emailInput = document.getElementById("email");
@@ -177,11 +178,17 @@
         if (micSupported) micBtn.hidden = false;
       }
 
+      // appleLoginAvailable isn't sent by the server yet (no Apple Sign-In
+      // backend/route configured) — this stays inert (button never
+      // un-hides) until that's set up, same fail-safe pattern as the other
+      // two providers before their credentials existed.
+      var appleOn = Boolean(data.appleLoginAvailable);
       var googleOn = Boolean(data.googleLoginAvailable);
       var facebookOn = Boolean(data.facebookLoginAvailable);
+      if (appleOn) appleLoginBtn.hidden = false;
       if (googleOn) googleLoginBtn.hidden = false;
       if (facebookOn) facebookLoginBtn.hidden = false;
-      if (googleOn || facebookOn) socialAuthWrap.hidden = false;
+      if (appleOn || googleOn || facebookOn) socialAuthWrap.hidden = false;
     })
     .catch(function () {});
 

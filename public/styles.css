@@ -1,47 +1,62 @@
 :root {
-  --bg: #f4f5f7;
+  /* ---- iOS-native palette (2026-09 redesign) ----
+     White/light-gray surfaces, near-black text, one teal accent — the
+     look of a native iOS app rather than a marketing site. See the
+     per-section comments below for where each secondary token lands. */
+  --bg: #f2f2f7;
   --surface: #ffffff;
-  --surface-sunken: #eaedf1;
-  --text: #1a2530;
-  --muted: #6b7480;
-  --border: #d7dbe0;
-  --accent: #2e5aa8;
+  --surface-sunken: #ededf2;
+  --text: #000000;
+  --muted: #8e8e93;
+  --border: #e2e2e6;
+  --accent: #2f9e97;
+  --accent-tint: #e4f5f3;
   --accent-contrast: #ffffff;
-  --error: #b3453c;
-  --bubble-user-bg: #1a2530;
-  --bubble-user-text: #f4f5f7;
-  --bubble-bot-bg: #eaedf1;
-  --bubble-bot-text: #1a2530;
+  --error: #ff3b30;
+  --bubble-user-bg: #2f9e97;
+  --bubble-user-text: #ffffff;
+  --bubble-bot-bg: #ffffff;
+  --bubble-bot-text: #000000;
   /* --shadow-opacity is its own variable (not just baked into --shadow)
      so Design Mode can offer a single "elevation" slider that darkens or
      flattens every card's shadow at once, without needing to know the
-     rest of the shadow's shape. */
-  --shadow-opacity: 0.06;
+     rest of the shadow's shape. iOS cards lean flatter than the old
+     palette's, hence the lower default. */
+  --shadow-opacity: 0.04;
   --shadow: 0 1px 2px rgba(20, 30, 45, var(--shadow-opacity));
-  --chalk: #1a2530;
+  --chalk: #000000;
   --chalk-muted: var(--muted);
   /* A single knob that scales every border-radius in the app at once
      (see the calc(Npx * var(--radius-scale)) rules below) — 1 = the
-     shipped look, 0 = sharp corners, 2 = noticeably rounder. */
-  --radius-scale: 1;
+     original shipped look, 2.2 = the rounder, native-iOS corner radii
+     this redesign uses (roughly 9-18px depending on the element), 0 =
+     sharp corners. */
+  --radius-scale: 2.2;
   /* Overall content width — the same var everything below already reads
      via .wrap, so a Design Mode "page width" slider is a single edit. */
   --content-max-width: 880px;
 
-  /* small secondary accents: the logo mark's spark + heart outline, and the
-     "pin" dot on each remembered note. Used sparingly, never as a primary
-     button or text color. */
-  --honey: #9c7b3d;
-  --honey-tint: #edf0f4;
-  --plum: #57678a;
-  --note-bg: #f1f3f6;
+  /* small secondary accents: the logo mark's spark + heart outline, the
+     "pin" dot on each remembered note, and (as of this redesign) the
+     tinted icon circles on the home screen's quick-action cards — mapped
+     to the same indigo/orange/green/pink family iOS itself uses for
+     Settings-style icon tiles. Used sparingly, never as a primary button
+     or text color. */
+  --honey: #ff9500;
+  --honey-tint: #fff2de;
+  --plum: #5856d6;
+  --plum-tint: #ebeafc;
+  --note-bg: #f2f2f7;
 
   /* Typography as variables (not just literals) so the live Design Mode
      editor (public/design.js, src/design.js) can swap fonts app-wide by
      setting these two custom properties — every font-family rule below
-     references one of these two instead of hardcoding a family name. */
-  --font-body: 'Work Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Lora', Georgia, serif;
+     references one of these two instead of hardcoding a family name.
+     Both point at the system stack now (SF Pro on Apple devices) rather
+     than the old Lora/Work Sans pairing, so headings and body text read
+     as one native type family instead of a display/body serif pairing. */
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -274,6 +289,22 @@ h1 {
 .btn-google { border-color: var(--border); }
 .btn-facebook { border-color: var(--border); }
 
+/* Apple's own Sign in with Apple guidelines call for a solid black (or
+   white) pill with the Apple mark + label — deliberately NOT themed off
+   --text/--surface like the rest of .btn-social, since this one control
+   isn't supposed to reskin with the rest of the app. */
+.btn-apple {
+  background: #0a0a0a;
+  border-color: #0a0a0a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.btn-apple:hover { filter: brightness(1.15); }
+.apple-logo { flex-shrink: 0; }
+
 /* .btn-social sets display:block above, which (author styles always beat
    the UA stylesheet, regardless of specificity) would otherwise override
    the [hidden] attribute's default display:none and show the button
@@ -396,10 +427,10 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 0.65rem;
   padding: 1rem;
   border-radius: calc(6px * var(--radius-scale));
-  border: 1px solid var(--border);
+  border: none;
   background: var(--surface);
   box-shadow: var(--shadow);
   font-family: inherit;
@@ -410,9 +441,24 @@ h1 {
   text-align: left;
 }
 
-.quick-action-card:hover { border-color: var(--accent); }
+.quick-action-card:hover { box-shadow: 0 4px 14px -6px rgba(20, 30, 45, 0.22); }
 
-.quick-action-emoji { font-size: 1.4rem; }
+/* Tinted icon circle, one per card — replaces the old plain emoji glyph
+   with the same "colored circle + line icon" treatment iOS itself uses
+   for Settings-style tiles. Each card sets its own --qa-tint/--qa-ink
+   pair inline (see index.html) rather than four bespoke classes here. */
+.quick-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  background: var(--qa-tint, var(--accent-tint, var(--surface-sunken)));
+  color: var(--qa-ink, var(--accent));
+  flex-shrink: 0;
+}
+.quick-action-icon svg { width: 18px; height: 18px; }
 
 .home-continue-btn { width: 100%; }
 
@@ -550,8 +596,8 @@ h1 {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.msg.bot { align-self: flex-start; background: var(--bubble-bot-bg); color: var(--bubble-bot-text); border-bottom-left-radius: 4px; }
-.msg.user { align-self: flex-end; background: var(--bubble-user-bg); color: var(--bubble-user-text); border: 1px solid var(--border); border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--bubble-bot-bg); color: var(--bubble-bot-text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg.user { align-self: flex-end; background: var(--bubble-user-bg); color: var(--bubble-user-text); border-bottom-right-radius: 4px; }
 
 .msg.pending { display: flex; align-items: center; padding: 0.75rem 1rem; }
 

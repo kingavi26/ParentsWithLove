@@ -4,15 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Parenting Help Chat</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
-    rel="stylesheet"
-  />
   <link rel="stylesheet" href="/styles.css" />
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#2e5aa8" />
+  <meta name="theme-color" content="#2f9e97" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 <body>
@@ -59,6 +53,18 @@
 
         <div id="social-auth" class="social-auth" hidden>
           <div class="social-divider"><span data-editable="social-divider-or">or</span></div>
+          <!-- Hidden until the server reports appleLoginAvailable (see app.js) —
+               there's no Apple Sign-In backend wired up yet, so this stays
+               inert (same pattern Google/Facebook already use below) until
+               that's configured. Styled per Apple's own button guidelines
+               (solid black, white logo+label) rather than the shared
+               .btn-social look, since that part isn't meant to reskin. -->
+          <a href="/api/auth/apple" class="btn-social btn-apple" id="apple-login-btn" hidden>
+            <svg class="apple-logo" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M15.7 12.4c-.02-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.4 2.5-.4 6.2 1 8.2.7 1 1.5 2.1 2.6 2.1 1 0 1.4-.7 2.7-.7 1.3 0 1.6.7 2.7.6 1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3-.1 0-2.1-.8-2.2-3.1zM13.9 6c.6-.7 1-1.7.9-2.7-.8 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2z" />
+            </svg>
+            <span data-editable="social-apple-btn">Continue with Apple</span>
+          </a>
           <a href="/api/auth/google" class="btn-social btn-google" id="google-login-btn" hidden><span data-editable="social-google-btn">Continue with Google</span></a>
           <a href="/api/auth/facebook" class="btn-social btn-facebook" id="facebook-login-btn" hidden><span data-editable="social-facebook-btn">Continue with Facebook</span></a>
         </div>
@@ -108,19 +114,27 @@
             <div class="home-section-label" data-editable="home-section-label">Ask about&hellip;</div>
             <div class="home-quick-actions" id="home-quick-actions" data-reorder-group="home-quick-actions">
               <button type="button" class="quick-action-card" data-prompt="My kids keep fighting with each other and I don't know how to handle it." data-reorder-id="sibling">
-                <span class="quick-action-emoji" aria-hidden="true">&#129309;</span>
+                <span class="quick-action-icon" style="--qa-tint: #e8f8ec; --qa-ink: #34c759;" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
+                </span>
                 <span data-editable="quick-action-sibling-label">Sibling conflict</span>
               </button>
               <button type="button" class="quick-action-card" data-prompt="Bedtime has turned into a nightly battle. What can I try?" data-reorder-id="bedtime">
-                <span class="quick-action-emoji" aria-hidden="true">&#127769;</span>
+                <span class="quick-action-icon" style="--qa-tint: var(--plum-tint); --qa-ink: var(--plum);" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
+                </span>
                 <span data-editable="quick-action-bedtime-label">Bedtime battles</span>
               </button>
               <button type="button" class="quick-action-card" data-prompt="My kid is having a meltdown/tantrum and I'm not sure how to respond in the moment." data-reorder-id="tantrums">
-                <span class="quick-action-emoji" aria-hidden="true">&#128165;</span>
+                <span class="quick-action-icon" style="--qa-tint: #ffe8ed; --qa-ink: #ff2d55;" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
+                </span>
                 <span data-editable="quick-action-tantrums-label">Tantrums</span>
               </button>
               <button type="button" class="quick-action-card" data-prompt="I want to set healthier screen time limits without a huge fight." data-reorder-id="screen-time">
-                <span class="quick-action-emoji" aria-hidden="true">&#128241;</span>
+                <span class="quick-action-icon" style="--qa-tint: var(--honey-tint); --qa-ink: var(--honey);" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
+                </span>
                 <span data-editable="quick-action-screen-time-label">Screen time</span>
               </button>
             </div>
