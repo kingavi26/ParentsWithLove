@@ -37,8 +37,16 @@ const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 // either one of the two Google Fonts already linked in index.html/admin.html
 // (Lora, Work Sans) or a safe, universally available system stack.
 const ALLOWED_FONTS = [
-  { value: "'Work Sans', system-ui, -apple-system, sans-serif", label: "Work Sans (default body)" },
-  { value: "'Lora', Georgia, serif", label: "Lora (default display)" },
+  {
+    value: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
+    label: "SF Pro / System (default body)"
+  },
+  {
+    value: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
+    label: "SF Pro Display / System (default display)"
+  },
+  { value: "'Work Sans', system-ui, -apple-system, sans-serif", label: "Work Sans (sans)" },
+  { value: "'Lora', Georgia, serif", label: "Lora (serif)" },
   { value: "Georgia, 'Times New Roman', serif", label: "Georgia (serif)" },
   { value: "'Helvetica Neue', Arial, sans-serif", label: "Helvetica (sans)" },
   { value: "system-ui, -apple-system, sans-serif", label: "System UI (sans)" },
@@ -54,6 +62,7 @@ const ALLOWED_FONT_VALUES = new Set(ALLOWED_FONTS.map((f) => f.value));
 // used directly). min/max/step describe the slider the client should show.
 const ALLOWED_THEME_VARS = {
   "--accent": { label: "Accent (buttons, links)", type: "color", group: "Colors" },
+  "--accent-tint": { label: "Accent (tint, e.g. icon circles)", type: "color", group: "Colors" },
   "--accent-contrast": { label: "Text on accent", type: "color", group: "Colors" },
   "--bg": { label: "Page background", type: "color", group: "Colors" },
   "--surface": { label: "Card surface", type: "color", group: "Colors" },
@@ -65,6 +74,7 @@ const ALLOWED_THEME_VARS = {
   "--honey": { label: "Logo spark / small accent", type: "color", group: "Colors" },
   "--honey-tint": { label: "Small accent (tint)", type: "color", group: "Colors" },
   "--plum": { label: "Logo heart / secondary accent", type: "color", group: "Colors" },
+  "--plum-tint": { label: "Secondary accent (tint)", type: "color", group: "Colors" },
   "--note-bg": { label: "Pinned note background", type: "color", group: "Colors" },
   "--bubble-user-bg": { label: "Your chat bubble", type: "color", group: "Colors" },
   "--bubble-user-text": { label: "Your chat bubble text", type: "color", group: "Colors" },
@@ -124,6 +134,7 @@ const ALLOWED_EDITABLE = {
   "field-email-label": { label: "Email field label", maxLen: 30, group: "Auth screen" },
   "field-password-label": { label: "Password field label", maxLen: 30, group: "Auth screen" },
   "social-divider-or": { label: "Social login divider (\"or\")", maxLen: 10, group: "Auth screen" },
+  "social-apple-btn": { label: "Apple login button", maxLen: 40, group: "Auth screen" },
   "social-google-btn": { label: "Google login button", maxLen: 40, group: "Auth screen" },
   "social-facebook-btn": { label: "Facebook login button", maxLen: 40, group: "Auth screen" },
 
