@@ -151,6 +151,7 @@ router.post("/chat", requireAuth, chatLimiter, async (req, res) => {
 
   res.json({
     reply: result.reply,
+    sources: result.sources || [],
     demoMode: isDemoMode,
     remembered: {
       children: updatedChildren,
