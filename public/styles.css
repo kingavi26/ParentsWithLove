@@ -555,6 +555,27 @@ h1 {
 
 .msg.pending { display: flex; align-items: center; padding: 0.75rem 1rem; }
 
+/* A bot reply that came with research-source tags (see addMessage() in
+   app.js / src/research-sources.js) gets wrapped in this group instead of
+   being appended to .chat-log directly, so the "Based on" caption sits
+   right under that one bubble — same left alignment and max-width as a
+   plain .msg.bot, just with room for a second line underneath. */
+.msg-group-bot { display: flex; flex-direction: column; align-self: flex-start; max-width: 82%; gap: 0.3rem; }
+.msg-group-bot .msg.bot { max-width: none; } /* width now comes from the group wrapper */
+
+.msg-sources {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--muted);
+  padding: 0 0.3rem;
+}
+.msg-sources-label { font-weight: 600; }
+.msg-sources a { color: var(--muted); text-decoration: underline; }
+.msg-sources a:hover { color: var(--text); }
+.msg-sources-sep { padding: 0 0.15rem; }
+.msg-sources-all { color: var(--accent); text-decoration: underline; white-space: nowrap; }
+.msg-sources-all:hover { color: var(--text); }
+
 .typing-dots { display: inline-flex; align-items: center; gap: 4px; }
 
 .typing-dots span {
@@ -1183,6 +1204,27 @@ h1 {
 .privacy-back { margin-top: 1.5rem; }
 .privacy-back a { color: var(--muted); font-size: 0.85rem; text-decoration: none; }
 .privacy-back a:hover { color: var(--text); text-decoration: underline; }
+
+/* Standalone research-sources page (public/sources.html) — the full
+   curated library from src/research-sources.js, rendered client-side from
+   /api/sources so this page and the per-reply "Based on" line (see
+   .msg-sources below) never drift out of sync with each other. */
+.sources-list { display: flex; flex-direction: column; gap: 0.6rem; margin: 0.75rem 0 1.4rem; }
+.sources-loading { color: var(--muted); font-size: 0.88rem; font-style: italic; }
+.source-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: calc(6px * var(--radius-scale));
+  background: var(--surface-sunken);
+}
+.source-row-org { font-weight: 600; color: var(--accent); text-decoration: none; }
+.source-row-org:hover { text-decoration: underline; }
+.source-row-title { font-size: 0.85rem; color: var(--muted); }
+.source-row-title::before { content: "\2014"; margin-right: 0.4rem; }
 
 .form-success {
   background: color-mix(in srgb, var(--accent) 14%, transparent);

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Research Sources — Parents with Love</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+</head>
+<body>
+  <div class="wrap privacy-page">
+    <div class="page-head">
+      <div class="brand-lockup">
+        <svg class="brand-mark" viewBox="0 0 24 24" width="34" height="34" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="1.8" r="1.5" fill="var(--honey)"></circle>
+          <line x1="12" y1="3.3" x2="12" y2="5" stroke="var(--honey)" stroke-width="1.3" stroke-linecap="round"></line>
+          <path d="M12 21.5 C6.8 17.6 3 14.1 3 10.3 C3 7.4 5.2 5.2 8 5.2 C9.7 5.2 11.2 6.1 12 7.5 C12.8 6.1 14.3 5.2 16 5.2 C18.8 5.2 21 7.4 21 10.3 C21 14.1 17.2 17.6 12 21.5 Z" fill="none" stroke="var(--plum)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div class="brand-wordmark">
+          <span class="brand-parents">Parents</span><span class="brand-with">with</span><span class="brand-love">Love</span>
+        </div>
+      </div>
+      <h1>Research sources</h1>
+      <p>Last checked September 9, 2026. What these links are, and aren't, below.</p>
+    </div>
+
+    <div class="auth-card privacy-card">
+      <div class="disclaimer-body">
+        <h2>What this page is</h2>
+        <p>
+          pwl7's replies are guided by a written parenting framework (love-first, understand-before-guide,
+          warm boundaries, and so on) built around established child-development ideas &mdash; attachment
+          theory, authoritative-parenting research, emotion-coaching research, and positive-discipline
+          research. When a reply below a topic like tantrums, bedtime, screens, sibling conflict, or
+          discipline shows a "Based on" line, it's pointing you to the real organizations whose published
+          guidance covers that general topic.
+        </p>
+        <p>
+          <strong>What this isn't:</strong> a citation for that exact sentence. pwl7 doesn't look up a
+          specific study or article before writing each reply, so these are topic-level pointers to
+          reputable organizations, not a bibliography entry for a specific claim. If a particular answer
+          matters for a real decision, please follow up with your pediatrician or a licensed professional
+          &mdash; the assistant will tell you as much whenever a conversation touches on something outside
+          general parenting guidance (safety, abuse, or sexual topics, for example).
+        </p>
+
+        <h2 data-editable="sources-list-heading">The organizations</h2>
+        <div id="sources-list" class="sources-list">
+          <p class="sources-loading">Loading&hellip;</p>
+        </div>
+
+        <h2>Questions</h2>
+        <p>
+          For anything about this list, contact <a href="mailto:kingavi26@gmail.com">kingavi26@gmail.com</a>.
+        </p>
+      </div>
+    </div>
+
+    <p class="privacy-back"><a href="/">&larr; Back to Parents with Love</a></p>
+  </div>
+
+  <script>
+    (function () {
+      var list = document.getElementById("sources-list");
+      fetch("/api/sources")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          var sources = (data && data.sources) || [];
+          if (!sources.length) {
+            list.innerHTML = '<p class="sources-loading">No sources available right now.</p>';
+            return;
+          }
+          list.innerHTML = "";
+          sources.forEach(function (s) {
+            var row = document.createElement("div");
+            row.className = "source-row";
+
+            var link = document.createElement("a");
+            link.href = s.url;
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.className = "source-row-org";
+            link.textContent = s.org;
+
+            var title = document.createElement("span");
+            title.className = "source-row-title";
+            title.textContent = s.title;
+
+            row.appendChild(link);
+            row.appendChild(title);
+            list.appendChild(row);
+          });
+        })
+        .catch(function () {
+          list.innerHTML = '<p class="sources-loading">Couldn’t load the source list. Please try again later.</p>';
+        });
+    })();
+  </script>
+</body>
+</html>

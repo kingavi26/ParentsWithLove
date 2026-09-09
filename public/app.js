@@ -428,11 +428,66 @@
     }
   }
 
-  function addMessage(text, who) {
+  // sources (optional): the array the server returned alongside a bot
+  // reply — [{id, org, title, url}], already picked by the backend from
+  // src/research-sources.js. Never build this from anything the user
+  // typed; it only ever comes straight from result.data.sources.
+  function addMessage(text, who, sources) {
     var el = document.createElement("div");
     el.className = "msg " + who;
     el.textContent = text;
-    chatLog.appendChild(el);
+
+    if (!sources || !sources.length) {
+      chatLog.appendChild(el);
+      chatLog.scrollTop = chatLog.scrollHeight;
+      return el;
+    }
+
+    // Wrap bubble + "Based on" caption together so the caption stays
+    // pinned under this one reply, left-aligned and width-matched like a
+    // normal bot bubble (see .msg-group-bot in styles.css).
+    var group = document.createElement("div");
+    group.className = "msg-group-bot";
+    group.appendChild(el);
+
+    var caption = document.createElement("div");
+    caption.className = "msg-sources";
+
+    var label = document.createElement("span");
+    label.className = "msg-sources-label";
+    label.textContent = "Based on: ";
+    caption.appendChild(label);
+
+    sources.forEach(function (s, i) {
+      if (i > 0) {
+        var sep = document.createElement("span");
+        sep.className = "msg-sources-sep";
+        sep.textContent = "·";
+        caption.appendChild(sep);
+      }
+      var link = document.createElement("a");
+      link.href = s.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = s.org;
+      caption.appendChild(link);
+    });
+
+    var allSep = document.createElement("span");
+    allSep.className = "msg-sources-sep";
+    allSep.textContent = "—";
+    caption.appendChild(allSep);
+
+    var allLink = document.createElement("a");
+    allLink.className = "msg-sources-all";
+    allLink.href = "/sources.html";
+    allLink.target = "_blank";
+    allLink.rel = "noopener";
+    allLink.textContent = "See all sources";
+    caption.appendChild(allLink);
+
+    group.appendChild(caption);
+    chatLog.appendChild(group);
     chatLog.scrollTop = chatLog.scrollHeight;
     return el;
   }
@@ -491,7 +546,7 @@
           return;
         }
 
-        addMessage(result.data.reply, "bot");
+        addMessage(result.data.reply, "bot", result.data.sources);
         conversation.push({ role: "assistant", content: result.data.reply });
         if (result.data.remembered) renderMemory(Object.assign({ email: accountEmail.textContent }, result.data.remembered));
         speakText(result.data.reply);
