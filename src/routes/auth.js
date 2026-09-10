@@ -79,7 +79,7 @@ router.post("/login", loginIpLimiter, loginEmailLimiter, async (req, res) => {
     return res.status(403).json({ error: "This account has been suspended." });
   }
 
-  issueSession(res, user.id);
+  issueSession(res, user.id, user.token_version);
   res.json({ ok: true, email: user.email });
 });
 

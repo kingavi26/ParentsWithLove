@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const { db } = require("../db");
-const { requireAuth, clearSession } = require("../auth-middleware");
+const { requireAuth, clearSession, issueSession } = require("../auth-middleware");
 const { loadFamilyState, normalizeTopics, normalizeNotes } = require("../family-state");
 
 const router = express.Router();
@@ -63,7 +63,7 @@ router.post("/account/password", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "New password must be at least 8 characters." });
   }
 
-  const user = db.prepare("SELECT id, password_hash FROM users WHERE id = ?").get(req.userId);
+  const user = db.prepare("SELECT id, password_hash, token_version FROM users WHERE id = ?").get(req.userId);
   if (!user) {
     clearSession(res);
     return res.status(401).json({ error: "Account no longer exists." });
@@ -80,7 +80,18 @@ router.post("/account/password", requireAuth, async (req, res) => {
   }
 
   const newHash = await bcrypt.hash(newPassword, 10);
-  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(newHash, user.id);
+  const nextTokenVersion = (user.token_version || 0) + 1;
+  // Bumping token_version invalidates every other session immediately (see
+  // requireAuth in auth-middleware.js) — a stolen or shared-device cookie
+  // stops working the moment the password changes, not up to 30 days later.
+  // Re-issuing a session below with the new version keeps *this* device
+  // logged in rather than also kicking out the person who just changed it.
+  db.prepare("UPDATE users SET password_hash = ?, token_version = ? WHERE id = ?").run(
+    newHash,
+    nextTokenVersion,
+    user.id
+  );
+  issueSession(res, user.id, nextTokenVersion);
 
   res.json({ ok: true, hasPassword: true });
 });
