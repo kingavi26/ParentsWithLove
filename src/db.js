@@ -87,6 +87,19 @@ function initDb() {
       review_count INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- Emails collected from the beta-signup landing page (public/index.html,
+    -- POST /api/beta-signup — see src/routes/beta.js). Deliberately its own
+    -- table rather than a row in "users": someone joining the waitlist
+    -- hasn't created an account and shouldn't show up in user-facing counts
+    -- or gain login access. Self-hosted for now per Avi's call — an admin
+    -- exports/copies these into Mailchimp (or wherever) by hand for now;
+    -- GET /api/admin/beta-signups?format=csv gives a ready-to-import file.
+    CREATE TABLE IF NOT EXISTS beta_signups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Migration path for a users table created before social login existed
