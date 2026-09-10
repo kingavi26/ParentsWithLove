@@ -20,6 +20,7 @@ function initDb() {
       password_hash TEXT,
       google_id TEXT,
       facebook_id TEXT,
+      token_version INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -104,6 +105,14 @@ function initDb() {
   // invalidates any session already in progress (see requireAuth).
   if (!columns.includes("suspended")) {
     db.exec("ALTER TABLE users ADD COLUMN suspended INTEGER NOT NULL DEFAULT 0");
+  }
+  // Bumped whenever a password changes (see src/routes/account.js) so every
+  // other JWT already out there — on another device, in a stolen cookie —
+  // stops working immediately instead of staying valid for up to 30 days.
+  // Missing/old tokens are treated as version 0 (see requireAuth below), so
+  // this migration doesn't invalidate anyone's existing session by itself.
+  if (!columns.includes("token_version")) {
+    db.exec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
   }
 
   // Migration path for a family_notes table created before conversations
