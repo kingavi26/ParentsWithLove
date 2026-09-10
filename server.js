@@ -14,6 +14,7 @@ const voiceRoutes = require("./src/routes/voice");
 const socialAuthRoutes = require("./src/routes/social-auth");
 const adminRoutes = require("./src/routes/admin");
 const designRoutes = require("./src/routes/design");
+const betaRoutes = require("./src/routes/beta");
 const { isDemoMode } = require("./src/reply-engine");
 const { isVoiceAvailable } = require("./src/voice");
 const { isGoogleAvailable, isFacebookAvailable } = require("./src/oauth");
@@ -77,6 +78,15 @@ app.get("/.well-known/assetlinks.json", (req, res) => {
     res.sendFile(path.join(__dirname, "public", ".well-known", "assetlinks.json"));
 });
 
+// public/index.html is now the pre-launch beta-signup landing page, not the
+// product — the actual login/chat app lives at public/app.html and is
+// served here under a clean extensionless URL (this is also what
+// manifest.json's start_url/scope point at, so the installed PWA/Android
+// TWA opens straight into the app rather than the marketing page).
+app.get("/app", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "app.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", authRoutes);
@@ -87,6 +97,7 @@ app.use("/api", voiceRoutes);
 app.use("/api", socialAuthRoutes);
 app.use("/api", adminRoutes);
 app.use("/api", designRoutes);
+app.use("/api", betaRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
 app.get("/api/status", (req, res) => {
