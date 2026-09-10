@@ -22,6 +22,7 @@
 
   var statsEl = document.getElementById("admin-stats");
   var recentSignupsEl = document.getElementById("admin-recent-signups");
+  var betaSignupsEl = document.getElementById("admin-beta-signups");
 
   var usersBody = document.getElementById("admin-users-body");
 
@@ -196,6 +197,26 @@
       } else {
         recentSignupsEl.innerHTML = '<div class="memory-empty">No signups yet</div>';
       }
+    });
+
+    loadBetaSignups();
+  }
+
+  function loadBetaSignups() {
+    if (!betaSignupsEl) return;
+    j("/api/admin/beta-signups").then(function (result) {
+      if (!result.ok) return;
+      var d = result.data;
+      var countLine = '<div class="admin-signup-row"><span><strong>' + d.count +
+        '</strong> on the waitlist</span></div>';
+      var rows = (d.signups || [])
+        .slice(0, 10)
+        .map(function (s) {
+          return '<div class="admin-signup-row"><span>' + escapeHtml(s.email) + "</span><span class=\"admin-muted\">" +
+            formatDate(s.created_at) + "</span></div>";
+        })
+        .join("");
+      betaSignupsEl.innerHTML = countLine + (rows || '<div class="memory-empty">No signups yet</div>');
     });
   }
 

@@ -3,370 +3,256 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Parenting Help Chat</title>
-  <link rel="stylesheet" href="/styles.css" />
-  <link rel="manifest" href="/manifest.json" />
+  <title>Parents with Love — Beta</title>
+  <meta name="description" content="AI parenting help that remembers your kids and picks up where you left off. Join the beta waitlist for Parents with Love." />
+  <link rel="stylesheet" href="/landing.css" />
   <meta name="theme-color" content="#2f9e97" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 <body>
+
   <div class="wrap">
-    <div class="page-head">
+    <nav class="landing-nav">
       <div class="brand-lockup">
-        <svg class="brand-mark" viewBox="0 0 24 24" width="34" height="34" fill="none" aria-hidden="true" focusable="false">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
           <circle cx="12" cy="1.8" r="1.5" fill="var(--honey)"></circle>
           <line x1="12" y1="3.3" x2="12" y2="5" stroke="var(--honey)" stroke-width="1.3" stroke-linecap="round"></line>
           <path d="M12 21.5 C6.8 17.6 3 14.1 3 10.3 C3 7.4 5.2 5.2 8 5.2 C9.7 5.2 11.2 6.1 12 7.5 C12.8 6.1 14.3 5.2 16 5.2 C18.8 5.2 21 7.4 21 10.3 C21 14.1 17.2 17.6 12 21.5 Z" fill="none" stroke="var(--plum)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
-        <div class="brand-wordmark">
-          <span class="brand-parents" data-editable="brand-parents">Parents</span><span class="brand-with" data-editable="brand-with">with</span><span class="brand-love" data-editable="brand-love">Love</span>
-        </div>
+        <div class="brand-wordmark">Parents<span class="brand-with">with</span><span class="brand-love">Love</span></div>
       </div>
-      <div class="eyebrow" data-editable="hero-eyebrow">pwl7 &middot; prototype</div>
-      <h1 data-editable="hero-title">Parenting help chat</h1>
-      <p data-editable="hero-subtitle">Log in and it remembers your kids and what you've already talked about, so the conversation picks up where it left off.</p>
-    </div>
-
-    <div id="demo-banner" class="demo-banner" hidden></div>
-
-    <!-- Auth screen -->
-    <section id="auth-screen">
-      <div class="auth-card">
-        <div class="auth-tabs">
-          <button type="button" class="auth-tab active" data-mode="login"><span data-editable="auth-tab-login">Log in</span></button>
-          <button type="button" class="auth-tab" data-mode="signup"><span data-editable="auth-tab-signup">Sign up</span></button>
-        </div>
-
-        <div id="auth-error" class="form-error"></div>
-
-        <form id="auth-form">
-          <div class="field">
-            <label for="email" data-editable="field-email-label">Email</label>
-            <input id="email" type="email" autocomplete="email" required />
-          </div>
-          <div class="field">
-            <label for="password" data-editable="field-password-label">Password</label>
-            <input id="password" type="password" autocomplete="current-password" required minlength="8" />
-          </div>
-          <button type="submit" class="btn-primary" id="auth-submit">Log in</button>
-        </form>
-
-        <div id="social-auth" class="social-auth" hidden>
-          <div class="social-divider"><span data-editable="social-divider-or">or</span></div>
-          <!-- Hidden until the server reports appleLoginAvailable (see app.js) —
-               there's no Apple Sign-In backend wired up yet, so this stays
-               inert (same pattern Google/Facebook already use below) until
-               that's configured. Styled per Apple's own button guidelines
-               (solid black, white logo+label) rather than the shared
-               .btn-social look, since that part isn't meant to reskin. -->
-          <a href="/api/auth/apple" class="btn-social btn-apple" id="apple-login-btn" hidden>
-            <svg class="apple-logo" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-              <path fill="currentColor" d="M15.7 12.4c-.02-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.4 2.5-.4 6.2 1 8.2.7 1 1.5 2.1 2.6 2.1 1 0 1.4-.7 2.7-.7 1.3 0 1.6.7 2.7.6 1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3-.1 0-2.1-.8-2.2-3.1zM13.9 6c.6-.7 1-1.7.9-2.7-.8 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2z" />
-            </svg>
-            <span data-editable="social-apple-btn">Continue with Apple</span>
-          </a>
-          <a href="/api/auth/google" class="btn-social btn-google" id="google-login-btn" hidden><span data-editable="social-google-btn">Continue with Google</span></a>
-          <a href="/api/auth/facebook" class="btn-social btn-facebook" id="facebook-login-btn" hidden><span data-editable="social-facebook-btn">Continue with Facebook</span></a>
-        </div>
-      </div>
-    </section>
-
-    <!-- App screen: a real app shell (nav + screens) rather than one long page -->
-    <section id="app-screen" hidden>
-      <div class="app-shell">
-        <header class="app-topbar" id="app-topbar">
-          <span class="app-topbar-title" id="app-topbar-title">Home</span>
-          <span class="app-topbar-badge" id="app-topbar-badge" hidden>Demo</span>
-        </header>
-
-        <nav class="app-nav" id="app-nav" aria-label="Main" data-reorder-group="app-nav">
-          <button type="button" class="nav-item active" data-screen="home" data-reorder-id="home">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" /></svg>
-            <span>Home</span>
-          </button>
-          <button type="button" class="nav-item" data-screen="chat" data-reorder-id="chat">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5Z" /></svg>
-            <span>Chat</span>
-          </button>
-          <button type="button" class="nav-item" data-screen="memory" data-reorder-id="memory">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="13" y2="16" /></svg>
-            <span>Memory</span>
-          </button>
-          <button type="button" class="nav-item" id="nav-settings-btn" data-screen="settings" data-reorder-id="settings">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
-            <span>Settings</span>
-          </button>
-        </nav>
-
-        <div class="app-main">
-          <div class="app-header">
-            <span id="account-email" style="font-size: 0.85rem; color: var(--chalk-muted)"></span>
-            <div class="app-header-actions">
-              <button type="button" class="logout-link" id="logout-btn">Log out</button>
-            </div>
-          </div>
-
-          <!-- Home screen -->
-          <div class="app-panel" id="screen-home">
-            <div class="home-greeting" id="home-greeting">Welcome back!</div>
-            <div id="home-kids" class="pill-row home-kids" hidden></div>
-
-            <div class="home-section-label" data-editable="home-section-label">Ask about&hellip;</div>
-            <div class="home-quick-actions" id="home-quick-actions" data-reorder-group="home-quick-actions">
-              <button type="button" class="quick-action-card" data-prompt="My kids keep fighting with each other and I don't know how to handle it." data-reorder-id="sibling">
-                <span class="quick-action-icon" style="--qa-tint: #e8f8ec; --qa-ink: #34c759;" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
-                </span>
-                <span data-editable="quick-action-sibling-label">Sibling conflict</span>
-              </button>
-              <button type="button" class="quick-action-card" data-prompt="Bedtime has turned into a nightly battle. What can I try?" data-reorder-id="bedtime">
-                <span class="quick-action-icon" style="--qa-tint: var(--plum-tint); --qa-ink: var(--plum);" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
-                </span>
-                <span data-editable="quick-action-bedtime-label">Bedtime battles</span>
-              </button>
-              <button type="button" class="quick-action-card" data-prompt="My kid is having a meltdown/tantrum and I'm not sure how to respond in the moment." data-reorder-id="tantrums">
-                <span class="quick-action-icon" style="--qa-tint: #ffe8ed; --qa-ink: #ff2d55;" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
-                </span>
-                <span data-editable="quick-action-tantrums-label">Tantrums</span>
-              </button>
-              <button type="button" class="quick-action-card" data-prompt="I want to set healthier screen time limits without a huge fight." data-reorder-id="screen-time">
-                <span class="quick-action-icon" style="--qa-tint: var(--honey-tint); --qa-ink: var(--honey);" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
-                </span>
-                <span data-editable="quick-action-screen-time-label">Screen time</span>
-              </button>
-            </div>
-
-            <button type="button" class="btn-primary home-continue-btn" id="home-continue-btn" data-editable="home-continue-btn">Continue chatting &rarr;</button>
-          </div>
-
-          <!-- Chat screen -->
-          <div class="app-panel" id="screen-chat" hidden>
-            <div class="chat-card">
-              <div class="chat-header">
-                <span class="chat-dot"></span>
-                <div>
-                  <div class="chat-title" data-editable="chat-title">Parenting Help Chat</div>
-                  <div class="chat-subtitle" id="chat-subtitle">Demo mode &mdash; scripted answers for now</div>
-                </div>
-                <button type="button" class="voice-toggle" id="voice-toggle-btn" aria-pressed="false" hidden>
-                  &#128264; Read replies aloud
-                </button>
-              </div>
-
-              <div class="chat-log" id="chat-log" aria-live="polite"></div>
-
-              <form class="chat-inputrow" id="chat-form">
-                <button type="button" class="mic-btn" id="mic-btn" aria-label="Record a voice message" hidden>&#127908;</button>
-                <input
-                  type="text"
-                  id="chat-input"
-                  class="chat-input"
-                  placeholder="Type a question about your kid&hellip;"
-                  autocomplete="off"
-                  data-editable="chat-input-placeholder"
-                  data-editable-attr="placeholder"
-                />
-                <button type="submit" class="chat-send" id="chat-send"><span data-editable="chat-send-btn">Send</span></button>
-              </form>
-              <audio id="voice-player" hidden></audio>
-
-              <div class="chat-footer">
-                <button type="button" class="rate-session-link" id="rate-session-btn" data-editable="rate-session-link">Rate this session based on deep child development research</button>
-              </div>
-
-              <section id="review-panel" class="review-panel" hidden>
-                <div class="review-head">
-                  <h2 data-editable="review-panel-heading">Self-review</h2>
-                  <button type="button" class="review-close" id="review-close-btn" aria-label="Close">&times;</button>
-                </div>
-                <div id="review-body"></div>
-              </section>
-            </div>
-          </div>
-
-          <!-- Memory screen -->
-          <div class="app-panel" id="screen-memory" hidden>
-            <aside class="memory-card" data-reorder-group="memory-sections">
-              <h2 data-editable="memory-heading">What we remember</h2>
-              <div id="memory-last-active" class="memory-last-active" hidden></div>
-
-              <div class="memory-section" data-reorder-id="children">
-                <div class="memory-label" data-editable="memory-label-children">Children</div>
-                <div id="memory-children" class="pill-row"><div class="memory-empty">Nothing yet</div></div>
-              </div>
-
-              <div class="memory-section hanging" data-reorder-id="topics">
-                <div class="memory-label" data-editable="memory-label-topics">Topics discussed</div>
-                <div id="memory-topics" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
-                <div id="memory-topics-error" class="form-error"></div>
-              </div>
-
-              <div class="memory-section hanging" data-reorder-id="notes">
-                <div class="memory-label" data-editable="memory-label-notes">Notes</div>
-                <div id="memory-notes" class="pin-list"><div class="memory-empty">Nothing yet</div></div>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Account settings modal -->
-    <div id="account-modal" class="modal-backdrop" hidden>
-      <div class="modal-card">
-        <div class="modal-head">
-          <h2 data-editable="account-modal-heading">Account settings</h2>
-          <button type="button" class="modal-close" id="account-modal-close-btn" aria-label="Close">&times;</button>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-label" data-editable="account-email-section-label">Email</div>
-          <div id="account-modal-email" class="modal-static"></div>
-        </div>
-
-        <form id="account-password-form" class="modal-section">
-          <div class="modal-label" id="account-password-heading">Change password</div>
-          <div id="account-password-error" class="form-error"></div>
-          <div id="account-password-success" class="form-success" hidden>Password updated.</div>
-          <div class="field" id="current-password-field">
-            <label for="current-password">Current password</label>
-            <input id="current-password" type="password" autocomplete="current-password" />
-          </div>
-          <div class="field">
-            <label for="new-password" id="new-password-label">New password</label>
-            <input id="new-password" type="password" autocomplete="new-password" required minlength="8" />
-          </div>
-          <button type="submit" class="btn-primary" id="account-password-submit">Update password</button>
-        </form>
-
-        <div class="modal-section">
-          <div class="modal-label" data-editable="account-children-label">Children we remember</div>
-          <p class="modal-hint" data-editable="account-children-hint">Fix a name or age the assistant got wrong, or remove a duplicate entry. A nickname or first name works just as well as a full name — use whatever you're comfortable storing here.</p>
-          <div id="account-children-error" class="form-error"></div>
-          <div id="account-children-list" class="account-children-list"></div>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-label" data-editable="account-memory-label">Topics &amp; notes we remember</div>
-          <p class="modal-hint" data-editable="account-memory-hint">Remove anything specific you'd rather the assistant forget, without deleting your whole account.</p>
-          <div id="account-topics-error" class="form-error"></div>
-          <div class="account-memory-group">
-            <div class="account-memory-subhead" data-editable="account-topics-subhead">Topics discussed</div>
-            <div id="account-topics-list" class="account-memory-list"></div>
-          </div>
-          <div class="account-memory-group">
-            <div class="account-memory-subhead" data-editable="account-notes-subhead">Notes</div>
-            <div id="account-notes-list" class="account-memory-list"></div>
-          </div>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-label" data-editable="account-data-label">Your data</div>
-          <p class="modal-hint" data-editable="account-data-hint">Download a copy of everything remembered about your family &mdash; children, topics, notes, and self-review history &mdash; as a file you can keep.</p>
-          <button type="button" class="btn-secondary-outline" id="export-data-btn" data-editable="account-export-btn">Download what we remember</button>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-label">Legal</div>
-          <div class="settings-list">
-            <button type="button" class="settings-row" id="settings-disclaimer-btn">
-              <span>Disclaimer</span>
-              <span class="settings-row-chevron" aria-hidden="true">&rsaquo;</span>
-            </button>
-            <a class="settings-row" href="/privacy.html" target="_blank" rel="noopener">
-              <span>Privacy policy</span>
-              <span class="settings-row-chevron" aria-hidden="true">&rsaquo;</span>
-            </a>
-            <a class="settings-row" href="/sources.html" target="_blank" rel="noopener">
-              <span>Research sources</span>
-              <span class="settings-row-chevron" aria-hidden="true">&rsaquo;</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="modal-section">
-          <button type="button" class="settings-row settings-row-danger" id="settings-logout-btn">Log out</button>
-        </div>
-
-        <div class="modal-danger-zone">
-          <div class="modal-label" data-editable="account-delete-label">Delete account</div>
-          <p class="modal-danger-copy" data-editable="account-delete-copy">
-            This permanently deletes your account, your children's info, and everything the assistant remembers.
-            This can't be undone.
-          </p>
-          <div id="account-delete-error" class="form-error"></div>
-          <button type="button" class="btn-danger-outline" id="show-delete-confirm-btn" data-editable="account-delete-btn">Delete my account&hellip;</button>
-          <div id="delete-confirm-block" class="delete-confirm-block" hidden>
-            <div class="field">
-              <label for="delete-confirm-email">Type your email (<span id="delete-confirm-email-hint"></span>) to confirm</label>
-              <input id="delete-confirm-email" type="email" autocomplete="off" />
-            </div>
-            <button type="button" class="btn-danger" id="confirm-delete-btn" data-editable="account-delete-confirm-btn">Permanently delete my account</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Disclaimer modal -->
-    <div id="disclaimer-modal" class="modal-backdrop" hidden>
-      <div class="modal-card">
-        <div class="modal-head">
-          <h2 data-editable="disclaimer-heading">Disclaimer</h2>
-          <button type="button" class="modal-close" id="disclaimer-modal-close-btn" aria-label="Close">&times;</button>
-        </div>
-        <div class="disclaimer-body">
-          <p data-editable="disclaimer-p1">
-            Parenting Help Chat uses an AI model to write its replies. AI-generated answers
-            can be incomplete, out of date, or simply wrong &mdash; even when they sound confident.
-            Always use your own judgment.
-          </p>
-          <p data-editable="disclaimer-p2">
-            This bot doesn't provide medical, psychological, or legal advice, and talking to it
-            doesn't create a doctor&ndash;patient, therapist&ndash;client, or other professional
-            relationship. It's meant to help you think through everyday parenting questions,
-            not to diagnose, treat, or replace your child's pediatrician, a licensed therapist,
-            or another qualified professional. Check anything important with one before acting on it.
-          </p>
-          <p>
-            <strong data-editable="disclaimer-crisis-label">If your child &mdash; or anyone &mdash; is in immediate danger or a crisis,
-            don't use this chat.</strong> <span data-editable="disclaimer-crisis-text">Call your local emergency number (911 in the US) or a
-            crisis line right away (in the US, call or text 988).</span>
-          </p>
-          <p>
-            <strong data-editable="disclaimer-data-label">How your data is handled:</strong> what you type, and the facts this app
-            remembers about your family (like a child's name/nickname and age), are sent to
-            OpenAI's API to generate replies and to figure out what to remember. OpenAI doesn't
-            use this to train its models, but does retain it briefly (per its own policy) for
-            abuse monitoring. Only your own account can see your family's data day-to-day; the
-            site's administrator can also view account data through an internal dashboard for
-            support and moderation. See the <a href="/privacy.html" target="_blank" rel="noopener">privacy policy</a>
-            for the full picture, including how to edit or delete what's remembered.
-          </p>
-          <p data-editable="disclaimer-p-final">
-            You're always the one responsible for decisions about your child. This tool is
-            provided as-is, with no warranty, and its creator isn't liable for actions taken
-            based on its replies.
-          </p>
-        </div>
-      </div>
-    </div>
+      <a class="nav-login-link" href="/app">Log in</a>
+    </nav>
   </div>
 
-  <footer class="site-disclaimer">
-    <p>
-      <strong data-editable="footer-heads-up-label">Heads up:</strong>
-      <span data-editable="footer-disclaimer-text">this bot uses AI and can be wrong. It isn't medical,
-      psychological, or legal advice.</span>
-      <button type="button" class="disclaimer-link" id="disclaimer-more-btn"><span data-editable="footer-more-link">Read the full disclaimer</span></button>
-      &middot;
-      <a class="disclaimer-link" href="/privacy.html" target="_blank" rel="noopener"><span data-editable="footer-privacy-link">Privacy policy</span></a>
-    </p>
+  <!-- ============ HERO ============ -->
+  <header class="wrap hero">
+    <div>
+      <div class="eyebrow-pill"><span class="dot"></span> Now in beta &mdash; early access is limited</div>
+      <h1>Parenting help that <span class="accent-text">remembers your family</span></h1>
+      <p class="hero-sub">
+        An AI parenting assistant that keeps up with your kids' ages, the patterns you're working through,
+        and what you've already tried &mdash; so you never have to re-explain your family from scratch.
+      </p>
+
+      <form class="signup-form" id="hero-signup-form">
+        <label class="sr-only" for="hero-email">Email address</label>
+        <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
+        <button type="submit" class="signup-btn">Get beta access</button>
+      </form>
+      <p class="signup-feedback" aria-live="polite"></p>
+      <p class="signup-note">Free during beta. One email when your spot opens &mdash; no spam, unsubscribe anytime.</p>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="phone-mock">
+        <div class="phone-mock-head"><span class="live-dot"></span> Parents with Love</div>
+        <div class="mock-bubble user">Bedtime has turned into a nightly battle. Any ideas?</div>
+        <div class="mock-bubble bot">
+          Got it &mdash; and since you mentioned Mia is 4, here's something that tends to work well at that age...
+        </div>
+        <div class="mock-bubble user second">She did great with that tonight, actually!</div>
+        <div class="mock-bubble bot second"><span class="mock-typing"><span></span><span></span><span></span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="landing-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">What it helps with</div>
+        <h2>Real situations, not generic advice</h2>
+        <p>Ask about what's actually happening in your house right now &mdash; these are the moments parents ask about most.</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="feature-icon" style="--tint: var(--green-tint); --ink: var(--green);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
+          </span>
+          <h3>Sibling conflict</h3>
+          <p>De-escalate the fighting and referee less, without picking favorites.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" style="--tint: var(--plum-tint); --ink: var(--plum);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
+          </span>
+          <h3>Bedtime battles</h3>
+          <p>Practical, age-specific strategies for the nightly stall-and-negotiate routine.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" style="--tint: var(--pink-tint); --ink: var(--pink);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
+          </span>
+          <h3>Tantrums</h3>
+          <p>What to actually do in the moment &mdash; and how to talk about it after.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" style="--tint: var(--honey-tint); --ink: var(--honey);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
+          </span>
+          <h3>Screen time</h3>
+          <p>Set limits that actually stick, without a fight every single day.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="landing-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">How it works</div>
+        <h2>Every answer goes through six steps</h2>
+        <p>It's not a generic chatbot bolted onto a search engine &mdash; every reply is checked before it reaches you.</p>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-connector"></div>
+          <div class="flow-step-num">1</div>
+          <h4>Listens</h4>
+          <p>Takes in what's happening, plus your kids' ages and history.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-connector"></div>
+          <div class="flow-step-num">2</div>
+          <h4>Checks the research</h4>
+          <p>Grounds the answer in pediatric and child-development guidance.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-connector"></div>
+          <div class="flow-step-num">3</div>
+          <h4>Filters for fit</h4>
+          <p>Matches advice to your child's age and your specific situation.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-connector"></div>
+          <div class="flow-step-num">4</div>
+          <h4>Double-checks</h4>
+          <p>Reviews the answer before it's sent &mdash; never guesses or invents.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-connector"></div>
+          <div class="flow-step-num">5</div>
+          <h4>Responds with warmth</h4>
+          <p>No judgment, no shame &mdash; just something useful you can try.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">6</div>
+          <h4>Remembers, on your terms</h4>
+          <p>Picks up next time where you left off. Edit or delete anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPARISON ============ -->
+  <section class="landing-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">Why not just search it?</div>
+        <h2>Built for your family, not the internet at large</h2>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-card is-other">
+          <h3>Searching online</h3>
+          <ul>
+            <li><span class="compare-mark">&minus;</span> Generic advice that ignores your kid's age</li>
+            <li><span class="compare-mark">&minus;</span> Re-explain your situation every single time</li>
+            <li><span class="compare-mark">&minus;</span> No memory of what you've already tried</li>
+            <li><span class="compare-mark">&minus;</span> Hard to tell what's actually credible</li>
+          </ul>
+        </div>
+        <div class="compare-card is-pwl">
+          <h3>Parents with Love</h3>
+          <ul>
+            <li><span class="compare-mark">&check;</span> Tailored to each child's age and your family's patterns</li>
+            <li><span class="compare-mark">&check;</span> Remembers the conversation &mdash; pick up where you left off</li>
+            <li><span class="compare-mark">&check;</span> Tracks what's worked and what hasn't</li>
+            <li><span class="compare-mark">&check;</span> Grounded in pediatric and child-development research</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST ============ -->
+  <section class="landing-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">Privacy &amp; safety</div>
+        <h2>Your family's information stays yours</h2>
+      </div>
+
+      <div class="trust-grid">
+        <div class="trust-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+          <h4>Secure by default</h4>
+          <p>Encrypted passwords, protected sessions, nothing stored in plain text.</p>
+        </div>
+        <div class="trust-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><line x1="9" y1="9" x2="15" y2="9" /><line x1="9" y1="13" x2="15" y2="13" /></svg>
+          <h4>Deliberately limited memory</h4>
+          <p>Only remembers everyday parenting details &mdash; by design, never sensitive disclosures.</p>
+        </div>
+        <div class="trust-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" /></svg>
+          <h4>Full control, always</h4>
+          <p>View, edit, export, or delete anything it remembers, anytime.</p>
+        </div>
+        <div class="trust-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4l3 2" /></svg>
+          <h4>Never invents facts</h4>
+          <p>Every answer is checked against real guidance before it reaches you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SOURCES ============ -->
+  <section class="landing-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">Grounded in real research</div>
+        <h2>Not just an opinionated chatbot</h2>
+        <p>Answers draw on guidance from organizations parents already trust.</p>
+      </div>
+      <div class="sources-strip" id="sources-strip">
+        <span class="source-pill">American Academy of Pediatrics</span>
+        <span class="source-pill">CDC</span>
+        <span class="source-pill">ZERO TO THREE</span>
+        <span class="source-pill">The Gottman Institute</span>
+        <span class="source-pill">Sleep Foundation</span>
+        <span class="source-pill">Child Mind Institute</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="wrap cta-section">
+    <h2>Be one of the first families in the beta</h2>
+    <p>Spots are limited while we roll out slowly. Join the list and we'll email you when it's your turn.</p>
+    <form class="signup-form" id="cta-signup-form">
+      <label class="sr-only" for="cta-email">Email address</label>
+      <input id="cta-email" type="email" required placeholder="you@example.com" autocomplete="email" />
+      <button type="submit" class="signup-btn">Get beta access</button>
+    </form>
+    <p class="signup-feedback" aria-live="polite"></p>
+    <p class="signup-note">Free during beta. No spam, unsubscribe anytime.</p>
+  </section>
+
+  <footer class="wrap landing-footer">
+    <span>&copy; 3DWDS &mdash; Parents with Love</span>
+    <div class="footer-links">
+      <a href="/sources.html">Sources</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/app">Already in the beta? Log in &rarr;</a>
+    </div>
   </footer>
 
-  <script src="/app.js"></script>
-  <script src="/design.js"></script>
+  <script src="/landing.js"></script>
 </body>
 </html>

@@ -62,6 +62,15 @@
           <h2>Recent signups</h2>
           <div id="admin-recent-signups"></div>
         </div>
+        <div class="admin-card">
+          <h2>Beta waitlist</h2>
+          <p style="margin: -0.4rem 0 0.8rem; color: var(--chalk-muted); font-size: 0.85rem;">
+            Emails collected from the beta landing page (<code>/</code>). Not yet synced to Mailchimp —
+            download the CSV below and import it, or hand it to whatever list tool you're using.
+          </p>
+          <a class="btn-secondary-outline" href="/api/admin/beta-signups?format=csv" style="display: inline-block; width: auto; padding: 0.5rem 1rem; text-decoration: none; margin-bottom: 0.9rem;">Download CSV &darr;</a>
+          <div id="admin-beta-signups"></div>
+        </div>
       </div>
 
       <!-- Users -->
@@ -162,7 +171,7 @@
             corner. Click any dashed text to retype it; drag any dashed card or nav item to
             reorder it; use the panel for colors and fonts.
           </p>
-          <a class="btn-secondary-outline" href="/" target="_blank" rel="noopener" style="display: inline-block; width: auto; padding: 0.6rem 1.2rem; text-decoration: none; text-align: center;">Open site to edit design &rarr;</a>
+          <a class="btn-secondary-outline" href="/app" target="_blank" rel="noopener" style="display: inline-block; width: auto; padding: 0.6rem 1.2rem; text-decoration: none; text-align: center;">Open site to edit design &rarr;</a>
         </div>
 
         <div class="admin-card">
