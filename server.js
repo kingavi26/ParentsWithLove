@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
@@ -29,6 +30,41 @@ const PORT = process.env.PORT || 3000;
 app.set("trust proxy", 1);
 
 initDb();
+
+// Baseline HTTP security headers (X-Content-Type-Options, X-Frame-Options,
+// Strict-Transport-Security, Referrer-Policy, etc.), plus a Content-Security
+// Policy scoped to what this app actually loads: everything is same-origin
+// (no CDNs, no Google Fonts, no third-party embeds — see public/*.html), so
+// script-src can stay locked to 'self' with no 'unsafe-inline'/'unsafe-eval'.
+// style-src keeps 'unsafe-inline' for the small number of static inline
+// style="" attributes still in public/admin.html and public/index.html
+// (none of them render user-supplied data) and for the live Design Mode
+// theme editor (src/design.js, public/design.js), which previews color/
+// spacing changes by writing CSS custom properties onto the page.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:"],
+        fontSrc: ["'self'"],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"]
+      }
+    },
+    // The Android TWA wrapper (see the assetlinks.json route below) needs
+    // this app's own assets embeddable/fetchable from that shell; leaving
+    // COEP/CORP at helmet's cross-origin-isolating defaults broke that in
+    // testing, and nothing here depends on cross-origin isolation.
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "same-site" }
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
