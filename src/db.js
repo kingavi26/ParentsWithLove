@@ -100,6 +100,22 @@ function initDb() {
       email TEXT UNIQUE NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- Free-text submissions from the "Other" card in the "What it helps
+    -- with" grid (public/index.html, POST /api/other-issue — see
+    -- src/routes/other-issue.js). The visitor's question is run through the
+    -- same getReply() pipeline as a real logged-in chat message (router ->
+    -- generator -> validator, or DEMO_MODE) with an empty family state, so
+    -- "reply" is the actual research-grounded answer shown back to them —
+    -- not just a stored note. No account/email attached — anonymous by
+    -- design. Reviewed by an admin in the dashboard's Overview tab, both as
+    -- a signal for what topics to add next and to spot bad replies.
+    CREATE TABLE IF NOT EXISTS other_issue_submissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      text TEXT NOT NULL,
+      reply TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Migration path for a users table created before social login existed

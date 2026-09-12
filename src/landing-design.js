@@ -157,6 +157,9 @@ const ALLOWED_EDITABLE = {
   "feature-social-media-body": { label: "Card 13 description", maxLen: 200, group: "What it helps with" },
   "feature-homework-title": { label: "Card 14 title", maxLen: 60, group: "What it helps with" },
   "feature-homework-body": { label: "Card 14 description", maxLen: 200, group: "What it helps with" },
+  "feature-other-title": { label: "\"Other\" card title", maxLen: 60, group: "What it helps with" },
+  "feature-other-body": { label: "\"Other\" card description", maxLen: 200, group: "What it helps with" },
+  "feature-other-submit-btn": { label: "\"Other\" card submit button", maxLen: 40, group: "What it helps with" },
 
   // How it works
   "steps-eyebrow": { label: "Eyebrow label", maxLen: 40, group: "How it works" },
@@ -252,7 +255,8 @@ const ALLOWED_REORDER_GROUPS = {
       { id: "worry", label: "Anxiety & worry" },
       { id: "bullying", label: "Bullying" },
       { id: "social-media", label: "Social media & online safety" },
-      { id: "homework", label: "Homework & motivation" }
+      { id: "homework", label: "Homework & motivation" },
+      { id: "other", label: "Other (free-text submission card)" }
     ]
   },
   "privacy-cards": {
