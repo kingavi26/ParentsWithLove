@@ -66,6 +66,91 @@
 
   document.querySelectorAll(".signup-form").forEach(wireSignupForm);
 
+  // ---------------- "Other" card: free-text issue submission ----------------
+
+  var otherIssueForm = document.getElementById("other-issue-form");
+  if (otherIssueForm) {
+    var otherIssueTextarea = document.getElementById("other-issue-text");
+    var otherIssueBtn = otherIssueForm.querySelector(".other-issue-btn");
+    var otherIssueFeedback = otherIssueForm.parentElement.querySelector(".other-issue-feedback");
+    var otherIssueResult = document.getElementById("other-issue-result");
+
+    otherIssueForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var text = (otherIssueTextarea.value || "").trim();
+      if (!text) return;
+
+      otherIssueBtn.disabled = true;
+      var originalLabel = otherIssueBtn.textContent;
+      otherIssueBtn.textContent = "Asking…";
+      if (otherIssueFeedback) {
+        otherIssueFeedback.textContent = "";
+        otherIssueFeedback.className = "other-issue-feedback";
+      }
+
+      fetch("/api/other-issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text })
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          otherIssueBtn.disabled = false;
+          otherIssueBtn.textContent = originalLabel;
+
+          if (!result.ok) {
+            if (otherIssueFeedback) {
+              otherIssueFeedback.textContent = (result.data && result.data.error) || "Something went wrong. Please try again.";
+              otherIssueFeedback.className = "other-issue-feedback is-error";
+            }
+            return;
+          }
+
+          if (otherIssueResult && result.data && result.data.reply) {
+            var questionBubble = document.createElement("div");
+            questionBubble.className = "chat-bubble from-parent";
+            questionBubble.textContent = text;
+
+            var replyBubble = document.createElement("div");
+            replyBubble.className = "chat-bubble from-app";
+            replyBubble.textContent = result.data.reply;
+
+            otherIssueResult.innerHTML = "";
+            otherIssueResult.appendChild(questionBubble);
+            otherIssueResult.appendChild(replyBubble);
+
+            var sources = result.data.sources || [];
+            if (sources.length) {
+              var sourcesLine = document.createElement("p");
+              sourcesLine.className = "other-issue-sources";
+              sourcesLine.textContent = "Grounded in: " + sources.map(function (s) { return s.org; }).join(", ");
+              otherIssueResult.appendChild(sourcesLine);
+            }
+
+            otherIssueResult.hidden = false;
+          }
+
+          otherIssueForm.reset();
+          if (otherIssueFeedback) {
+            otherIssueFeedback.textContent = "";
+            otherIssueFeedback.className = "other-issue-feedback";
+          }
+        })
+        .catch(function () {
+          otherIssueBtn.disabled = false;
+          otherIssueBtn.textContent = originalLabel;
+          if (otherIssueFeedback) {
+            otherIssueFeedback.textContent = "Something went wrong. Please try again.";
+            otherIssueFeedback.className = "other-issue-feedback is-error";
+          }
+        });
+    });
+  }
+
   // ---------------- live sources grid ----------------
   // Same /api/sources endpoint public/sources.html already renders from —
   // one source of truth, so this page never hand-maintains a second copy

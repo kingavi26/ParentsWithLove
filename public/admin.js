@@ -24,6 +24,7 @@
   var statsEl = document.getElementById("admin-stats");
   var recentSignupsEl = document.getElementById("admin-recent-signups");
   var betaSignupsEl = document.getElementById("admin-beta-signups");
+  var otherIssuesEl = document.getElementById("admin-other-issues");
 
   var usersBody = document.getElementById("admin-users-body");
 
@@ -202,6 +203,7 @@
     });
 
     loadBetaSignups();
+    loadOtherIssues();
   }
 
   function loadBetaSignups() {
@@ -219,6 +221,28 @@
         })
         .join("");
       betaSignupsEl.innerHTML = countLine + (rows || '<div class="memory-empty">No signups yet</div>');
+    });
+  }
+
+  function loadOtherIssues() {
+    if (!otherIssuesEl) return;
+    j("/api/admin/other-issues").then(function (result) {
+      if (!result.ok) return;
+      var d = result.data;
+      var countLine = '<div class="admin-signup-row"><span><strong>' + d.count +
+        "</strong> submitted</span></div>";
+      var rows = (d.submissions || [])
+        .slice(0, 10)
+        .map(function (s) {
+          var replyLine = s.reply
+            ? '<div class="admin-muted" style="margin: 0.15rem 0 0.5rem;">&rarr; ' + escapeHtml(s.reply) + "</div>"
+            : "";
+          return '<div class="admin-signup-row" style="align-items: flex-start; flex-direction: column;">' +
+            '<div style="display: flex; justify-content: space-between; width: 100%;"><span>' + escapeHtml(s.text) +
+            "</span><span class=\"admin-muted\">" + formatDate(s.created_at) + "</span></div>" + replyLine + "</div>";
+        })
+        .join("");
+      otherIssuesEl.innerHTML = countLine + (rows || '<div class="memory-empty">No submissions yet</div>');
     });
   }
 

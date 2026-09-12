@@ -312,6 +312,76 @@ section.landing-section.is-tinted { background: var(--surface-alt); }
   margin: 0;
 }
 
+.feature-card--wide {
+  grid-column: span 2;
+}
+@media (max-width: 480px) {
+  .feature-card--wide { grid-column: span 1; }
+}
+.feature-card--wide p { margin-bottom: 0.9rem; }
+
+.other-issue-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.other-issue-form textarea {
+  flex: 1;
+  min-width: 200px;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+}
+.other-issue-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
+}
+.other-issue-btn {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-contrast);
+  background: var(--navy);
+  border: 1px solid var(--navy);
+  border-radius: 3px;
+  padding: 0.65rem 1.2rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+.other-issue-btn:hover { background: color-mix(in srgb, var(--navy) 85%, black); }
+.other-issue-btn:active { background: color-mix(in srgb, var(--navy) 70%, black); }
+.other-issue-btn:disabled { opacity: 0.5; cursor: default; }
+
+.other-issue-feedback {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0;
+  min-height: 1.2em;
+}
+.other-issue-feedback.is-success { color: var(--green); }
+.other-issue-feedback.is-error { color: var(--error); }
+
+.other-issue-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.other-issue-result .chat-bubble { max-width: 100%; }
+.other-issue-sources {
+  font-size: 0.76rem;
+  color: var(--muted-light);
+  margin: -0.2rem 0 0;
+}
+
 /* ---------- trust bar (research / self-checks / customization) ---------- */
 
 .trust-bar-section { padding: 2.5rem 0; border-top: none; }

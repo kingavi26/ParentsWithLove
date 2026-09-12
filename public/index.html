@@ -244,6 +244,18 @@
             <h3 data-editable="feature-homework-title">Homework &amp; motivation</h3>
             <p data-editable="feature-homework-body">Turn nightly homework battles into something that doesn't end in tears.</p>
           </div>
+          <div class="feature-card feature-card--wide" data-reorder-id="other">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M12 7.5v5M9.5 10h5" /></svg>
+            <h3 data-editable="feature-other-title">Other</h3>
+            <p data-editable="feature-other-body">Don't see it above? Ask about it directly — same assistant, same research.</p>
+            <form class="other-issue-form" id="other-issue-form">
+              <label class="sr-only" for="other-issue-text">Describe what you're dealing with</label>
+              <textarea id="other-issue-text" rows="2" maxlength="1000" placeholder="What's going on with your kid right now?"></textarea>
+              <button type="submit" class="other-issue-btn"><span data-editable="feature-other-submit-btn">Submit</span></button>
+            </form>
+            <p class="other-issue-feedback" aria-live="polite"></p>
+            <div class="other-issue-result" id="other-issue-result" hidden></div>
+          </div>
         </div>
       </div>
     </section>
