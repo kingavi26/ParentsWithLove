@@ -16,6 +16,7 @@ const adminRoutes = require("./src/routes/admin");
 const designRoutes = require("./src/routes/design");
 const landingDesignRoutes = require("./src/routes/landing-design");
 const betaRoutes = require("./src/routes/beta");
+const otherIssueRoutes = require("./src/routes/other-issue");
 const { isDemoMode } = require("./src/reply-engine");
 const { isVoiceAvailable } = require("./src/voice");
 const { isGoogleAvailable, isFacebookAvailable } = require("./src/oauth");
@@ -100,6 +101,7 @@ app.use("/api", adminRoutes);
 app.use("/api", designRoutes);
 app.use("/api", landingDesignRoutes);
 app.use("/api", betaRoutes);
+app.use("/api", otherIssueRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
 app.get("/api/status", (req, res) => {
