@@ -7,9 +7,9 @@
   <meta name="description" content="AI parenting help that remembers your kids and picks up where you left off. Join the beta waitlist for Parents with Love." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/landing.css" />
-  <meta name="theme-color" content="#b68235" />
+  <meta name="theme-color" content="#1f3552" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 <body>
@@ -17,41 +17,60 @@
   <div class="wrap">
     <nav class="landing-nav">
       <div class="brand-lockup">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-          <circle cx="12" cy="1.8" r="1.5" fill="var(--accent)"></circle>
-          <line x1="12" y1="3.3" x2="12" y2="5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round"></line>
-          <path d="M12 21.5 C6.8 17.6 3 14.1 3 10.3 C3 7.4 5.2 5.2 8 5.2 C9.7 5.2 11.2 6.1 12 7.5 C12.8 6.1 14.3 5.2 16 5.2 C18.8 5.2 21 7.4 21 10.3 C21 14.1 17.2 17.6 12 21.5 Z" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
         <div class="brand-wordmark">Parents<span class="brand-with">with</span><span class="brand-love">Love</span></div>
+        <span class="beta-pill">Beta</span>
       </div>
-      <a class="nav-login-link" href="/app">Log in</a>
+      <div class="nav-right">
+        <a class="nav-login-link" href="/app">Log in</a>
+        <a class="nav-cta" href="#hero-email">Get beta access</a>
+      </div>
     </nav>
   </div>
 
   <!-- ============ HERO ============ -->
-  <header class="wrap hero">
-    <div>
-      <div class="eyebrow-pill"><span class="dot"></span> Now in beta</div>
-      <h1>Parenting help that <span class="accent-text">remembers your family</span></h1>
-      <p class="hero-sub">
-        Keeps up with your kids' ages and what you've already tried, so you never re-explain from scratch.
-      </p>
+  <img class="hero-photo-banner" src="/images/family-painting-chess.jpg" alt="Two parents and their two children painting together at a table, with a chess set beside them" />
 
-      <form class="signup-form" id="hero-signup-form">
-        <label class="sr-only" for="hero-email">Email address</label>
-        <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
-        <button type="submit" class="signup-btn">Get beta access</button>
-      </form>
-      <p class="signup-feedback" aria-live="polite"></p>
-      <p class="signup-note">Free during beta. No spam.</p>
-    </div>
+  <header class="hero">
+    <div class="eyebrow-pill"><span class="dot"></span> Now in beta</div>
+    <h1>Parenting help that <span class="accent-text">remembers your family</span></h1>
+    <p class="hero-sub">
+      An AI parenting assistant that keeps up with your kids' ages, the patterns you're working through, and what you've already tried — so you never have to re-explain your family from scratch.
+    </p>
 
-    <div class="hero-visual">
-      <div class="plate hero-photo-frame">
-        <img src="/images/family-painting-chess.jpg" alt="Two parents and their two children painting together at a table, with a chess set beside them" width="800" height="1000" />
+    <form class="signup-form" id="hero-signup-form">
+      <label class="sr-only" for="hero-email">Email address</label>
+      <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
+      <button type="submit" class="signup-btn">Get beta access</button>
+    </form>
+    <p class="signup-feedback" aria-live="polite"></p>
+    <p class="signup-note">Free during beta. One email when your spot opens — no spam, unsubscribe anytime.</p>
+  </header>
+
+  <!-- ============ SEE IT IN ACTION ============ -->
+  <section class="chat-demo-section">
+    <div class="wrap chat-demo-grid">
+      <div class="chat-demo-copy">
+        <div class="section-eyebrow">See it in action</div>
+        <h2>An AI guide that actually remembers your family.</h2>
+        <p>Tell it about your kids once. Every conversation after that picks up where you left off — the patterns you're working through and what's already helped.</p>
+        <div class="chat-demo-links">
+          <a class="nav-cta" href="#hero-email">Get beta access</a>
+          <a class="chat-demo-link" href="#how-it-works">How it works</a>
+        </div>
+      </div>
+      <div class="chat-card">
+        <div class="chat-card-header">
+          <div class="chat-card-dot"><span></span></div>
+          <div class="chat-card-title">Parenting Help Chat</div>
+        </div>
+        <div class="chat-card-body">
+          <div class="chat-bubble from-parent">Bedtime has turned into a nightly battle. Any ideas?</div>
+          <div class="chat-bubble from-app">Got it — and since you mentioned Mia is 4, here's something that tends to work well at that age...</div>
+          <div class="chat-bubble from-parent">She did great with that tonight, actually!</div>
+        </div>
       </div>
     </div>
-  </header>
+  </section>
 
   <!-- ============ FEATURES ============ -->
   <section class="landing-section">
@@ -59,6 +78,7 @@
       <div class="section-head">
         <div class="section-eyebrow">What it helps with</div>
         <h2>Real situations, not generic advice</h2>
+        <div class="section-rule"></div>
       </div>
 
       <div class="feature-grid">
@@ -86,21 +106,81 @@
     </div>
   </section>
 
-  <!-- ============ TRUST (photo + short list) ============ -->
+  <!-- ============ HOW IT WORKS: SIX STEPS ============ -->
+  <section class="landing-section is-tinted" id="how-it-works">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">How it works</div>
+        <h2>Every answer goes through six steps</h2>
+        <p>It's not a generic chatbot bolted onto a search engine.</p>
+        <div class="section-rule"></div>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-label">1 · Listens</div><p>Takes in what's happening, plus your kids' ages and history.</p></div>
+        <div class="step-card"><div class="step-label">2 · Checks the research</div><p>Grounds the answer in pediatric and child-development guidance.</p></div>
+        <div class="step-card"><div class="step-label">3 · Filters for fit</div><p>Matches advice to your child's age and your specific situation.</p></div>
+        <div class="step-card"><div class="step-label">4 · Double-checks</div><p>Reviews the answer before it's sent — never guesses or invents.</p></div>
+        <div class="step-card"><div class="step-label">5 · Responds with warmth</div><p>No judgment, no shame — just something useful you can try.</p></div>
+        <div class="step-card"><div class="step-label">6 · Remembers, on your terms</div><p>Picks up next time where you left off. Edit or delete anytime.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY NOT JUST SEARCH IT ============ -->
   <section class="landing-section">
     <div class="wrap">
-      <div class="trust-section-grid">
-        <div class="plate trust-photo-frame">
-          <img src="/images/family-painting-chess.jpg" alt="" aria-hidden="true" width="800" height="600" />
-        </div>
-        <div>
-          <div class="section-eyebrow">Privacy &amp; safety</div>
-          <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(1.5rem, 2.8vw, 2rem); margin: 0 0 1rem;">Your family's information stays yours</h2>
-          <ul class="trust-list">
-            <li>Encrypted, never stored in plain text.</li>
-            <li>Remembers everyday details only — never sensitive disclosures.</li>
-            <li>View, edit, export, or delete anything, anytime.</li>
+      <div class="section-head">
+        <div class="section-eyebrow">Why not just search it?</div>
+        <h2>Built for your family, not the internet at large</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-col compare-col--negative">
+          <div class="compare-col-label">Searching online</div>
+          <ul class="compare-list">
+            <li><span class="mark">✕</span><span>Generic advice that ignores your kid's age</span></li>
+            <li><span class="mark">✕</span><span>Re-explain your situation every single time</span></li>
+            <li><span class="mark">✕</span><span>No memory of what you've already tried</span></li>
+            <li><span class="mark">✕</span><span>Hard to tell what's actually credible</span></li>
           </ul>
+        </div>
+        <div class="compare-col compare-col--positive">
+          <div class="compare-col-label">Parents with Love</div>
+          <ul class="compare-list">
+            <li><span class="mark">✓</span><span>Tailored to each child's age and your family's patterns</span></li>
+            <li><span class="mark">✓</span><span>Remembers the conversation — pick up where you left off</span></li>
+            <li><span class="mark">✓</span><span>Tracks what's worked and what hasn't</span></li>
+            <li><span class="mark">✓</span><span>Grounded in pediatric and child-development research</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRIVACY & SAFETY ============ -->
+  <section class="landing-section is-tinted">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-eyebrow">Privacy</div>
+        <h2>Your family's information stays yours</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Secure by default</h3>
+          <p>Encrypted passwords, protected sessions, nothing stored in plain text.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Deliberately limited memory</h3>
+          <p>Only remembers everyday parenting details — by design, never sensitive disclosures.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Full control, always</h3>
+          <p>View, edit, export, or delete anything it remembers, anytime.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Never invents facts</h3>
+          <p>Every answer is checked against real guidance before it reaches you.</p>
         </div>
       </div>
     </div>
@@ -113,6 +193,7 @@
         <div class="section-eyebrow">Grounded in real research</div>
         <h2>Not just an opinionated chatbot</h2>
         <p>Answers draw on guidance from organizations parents already trust.</p>
+        <div class="section-rule"></div>
       </div>
       <div class="sources-strip" id="sources-strip">
         <span class="source-pill">American Academy of Pediatrics</span>
