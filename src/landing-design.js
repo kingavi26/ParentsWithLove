@@ -94,6 +94,14 @@ const ALLOWED_EDITABLE = {
   "hero-cta-btn": { label: "Hero signup button", maxLen: 40, group: "Hero" },
   "hero-signup-note": { label: "Hero signup note", maxLen: 150, group: "Hero" },
 
+  // Trust bar
+  "trust-bar-1-title": { label: "Column 1 title (research)", maxLen: 60, group: "Trust bar" },
+  "trust-bar-1-body": { label: "Column 1 description", maxLen: 220, group: "Trust bar" },
+  "trust-bar-2-title": { label: "Column 2 title (self-checks)", maxLen: 60, group: "Trust bar" },
+  "trust-bar-2-body": { label: "Column 2 description", maxLen: 220, group: "Trust bar" },
+  "trust-bar-3-title": { label: "Column 3 title (customization)", maxLen: 60, group: "Trust bar" },
+  "trust-bar-3-body": { label: "Column 3 description", maxLen: 220, group: "Trust bar" },
+
   // See it in action
   "chat-demo-eyebrow": { label: "Eyebrow label", maxLen: 40, group: "See it in action" },
   "chat-demo-heading": { label: "Heading", maxLen: 120, group: "See it in action" },
@@ -198,6 +206,7 @@ const ALLOWED_REORDER_GROUPS = {
   "landing-sections": {
     label: "Page sections (between the hero and the final signup)",
     items: [
+      { id: "trust-bar", label: "Trust bar (research / self-checks / customization)" },
       { id: "chat-demo", label: "See it in action" },
       { id: "app-demo", label: "App demo (screens)" },
       { id: "features", label: "What it helps with" },
