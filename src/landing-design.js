@@ -104,6 +104,20 @@ const ALLOWED_EDITABLE = {
   "chat-demo-msg-2": { label: "Chat bubble 2 (assistant)", maxLen: 200, group: "See it in action" },
   "chat-demo-msg-3": { label: "Chat bubble 3 (parent)", maxLen: 150, group: "See it in action" },
 
+  // App demo
+  "app-demo-eyebrow": { label: "Eyebrow label", maxLen: 40, group: "App demo" },
+  "app-demo-heading": { label: "Heading", maxLen: 120, group: "App demo" },
+  "app-demo-subheading": { label: "Subheading", maxLen: 300, group: "App demo" },
+  "app-demo-caption-1-title": { label: "Home screen caption title", maxLen: 60, group: "App demo" },
+  "app-demo-caption-1-body": { label: "Home screen caption body", maxLen: 200, group: "App demo" },
+  "app-demo-caption-2-title": { label: "Chat screen caption title", maxLen: 60, group: "App demo" },
+  "app-demo-caption-2-body": { label: "Chat screen caption body", maxLen: 200, group: "App demo" },
+  "app-demo-caption-3-title": { label: "Memory screen caption title", maxLen: 60, group: "App demo" },
+  "app-demo-caption-3-body": { label: "Memory screen caption body", maxLen: 200, group: "App demo" },
+  "app-demo-cta-btn": { label: "\"Get beta access\" button", maxLen: 40, group: "App demo" },
+  "app-demo-try-btn": { label: "\"Try the live demo\" button", maxLen: 40, group: "App demo" },
+  "app-demo-note": { label: "Note under the buttons", maxLen: 150, group: "App demo" },
+
   // What it helps with
   "features-eyebrow": { label: "Eyebrow label", maxLen: 40, group: "What it helps with" },
   "features-heading": { label: "Heading", maxLen: 120, group: "What it helps with" },
@@ -185,6 +199,7 @@ const ALLOWED_REORDER_GROUPS = {
     label: "Page sections (between the hero and the final signup)",
     items: [
       { id: "chat-demo", label: "See it in action" },
+      { id: "app-demo", label: "App demo (screens)" },
       { id: "features", label: "What it helps with" },
       { id: "how-it-works", label: "How it works (six steps)" },
       { id: "why-not-search", label: "Why not just search it" },
