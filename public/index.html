@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Parents with Love — Beta</title>
   <meta name="description" content="AI parenting help that remembers your kids and picks up where you left off. Join the beta waitlist for Parents with Love." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/landing.css" />
-  <meta name="theme-color" content="#2f9e97" />
+  <meta name="theme-color" content="#b68235" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 <body>
@@ -14,10 +17,10 @@
   <div class="wrap">
     <nav class="landing-nav">
       <div class="brand-lockup">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-          <circle cx="12" cy="1.8" r="1.5" fill="var(--honey)"></circle>
-          <line x1="12" y1="3.3" x2="12" y2="5" stroke="var(--honey)" stroke-width="1.3" stroke-linecap="round"></line>
-          <path d="M12 21.5 C6.8 17.6 3 14.1 3 10.3 C3 7.4 5.2 5.2 8 5.2 C9.7 5.2 11.2 6.1 12 7.5 C12.8 6.1 14.3 5.2 16 5.2 C18.8 5.2 21 7.4 21 10.3 C21 14.1 17.2 17.6 12 21.5 Z" fill="none" stroke="var(--plum)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="1.8" r="1.5" fill="var(--accent)"></circle>
+          <line x1="12" y1="3.3" x2="12" y2="5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round"></line>
+          <path d="M12 21.5 C6.8 17.6 3 14.1 3 10.3 C3 7.4 5.2 5.2 8 5.2 C9.7 5.2 11.2 6.1 12 7.5 C12.8 6.1 14.3 5.2 16 5.2 C18.8 5.2 21 7.4 21 10.3 C21 14.1 17.2 17.6 12 21.5 Z" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
         <div class="brand-wordmark">Parents<span class="brand-with">with</span><span class="brand-love">Love</span></div>
       </div>
@@ -28,11 +31,10 @@
   <!-- ============ HERO ============ -->
   <header class="wrap hero">
     <div>
-      <div class="eyebrow-pill"><span class="dot"></span> Now in beta &mdash; early access is limited</div>
+      <div class="eyebrow-pill"><span class="dot"></span> Now in beta</div>
       <h1>Parenting help that <span class="accent-text">remembers your family</span></h1>
       <p class="hero-sub">
-        An AI parenting assistant that keeps up with your kids' ages, the patterns you're working through,
-        and what you've already tried &mdash; so you never have to re-explain your family from scratch.
+        Keeps up with your kids' ages and what you've already tried, so you never re-explain from scratch.
       </p>
 
       <form class="signup-form" id="hero-signup-form">
@@ -41,18 +43,12 @@
         <button type="submit" class="signup-btn">Get beta access</button>
       </form>
       <p class="signup-feedback" aria-live="polite"></p>
-      <p class="signup-note">Free during beta. One email when your spot opens &mdash; no spam, unsubscribe anytime.</p>
+      <p class="signup-note">Free during beta. No spam.</p>
     </div>
 
-    <div class="hero-visual" aria-hidden="true">
-      <div class="phone-mock">
-        <div class="phone-mock-head"><span class="live-dot"></span> Parents with Love</div>
-        <div class="mock-bubble user">Bedtime has turned into a nightly battle. Any ideas?</div>
-        <div class="mock-bubble bot">
-          Got it &mdash; and since you mentioned Mia is 4, here's something that tends to work well at that age...
-        </div>
-        <div class="mock-bubble user second">She did great with that tonight, actually!</div>
-        <div class="mock-bubble bot second"><span class="mock-typing"><span></span><span></span><span></span></span></div>
+    <div class="hero-visual">
+      <div class="plate hero-photo-frame">
+        <img src="/images/family-painting-chess.jpg" alt="Two parents and their two children painting together at a table, with a chess set beside them" width="800" height="1000" />
       </div>
     </div>
   </header>
@@ -63,35 +59,26 @@
       <div class="section-head">
         <div class="section-eyebrow">What it helps with</div>
         <h2>Real situations, not generic advice</h2>
-        <p>Ask about what's actually happening in your house right now &mdash; these are the moments parents ask about most.</p>
       </div>
 
       <div class="feature-grid">
         <div class="feature-card">
-          <span class="feature-icon" style="--tint: var(--green-tint); --ink: var(--green);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
-          </span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
           <h3>Sibling conflict</h3>
           <p>De-escalate the fighting and referee less, without picking favorites.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon" style="--tint: var(--plum-tint); --ink: var(--plum);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
-          </span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
           <h3>Bedtime battles</h3>
           <p>Practical, age-specific strategies for the nightly stall-and-negotiate routine.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon" style="--tint: var(--pink-tint); --ink: var(--pink);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
-          </span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
           <h3>Tantrums</h3>
-          <p>What to actually do in the moment &mdash; and how to talk about it after.</p>
+          <p>What to actually do in the moment — and how to talk about it after.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon" style="--tint: var(--honey-tint); --ink: var(--honey);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
-          </span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
           <h3>Screen time</h3>
           <p>Set limits that actually stick, without a fight every single day.</p>
         </div>
@@ -99,114 +86,21 @@
     </div>
   </section>
 
-  <!-- ============ HOW IT WORKS ============ -->
+  <!-- ============ TRUST (photo + short list) ============ -->
   <section class="landing-section">
     <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">How it works</div>
-        <h2>Every answer goes through six steps</h2>
-        <p>It's not a generic chatbot bolted onto a search engine &mdash; every reply is checked before it reaches you.</p>
-      </div>
-
-      <div class="flow-diagram">
-        <div class="flow-step">
-          <div class="flow-connector"></div>
-          <div class="flow-step-num">1</div>
-          <h4>Listens</h4>
-          <p>Takes in what's happening, plus your kids' ages and history.</p>
+      <div class="trust-section-grid">
+        <div class="plate trust-photo-frame">
+          <img src="/images/family-painting-chess.jpg" alt="" aria-hidden="true" width="800" height="600" />
         </div>
-        <div class="flow-step">
-          <div class="flow-connector"></div>
-          <div class="flow-step-num">2</div>
-          <h4>Checks the research</h4>
-          <p>Grounds the answer in pediatric and child-development guidance.</p>
-        </div>
-        <div class="flow-step">
-          <div class="flow-connector"></div>
-          <div class="flow-step-num">3</div>
-          <h4>Filters for fit</h4>
-          <p>Matches advice to your child's age and your specific situation.</p>
-        </div>
-        <div class="flow-step">
-          <div class="flow-connector"></div>
-          <div class="flow-step-num">4</div>
-          <h4>Double-checks</h4>
-          <p>Reviews the answer before it's sent &mdash; never guesses or invents.</p>
-        </div>
-        <div class="flow-step">
-          <div class="flow-connector"></div>
-          <div class="flow-step-num">5</div>
-          <h4>Responds with warmth</h4>
-          <p>No judgment, no shame &mdash; just something useful you can try.</p>
-        </div>
-        <div class="flow-step">
-          <div class="flow-step-num">6</div>
-          <h4>Remembers, on your terms</h4>
-          <p>Picks up next time where you left off. Edit or delete anytime.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ COMPARISON ============ -->
-  <section class="landing-section">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">Why not just search it?</div>
-        <h2>Built for your family, not the internet at large</h2>
-      </div>
-
-      <div class="compare-grid">
-        <div class="compare-card is-other">
-          <h3>Searching online</h3>
-          <ul>
-            <li><span class="compare-mark">&minus;</span> Generic advice that ignores your kid's age</li>
-            <li><span class="compare-mark">&minus;</span> Re-explain your situation every single time</li>
-            <li><span class="compare-mark">&minus;</span> No memory of what you've already tried</li>
-            <li><span class="compare-mark">&minus;</span> Hard to tell what's actually credible</li>
+        <div>
+          <div class="section-eyebrow">Privacy &amp; safety</div>
+          <h2 style="font-family: var(--font-display); font-weight: 600; font-size: clamp(1.5rem, 2.8vw, 2rem); margin: 0 0 1rem;">Your family's information stays yours</h2>
+          <ul class="trust-list">
+            <li>Encrypted, never stored in plain text.</li>
+            <li>Remembers everyday details only — never sensitive disclosures.</li>
+            <li>View, edit, export, or delete anything, anytime.</li>
           </ul>
-        </div>
-        <div class="compare-card is-pwl">
-          <h3>Parents with Love</h3>
-          <ul>
-            <li><span class="compare-mark">&check;</span> Tailored to each child's age and your family's patterns</li>
-            <li><span class="compare-mark">&check;</span> Remembers the conversation &mdash; pick up where you left off</li>
-            <li><span class="compare-mark">&check;</span> Tracks what's worked and what hasn't</li>
-            <li><span class="compare-mark">&check;</span> Grounded in pediatric and child-development research</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ TRUST ============ -->
-  <section class="landing-section">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">Privacy &amp; safety</div>
-        <h2>Your family's information stays yours</h2>
-      </div>
-
-      <div class="trust-grid">
-        <div class="trust-card">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
-          <h4>Secure by default</h4>
-          <p>Encrypted passwords, protected sessions, nothing stored in plain text.</p>
-        </div>
-        <div class="trust-card">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><line x1="9" y1="9" x2="15" y2="9" /><line x1="9" y1="13" x2="15" y2="13" /></svg>
-          <h4>Deliberately limited memory</h4>
-          <p>Only remembers everyday parenting details &mdash; by design, never sensitive disclosures.</p>
-        </div>
-        <div class="trust-card">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" /></svg>
-          <h4>Full control, always</h4>
-          <p>View, edit, export, or delete anything it remembers, anytime.</p>
-        </div>
-        <div class="trust-card">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4l3 2" /></svg>
-          <h4>Never invents facts</h4>
-          <p>Every answer is checked against real guidance before it reaches you.</p>
         </div>
       </div>
     </div>
