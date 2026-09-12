@@ -14,60 +14,74 @@
 // Every URL below was hand-checked live on 2026-09-09. Keep this list
 // small and only add an organization here once its URL has been verified.
 
+// `monogram` is a short, hand-curated typographic initialism used only for
+// the landing page's "grounded in real research" credibility grid — an
+// original monogram-badge treatment, deliberately NOT a reproduction of any
+// organization's actual trademarked logo/wordmark (see landing.js). Keep
+// these short (2-4 characters) and in plain caps/digits only.
 const SOURCES = {
   aap: {
     id: "aap",
     org: "American Academy of Pediatrics",
     title: "HealthyChildren.org",
-    url: "https://www.healthychildren.org"
+    url: "https://www.healthychildren.org",
+    monogram: "AAP"
   },
   cdc_parenting: {
     id: "cdc_parenting",
     org: "CDC",
     title: "Positive Parenting Tips (by age)",
-    url: "https://www.cdc.gov/child-development/positive-parenting-tips/index.html"
+    url: "https://www.cdc.gov/child-development/positive-parenting-tips/index.html",
+    monogram: "CDC"
   },
   zerotothree: {
     id: "zerotothree",
     org: "ZERO TO THREE",
     title: "Early childhood development resources",
-    url: "https://www.zerotothree.org"
+    url: "https://www.zerotothree.org",
+    monogram: "0–3"
   },
   gottman: {
     id: "gottman",
     org: "The Gottman Institute",
     title: "Emotion-coaching research",
-    url: "https://www.gottman.com"
+    url: "https://www.gottman.com",
+    monogram: "TGI"
   },
   positive_discipline: {
     id: "positive_discipline",
     org: "Positive Discipline",
     title: "Research-backed positive discipline tools",
-    url: "https://www.positivediscipline.com"
+    url: "https://www.positivediscipline.com",
+    monogram: "PD"
   },
   circle_of_security: {
     id: "circle_of_security",
     org: "Circle of Security International",
     title: "Attachment-based parenting",
-    url: "https://www.circleofsecurityinternational.com"
+    url: "https://www.circleofsecurityinternational.com",
+    monogram: "COS"
   },
   sleep_foundation: {
     id: "sleep_foundation",
     org: "Sleep Foundation",
     title: "Children's sleep guidance",
-    url: "https://www.sleepfoundation.org"
+    url: "https://www.sleepfoundation.org",
+    monogram: "SF"
   },
   common_sense_media: {
     id: "common_sense_media",
     org: "Common Sense Media",
     title: "Kids & screen time guidance",
-    url: "https://www.commonsensemedia.org"
+    url: "https://www.commonsensemedia.org",
+    monogram: "CSM"
   },
   child_mind: {
     id: "child_mind",
     org: "Child Mind Institute",
     title: "Child behavior & mental health resources",
-    url: "https://childmind.org"
+    url: "https://childmind.org",
+    monogram: "CMI"
   }
 };
 

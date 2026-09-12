@@ -194,7 +194,21 @@ const ALLOWED_EDITABLE = {
   "footer-heads-up-label": { label: "Footer \"Heads up:\" label", maxLen: 40, group: "Footer" },
   "footer-disclaimer-text": { label: "Footer disclaimer sentence", maxLen: 300, group: "Footer" },
   "footer-more-link": { label: "\"Read the full disclaimer\" link", maxLen: 60, group: "Footer" },
-  "footer-privacy-link": { label: "\"Privacy policy\" link", maxLen: 40, group: "Footer" }
+  "footer-privacy-link": { label: "\"Privacy policy\" link", maxLen: 40, group: "Footer" },
+
+  // Privacy page (public/privacy.html) — deliberately limited to the
+  // heading and date line, not the legal body text itself: several of
+  // those paragraphs carry inline <strong>/<a> tags that a textContent-only
+  // save would silently strip (same reasoning as the disclaimer fields
+  // above), so the legal copy stays a code change rather than an in-page
+  // edit.
+  "privacy-page-heading": { label: "Privacy page heading", maxLen: 60, group: "Privacy page" },
+  "privacy-page-updated": { label: "Privacy page \"last updated\" line", maxLen: 150, group: "Privacy page" },
+
+  // Sources page (public/sources.html) — same limited scope as above.
+  "sources-page-heading": { label: "Sources page heading", maxLen: 60, group: "Sources page" },
+  "sources-page-updated": { label: "Sources page \"last checked\" line", maxLen: 150, group: "Sources page" },
+  "sources-list-heading": { label: "\"The organizations\" heading", maxLen: 60, group: "Sources page" }
 };
 
 // Every group must match a real `data-reorder-group="<group>"` container
