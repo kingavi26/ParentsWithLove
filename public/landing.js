@@ -66,34 +66,55 @@
 
   document.querySelectorAll(".signup-form").forEach(wireSignupForm);
 
-  // ---------------- live sources strip ----------------
+  // ---------------- live sources grid ----------------
   // Same /api/sources endpoint public/sources.html already renders from —
   // one source of truth, so this page never hand-maintains a second copy
-  // of "who we're grounded in."
+  // of "who we're grounded in." Each card uses an original monogram badge
+  // (see the `monogram` field in src/research-sources.js), never a scraped
+  // copy of an organization's actual trademarked logo — real orgs' guidance
+  // informs pwl7's answers, but showing their real marks here would wrongly
+  // imply a formal endorsement/partnership.
 
-  var stripEl = document.getElementById("sources-strip");
-  if (stripEl) {
+  var gridEl = document.getElementById("sources-grid");
+  if (gridEl) {
     fetch("/api/sources")
       .then(function (res) { return res.json(); })
       .then(function (data) {
         var sources = (data && data.sources) || [];
         if (!sources.length) return;
         var seenOrgs = {};
-        var orgs = [];
+        var cards = [];
         sources.forEach(function (s) {
-          if (!seenOrgs[s.org]) {
-            seenOrgs[s.org] = true;
-            orgs.push(s.org);
+          if (seenOrgs[s.org]) return;
+          seenOrgs[s.org] = true;
+          var card = document.createElement("a");
+          card.className = "source-card";
+          card.href = s.url;
+          card.target = "_blank";
+          card.rel = "noopener";
+
+          var badge = document.createElement("span");
+          badge.className = "source-badge";
+          badge.setAttribute("aria-hidden", "true");
+          badge.textContent = s.monogram || s.org.slice(0, 3).toUpperCase();
+          card.appendChild(badge);
+
+          var name = document.createElement("span");
+          name.className = "source-name";
+          name.textContent = s.org;
+          card.appendChild(name);
+
+          if (s.title) {
+            var title = document.createElement("span");
+            title.className = "source-title";
+            title.textContent = s.title;
+            card.appendChild(title);
           }
+
+          cards.push(card);
         });
-        stripEl.innerHTML = orgs
-          .map(function (org) {
-            var pill = document.createElement("span");
-            pill.className = "source-pill";
-            pill.textContent = org;
-            return pill.outerHTML;
-          })
-          .join("");
+        gridEl.innerHTML = "";
+        cards.forEach(function (card) { gridEl.appendChild(card); });
       })
       .catch(function () {
         /* Leave the fallback static copy already in the HTML in place. */

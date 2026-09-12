@@ -17,12 +17,12 @@
   <div class="wrap">
     <nav class="landing-nav">
       <div class="brand-lockup">
-        <div class="brand-wordmark">Parents<span class="brand-with">with</span><span class="brand-love">Love</span></div>
-        <span class="beta-pill">Beta</span>
+        <div class="brand-wordmark"><span data-editable="brand-parents">Parents</span><span class="brand-with" data-editable="brand-with">with</span><span class="brand-love" data-editable="brand-love">Love</span></div>
+        <span class="beta-pill" data-editable="beta-pill">Beta</span>
       </div>
       <div class="nav-right">
-        <a class="nav-login-link" href="/app">Log in</a>
-        <a class="nav-cta" href="#hero-email">Get beta access</a>
+        <a class="nav-login-link" href="/app" data-editable="nav-login-link">Log in</a>
+        <a class="nav-cta" href="#hero-email" data-editable="nav-cta">Get beta access</a>
       </div>
     </nav>
   </div>
@@ -31,203 +31,247 @@
   <img class="hero-photo-banner" src="/images/family-painting-chess.jpg" alt="Two parents and their two children painting together at a table, with a chess set beside them" />
 
   <header class="hero">
-    <div class="eyebrow-pill"><span class="dot"></span> Now in beta</div>
-    <h1>Parenting help that <span class="accent-text">remembers your family</span></h1>
-    <p class="hero-sub">
+    <div class="eyebrow-pill"><span class="dot"></span> <span data-editable="hero-eyebrow">Now in beta</span></div>
+    <h1><span data-editable="hero-title-plain">Parenting help that</span> <span class="accent-text" data-editable="hero-title-accent">remembers your family</span></h1>
+    <p class="hero-sub" data-editable="hero-subtitle">
       An AI parenting assistant that keeps up with your kids' ages, the patterns you're working through, and what you've already tried — so you never have to re-explain your family from scratch.
     </p>
 
     <form class="signup-form" id="hero-signup-form">
       <label class="sr-only" for="hero-email">Email address</label>
       <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
-      <button type="submit" class="signup-btn">Get beta access</button>
+      <button type="submit" class="signup-btn"><span data-editable="hero-cta-btn">Get beta access</span></button>
     </form>
     <p class="signup-feedback" aria-live="polite"></p>
-    <p class="signup-note">Free during beta. One email when your spot opens — no spam, unsubscribe anytime.</p>
+    <p class="signup-note" data-editable="hero-signup-note">Free during beta. One email when your spot opens — no spam, unsubscribe anytime.</p>
   </header>
 
-  <!-- ============ SEE IT IN ACTION ============ -->
-  <section class="chat-demo-section">
-    <div class="wrap chat-demo-grid">
-      <div class="chat-demo-copy">
-        <div class="section-eyebrow">See it in action</div>
-        <h2>An AI guide that actually remembers your family.</h2>
-        <p>Tell it about your kids once. Every conversation after that picks up where you left off — the patterns you're working through and what's already helped.</p>
-        <div class="chat-demo-links">
-          <a class="nav-cta" href="#hero-email">Get beta access</a>
-          <a class="chat-demo-link" href="#how-it-works">How it works</a>
-        </div>
-      </div>
-      <div class="chat-card">
-        <div class="chat-card-header">
-          <div class="chat-card-dot"><span></span></div>
-          <div class="chat-card-title">Parenting Help Chat</div>
-        </div>
-        <div class="chat-card-body">
-          <div class="chat-bubble from-parent">Bedtime has turned into a nightly battle. Any ideas?</div>
-          <div class="chat-bubble from-app">Got it — and since you mentioned Mia is 4, here's something that tends to work well at that age...</div>
-          <div class="chat-bubble from-parent">She did great with that tonight, actually!</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <div data-reorder-group="landing-sections">
 
-  <!-- ============ FEATURES ============ -->
-  <section class="landing-section">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">What it helps with</div>
-        <h2>Real situations, not generic advice</h2>
-        <div class="section-rule"></div>
+    <!-- ============ SEE IT IN ACTION ============ -->
+    <section class="chat-demo-section" data-reorder-id="chat-demo">
+      <div class="wrap chat-demo-grid">
+        <div class="chat-demo-copy">
+          <div class="section-eyebrow" data-editable="chat-demo-eyebrow">See it in action</div>
+          <h2 data-editable="chat-demo-heading">An AI guide that actually remembers your family.</h2>
+          <p data-editable="chat-demo-body">Tell it about your kids once. Every conversation after that picks up where you left off — the patterns you're working through and what's already helped.</p>
+          <div class="chat-demo-links">
+            <a class="nav-cta" href="#hero-email" data-editable="chat-demo-cta-btn">Get beta access</a>
+            <a class="chat-demo-link" href="#how-it-works" data-editable="chat-demo-link">How it works</a>
+          </div>
+        </div>
+        <div class="chat-card">
+          <div class="chat-card-header">
+            <div class="chat-card-dot"><span></span></div>
+            <div class="chat-card-title">Parenting Help Chat</div>
+          </div>
+          <div class="chat-card-body">
+            <div class="chat-bubble from-parent" data-editable="chat-demo-msg-1">Bedtime has turned into a nightly battle. Any ideas?</div>
+            <div class="chat-bubble from-app" data-editable="chat-demo-msg-2">Got it — and since you mentioned Mia is 4, here's something that tends to work well at that age...</div>
+            <div class="chat-bubble from-parent" data-editable="chat-demo-msg-3">She did great with that tonight, actually!</div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="feature-grid">
-        <div class="feature-card">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
-          <h3>Sibling conflict</h3>
-          <p>De-escalate the fighting and referee less, without picking favorites.</p>
+    <!-- ============ FEATURES ============ -->
+    <section class="landing-section" data-reorder-id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-eyebrow" data-editable="features-eyebrow">What it helps with</div>
+          <h2 data-editable="features-heading">Real situations, not generic advice</h2>
+          <div class="section-rule"></div>
         </div>
-        <div class="feature-card">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
-          <h3>Bedtime battles</h3>
-          <p>Practical, age-specific strategies for the nightly stall-and-negotiate routine.</p>
-        </div>
-        <div class="feature-card">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
-          <h3>Tantrums</h3>
-          <p>What to actually do in the moment — and how to talk about it after.</p>
-        </div>
-        <div class="feature-card">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
-          <h3>Screen time</h3>
-          <p>Set limits that actually stick, without a fight every single day.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ============ HOW IT WORKS: SIX STEPS ============ -->
-  <section class="landing-section is-tinted" id="how-it-works">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">How it works</div>
-        <h2>Every answer goes through six steps</h2>
-        <p>It's not a generic chatbot bolted onto a search engine.</p>
-        <div class="section-rule"></div>
+        <div class="feature-grid" data-reorder-group="feature-cards">
+          <div class="feature-card" data-reorder-id="sibling">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.6" /><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14.8 20c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" /></svg>
+            <h3 data-editable="feature-sibling-title">Sibling conflict</h3>
+            <p data-editable="feature-sibling-body">De-escalate the fighting and referee less, without picking favorites.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="bedtime">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
+            <h3 data-editable="feature-bedtime-title">Bedtime battles</h3>
+            <p data-editable="feature-bedtime-body">Practical, age-specific strategies for the nightly stall-and-negotiate routine.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="tantrums">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 3.5 13.7 3.5 9.9 3.5 7 5.8 4.7 8.6 4.7c1.6 0 3 .8 3.4 2 .4-1.2 1.8-2 3.4-2 2.8 0 5.1 2.3 5.1 5.2 0 3.8-3.5 7.1-8.5 10.6Z" /></svg>
+            <h3 data-editable="feature-tantrums-title">Tantrums</h3>
+            <p data-editable="feature-tantrums-body">What to actually do in the moment — and how to talk about it after.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="screen-time">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
+            <h3 data-editable="feature-screen-title">Screen time</h3>
+            <p data-editable="feature-screen-body">Set limits that actually stick, without a fight every single day.</p>
+          </div>
+        </div>
       </div>
-      <div class="steps-grid">
-        <div class="step-card"><div class="step-label">1 · Listens</div><p>Takes in what's happening, plus your kids' ages and history.</p></div>
-        <div class="step-card"><div class="step-label">2 · Checks the research</div><p>Grounds the answer in pediatric and child-development guidance.</p></div>
-        <div class="step-card"><div class="step-label">3 · Filters for fit</div><p>Matches advice to your child's age and your specific situation.</p></div>
-        <div class="step-card"><div class="step-label">4 · Double-checks</div><p>Reviews the answer before it's sent — never guesses or invents.</p></div>
-        <div class="step-card"><div class="step-label">5 · Responds with warmth</div><p>No judgment, no shame — just something useful you can try.</p></div>
-        <div class="step-card"><div class="step-label">6 · Remembers, on your terms</div><p>Picks up next time where you left off. Edit or delete anytime.</p></div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ WHY NOT JUST SEARCH IT ============ -->
-  <section class="landing-section">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">Why not just search it?</div>
-        <h2>Built for your family, not the internet at large</h2>
-        <div class="section-rule"></div>
-      </div>
-      <div class="compare-grid">
-        <div class="compare-col compare-col--negative">
-          <div class="compare-col-label">Searching online</div>
-          <ul class="compare-list">
-            <li><span class="mark">✕</span><span>Generic advice that ignores your kid's age</span></li>
-            <li><span class="mark">✕</span><span>Re-explain your situation every single time</span></li>
-            <li><span class="mark">✕</span><span>No memory of what you've already tried</span></li>
-            <li><span class="mark">✕</span><span>Hard to tell what's actually credible</span></li>
-          </ul>
+    <!-- ============ HOW IT WORKS: SIX STEPS ============ -->
+    <section class="landing-section is-tinted" id="how-it-works" data-reorder-id="how-it-works">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-eyebrow" data-editable="steps-eyebrow">How it works</div>
+          <h2 data-editable="steps-heading">Every answer goes through six steps</h2>
+          <p data-editable="steps-subheading">It's not a generic chatbot bolted onto a search engine.</p>
+          <div class="section-rule"></div>
         </div>
-        <div class="compare-col compare-col--positive">
-          <div class="compare-col-label">Parents with Love</div>
-          <ul class="compare-list">
-            <li><span class="mark">✓</span><span>Tailored to each child's age and your family's patterns</span></li>
-            <li><span class="mark">✓</span><span>Remembers the conversation — pick up where you left off</span></li>
-            <li><span class="mark">✓</span><span>Tracks what's worked and what hasn't</span></li>
-            <li><span class="mark">✓</span><span>Grounded in pediatric and child-development research</span></li>
-          </ul>
+        <div class="steps-grid">
+          <div class="step-card"><div class="step-label" data-editable="step-1-label">1 · Listens</div><p data-editable="step-1-body">Takes in what's happening, plus your kids' ages and history.</p></div>
+          <div class="step-card"><div class="step-label" data-editable="step-2-label">2 · Checks the research</div><p data-editable="step-2-body">Grounds the answer in pediatric and child-development guidance.</p></div>
+          <div class="step-card"><div class="step-label" data-editable="step-3-label">3 · Filters for fit</div><p data-editable="step-3-body">Matches advice to your child's age and your specific situation.</p></div>
+          <div class="step-card"><div class="step-label" data-editable="step-4-label">4 · Double-checks</div><p data-editable="step-4-body">Reviews the answer before it's sent — never guesses or invents.</p></div>
+          <div class="step-card"><div class="step-label" data-editable="step-5-label">5 · Responds with warmth</div><p data-editable="step-5-body">No judgment, no shame — just something useful you can try.</p></div>
+          <div class="step-card"><div class="step-label" data-editable="step-6-label">6 · Remembers, on your terms</div><p data-editable="step-6-body">Picks up next time where you left off. Edit or delete anytime.</p></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ PRIVACY & SAFETY ============ -->
-  <section class="landing-section is-tinted">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">Privacy</div>
-        <h2>Your family's information stays yours</h2>
-        <div class="section-rule"></div>
+    <!-- ============ WHY NOT JUST SEARCH IT ============ -->
+    <section class="landing-section" data-reorder-id="why-not-search">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-eyebrow" data-editable="compare-eyebrow">Why not just search it?</div>
+          <h2 data-editable="compare-heading">Built for your family, not the internet at large</h2>
+          <div class="section-rule"></div>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-col compare-col--negative">
+            <div class="compare-col-label" data-editable="compare-negative-label">Searching online</div>
+            <ul class="compare-list">
+              <li><span class="mark">✕</span><span data-editable="compare-negative-1">Generic advice that ignores your kid's age</span></li>
+              <li><span class="mark">✕</span><span data-editable="compare-negative-2">Re-explain your situation every single time</span></li>
+              <li><span class="mark">✕</span><span data-editable="compare-negative-3">No memory of what you've already tried</span></li>
+              <li><span class="mark">✕</span><span data-editable="compare-negative-4">Hard to tell what's actually credible</span></li>
+            </ul>
+          </div>
+          <div class="compare-col compare-col--positive">
+            <div class="compare-col-label" data-editable="compare-positive-label">Parents with Love</div>
+            <ul class="compare-list">
+              <li><span class="mark">✓</span><span data-editable="compare-positive-1">Tailored to each child's age and your family's patterns</span></li>
+              <li><span class="mark">✓</span><span data-editable="compare-positive-2">Remembers the conversation — pick up where you left off</span></li>
+              <li><span class="mark">✓</span><span data-editable="compare-positive-3">Tracks what's worked and what hasn't</span></li>
+              <li><span class="mark">✓</span><span data-editable="compare-positive-4">Grounded in pediatric and child-development research</span></li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h3>Secure by default</h3>
-          <p>Encrypted passwords, protected sessions, nothing stored in plain text.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Deliberately limited memory</h3>
-          <p>Only remembers everyday parenting details — by design, never sensitive disclosures.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Full control, always</h3>
-          <p>View, edit, export, or delete anything it remembers, anytime.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Never invents facts</h3>
-          <p>Every answer is checked against real guidance before it reaches you.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ SOURCES ============ -->
-  <section class="landing-section">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-eyebrow">Grounded in real research</div>
-        <h2>Not just an opinionated chatbot</h2>
-        <p>Answers draw on guidance from organizations parents already trust.</p>
-        <div class="section-rule"></div>
+    <!-- ============ PRIVACY & SAFETY ============ -->
+    <section class="landing-section is-tinted" data-reorder-id="privacy">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-eyebrow" data-editable="privacy-eyebrow">Privacy</div>
+          <h2 data-editable="privacy-heading">Your family's information stays yours</h2>
+          <div class="section-rule"></div>
+        </div>
+        <div class="feature-grid" data-reorder-group="privacy-cards">
+          <div class="feature-card" data-reorder-id="secure">
+            <h3 data-editable="privacy-secure-title">Secure by default</h3>
+            <p data-editable="privacy-secure-body">Encrypted passwords, protected sessions, nothing stored in plain text.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="memory">
+            <h3 data-editable="privacy-memory-title">Deliberately limited memory</h3>
+            <p data-editable="privacy-memory-body">Only remembers everyday parenting details — by design, never sensitive disclosures.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="control">
+            <h3 data-editable="privacy-control-title">Full control, always</h3>
+            <p data-editable="privacy-control-body">View, edit, export, or delete anything it remembers, anytime.</p>
+          </div>
+          <div class="feature-card" data-reorder-id="facts">
+            <h3 data-editable="privacy-facts-title">Never invents facts</h3>
+            <p data-editable="privacy-facts-body">Every answer is checked against real guidance before it reaches you.</p>
+          </div>
+        </div>
       </div>
-      <div class="sources-strip" id="sources-strip">
-        <span class="source-pill">American Academy of Pediatrics</span>
-        <span class="source-pill">CDC</span>
-        <span class="source-pill">ZERO TO THREE</span>
-        <span class="source-pill">The Gottman Institute</span>
-        <span class="source-pill">Sleep Foundation</span>
-        <span class="source-pill">Child Mind Institute</span>
+    </section>
+
+    <!-- ============ SOURCES ============ -->
+    <section class="landing-section" data-reorder-id="sources">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-eyebrow" data-editable="sources-eyebrow">Grounded in real research</div>
+          <h2 data-editable="sources-heading">Not just an opinionated chatbot</h2>
+          <p data-editable="sources-subheading">Answers draw on guidance from organizations parents already trust.</p>
+          <div class="section-rule"></div>
+        </div>
+        <div class="sources-grid" id="sources-grid">
+          <a class="source-card" href="https://www.healthychildren.org" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">AAP</span>
+            <span class="source-name">American Academy of Pediatrics</span>
+            <span class="source-title">HealthyChildren.org</span>
+          </a>
+          <a class="source-card" href="https://www.cdc.gov/child-development/positive-parenting-tips/index.html" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">CDC</span>
+            <span class="source-name">CDC</span>
+            <span class="source-title">Positive Parenting Tips (by age)</span>
+          </a>
+          <a class="source-card" href="https://www.zerotothree.org" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">0–3</span>
+            <span class="source-name">ZERO TO THREE</span>
+            <span class="source-title">Early childhood development resources</span>
+          </a>
+          <a class="source-card" href="https://www.gottman.com" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">TGI</span>
+            <span class="source-name">The Gottman Institute</span>
+            <span class="source-title">Emotion-coaching research</span>
+          </a>
+          <a class="source-card" href="https://www.positivediscipline.com" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">PD</span>
+            <span class="source-name">Positive Discipline</span>
+            <span class="source-title">Research-backed positive discipline tools</span>
+          </a>
+          <a class="source-card" href="https://www.circleofsecurityinternational.com" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">COS</span>
+            <span class="source-name">Circle of Security International</span>
+            <span class="source-title">Attachment-based parenting</span>
+          </a>
+          <a class="source-card" href="https://www.sleepfoundation.org" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">SF</span>
+            <span class="source-name">Sleep Foundation</span>
+            <span class="source-title">Children's sleep guidance</span>
+          </a>
+          <a class="source-card" href="https://www.commonsensemedia.org" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">CSM</span>
+            <span class="source-name">Common Sense Media</span>
+            <span class="source-title">Kids &amp; screen time guidance</span>
+          </a>
+          <a class="source-card" href="https://childmind.org" target="_blank" rel="noopener">
+            <span class="source-badge" aria-hidden="true">CMI</span>
+            <span class="source-name">Child Mind Institute</span>
+            <span class="source-title">Child behavior &amp; mental health resources</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+  </div>
 
   <!-- ============ FINAL CTA ============ -->
   <section class="wrap cta-section">
-    <h2>Be one of the first families in the beta</h2>
-    <p>Spots are limited while we roll out slowly. Join the list and we'll email you when it's your turn.</p>
+    <h2 data-editable="final-cta-heading">Be one of the first families in the beta</h2>
+    <p data-editable="final-cta-body">Spots are limited while we roll out slowly. Join the list and we'll email you when it's your turn.</p>
     <form class="signup-form" id="cta-signup-form">
       <label class="sr-only" for="cta-email">Email address</label>
       <input id="cta-email" type="email" required placeholder="you@example.com" autocomplete="email" />
-      <button type="submit" class="signup-btn">Get beta access</button>
+      <button type="submit" class="signup-btn"><span data-editable="final-cta-btn">Get beta access</span></button>
     </form>
     <p class="signup-feedback" aria-live="polite"></p>
-    <p class="signup-note">Free during beta. No spam, unsubscribe anytime.</p>
+    <p class="signup-note" data-editable="final-cta-note">Free during beta. No spam, unsubscribe anytime.</p>
   </section>
 
   <footer class="wrap landing-footer">
-    <span>&copy; 3DWDS &mdash; Parents with Love</span>
+    <span data-editable="footer-copyright">&copy; 3DWDS &mdash; Parents with Love</span>
     <div class="footer-links">
-      <a href="/sources.html">Sources</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/app">Already in the beta? Log in &rarr;</a>
+      <a href="/sources.html" data-editable="footer-sources-link">Sources</a>
+      <a href="/privacy.html" data-editable="footer-privacy-link">Privacy</a>
+      <a href="/app" data-editable="footer-login-link">Already in the beta? Log in &rarr;</a>
     </div>
   </footer>
 
   <script src="/landing.js"></script>
+  <script src="/landing-design.js"></script>
 </body>
 </html>

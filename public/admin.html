@@ -53,6 +53,7 @@
         <button type="button" class="admin-tab" data-tab="reviews">Reviews</button>
         <button type="button" class="admin-tab" data-tab="prompt">Prompt</button>
         <button type="button" class="admin-tab" data-tab="design">Design</button>
+        <button type="button" class="admin-tab" data-tab="landing-design">Landing page</button>
       </div>
 
       <!-- Overview -->
@@ -196,6 +197,49 @@
           <div id="admin-design-reset-confirm" class="delete-confirm-block" hidden>
             <p class="modal-danger-copy">This clears every saved color, font, text edit, and layout order change. This can't be undone.</p>
             <button type="button" class="btn-danger" id="admin-design-reset-confirm-btn">Yes, reset everything</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Landing page design -->
+      <div class="admin-panel" id="admin-panel-landing-design" hidden>
+        <div class="admin-card">
+          <h2>Landing page live editor</h2>
+          <p class="modal-danger-copy">
+            A separate design editor for the marketing/landing page (<code>/</code>) &mdash; independent
+            from the app editor above, since the landing page has its own colors, fonts, and sections.
+            Restyle colors and fonts, edit any text, show/hide a whole section, or drag sections and
+            cards to reorder them &mdash; directly on the real page, no redeploy needed. Open the site
+            while logged in here as admin and an "Edit design" button appears in the bottom-right corner.
+          </p>
+          <a class="btn-secondary-outline" href="/" target="_blank" rel="noopener" style="display: inline-block; width: auto; padding: 0.6rem 1.2rem; text-decoration: none; text-align: center;">Open landing page to edit design &rarr;</a>
+        </div>
+
+        <div class="admin-card">
+          <h2>Current overrides</h2>
+          <div class="admin-stat-grid" id="admin-landing-design-stats"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-prompt-head">
+            <h2>Reset</h2>
+          </div>
+          <p class="modal-danger-copy">Reverts saved overrides back to what's shipped in the code. This can't be undone.</p>
+          <div id="admin-landing-design-reset-error" class="form-error"></div>
+          <div class="admin-pending-update-actions">
+            <button type="button" class="btn-danger-outline" data-landing-design-reset-scope="theme">Reset colors &amp; fonts</button>
+            <button type="button" class="btn-danger-outline" data-landing-design-reset-scope="content">Reset edited text</button>
+          </div>
+          <div class="admin-pending-update-actions" style="margin-top: 0.6rem;">
+            <button type="button" class="btn-danger-outline" data-landing-design-reset-scope="order">Reset section &amp; card order</button>
+            <button type="button" class="btn-danger-outline" data-landing-design-reset-scope="hidden">Unhide all sections</button>
+          </div>
+          <div class="admin-pending-update-actions" style="margin-top: 0.6rem;">
+            <button type="button" class="btn-danger" data-landing-design-reset-scope="all">Reset everything&hellip;</button>
+          </div>
+          <div id="admin-landing-design-reset-confirm" class="delete-confirm-block" hidden>
+            <p class="modal-danger-copy">This clears every saved color, font, text edit, section/card order, and hidden-section change. This can't be undone.</p>
+            <button type="button" class="btn-danger" id="admin-landing-design-reset-confirm-btn">Yes, reset everything</button>
           </div>
         </div>
       </div>

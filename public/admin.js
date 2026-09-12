@@ -17,7 +17,8 @@
     users: document.getElementById("admin-panel-users"),
     reviews: document.getElementById("admin-panel-reviews"),
     prompt: document.getElementById("admin-panel-prompt"),
-    design: document.getElementById("admin-panel-design")
+    design: document.getElementById("admin-panel-design"),
+    "landing-design": document.getElementById("admin-panel-landing-design")
   };
 
   var statsEl = document.getElementById("admin-stats");
@@ -144,6 +145,7 @@
       if (name === "reviews") loadReviews(reviewsFilterUserId);
       if (name === "prompt") { loadPrompt(); loadPendingUpdate(); }
       if (name === "design") loadDesign();
+      if (name === "landing-design") loadLandingDesign();
     });
   });
 
@@ -620,6 +622,76 @@
       }
       designResetConfirm.hidden = true;
       loadDesign();
+    });
+  });
+
+  // ---------------- landing page design ----------------
+
+  var landingDesignStatsEl = document.getElementById("admin-landing-design-stats");
+  var landingDesignResetError = document.getElementById("admin-landing-design-reset-error");
+  var landingDesignResetConfirm = document.getElementById("admin-landing-design-reset-confirm");
+  var landingDesignResetConfirmBtn = document.getElementById("admin-landing-design-reset-confirm-btn");
+  var landingDesignResetButtons = document.querySelectorAll("[data-landing-design-reset-scope]");
+
+  function loadLandingDesign() {
+    landingDesignResetError.textContent = "";
+    landingDesignResetError.classList.remove("visible");
+    landingDesignResetConfirm.hidden = true;
+
+    j("/api/landing-design").then(function (result) {
+      if (!result.ok) return;
+      var settings = result.data.settings || { theme: {}, content: {}, order: {}, hidden: [] };
+      var themeCount = Object.keys(settings.theme || {}).length;
+      var contentCount = Object.keys(settings.content || {}).length;
+      var orderCount = Object.keys(settings.order || {}).length;
+      var hiddenCount = (settings.hidden || []).length;
+
+      landingDesignStatsEl.innerHTML =
+        statCard("Colors/fonts changed", themeCount) +
+        statCard("Text fields edited", contentCount) +
+        statCard("Layouts reordered", orderCount) +
+        statCard("Sections hidden", hiddenCount);
+    });
+  }
+
+  var pendingLandingDesignResetScope = null;
+
+  landingDesignResetButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var scope = btn.getAttribute("data-landing-design-reset-scope");
+      landingDesignResetError.textContent = "";
+      landingDesignResetError.classList.remove("visible");
+
+      if (scope === "all") {
+        pendingLandingDesignResetScope = "all";
+        landingDesignResetConfirm.hidden = false;
+        return;
+      }
+
+      j("/api/landing-design/reset", { method: "POST", body: JSON.stringify({ scope: scope }) }).then(function (result) {
+        if (!result.ok) {
+          landingDesignResetError.textContent = (result.data && result.data.error) || "Something went wrong.";
+          landingDesignResetError.classList.add("visible");
+          return;
+        }
+        loadLandingDesign();
+      });
+    });
+  });
+
+  landingDesignResetConfirmBtn.addEventListener("click", function () {
+    if (!pendingLandingDesignResetScope) return;
+    landingDesignResetConfirmBtn.disabled = true;
+    j("/api/landing-design/reset", { method: "POST", body: JSON.stringify({ scope: pendingLandingDesignResetScope }) }).then(function (result) {
+      landingDesignResetConfirmBtn.disabled = false;
+      pendingLandingDesignResetScope = null;
+      if (!result.ok) {
+        landingDesignResetError.textContent = (result.data && result.data.error) || "Something went wrong.";
+        landingDesignResetError.classList.add("visible");
+        return;
+      }
+      landingDesignResetConfirm.hidden = true;
+      loadLandingDesign();
     });
   });
 
