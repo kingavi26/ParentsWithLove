@@ -14,6 +14,7 @@ const voiceRoutes = require("./src/routes/voice");
 const socialAuthRoutes = require("./src/routes/social-auth");
 const adminRoutes = require("./src/routes/admin");
 const designRoutes = require("./src/routes/design");
+const landingDesignRoutes = require("./src/routes/landing-design");
 const betaRoutes = require("./src/routes/beta");
 const { isDemoMode } = require("./src/reply-engine");
 const { isVoiceAvailable } = require("./src/voice");
@@ -97,6 +98,7 @@ app.use("/api", voiceRoutes);
 app.use("/api", socialAuthRoutes);
 app.use("/api", adminRoutes);
 app.use("/api", designRoutes);
+app.use("/api", landingDesignRoutes);
 app.use("/api", betaRoutes);
 
 // Unauthenticated — lets the frontend show a "demo mode" banner before login.
