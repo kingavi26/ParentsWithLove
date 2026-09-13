@@ -670,11 +670,14 @@ section.landing-section.is-tinted { background: var(--surface-alt); }
 .compare-col--positive li { color: #fff; }
 
 /* ---------- sources credibility grid ---------- */
-/* A classic, museum-wall-style grid: original monogram badges (see the
-   `monogram` field in src/research-sources.js) rather than any
-   organization's actual trademarked logo — real orgs' published guidance
-   informs pwl7's answers, but reproducing their real marks here would
-   wrongly imply a formal endorsement/partnership that doesn't exist. */
+/* Real organization logos (see the `logo` field in src/research-sources.js,
+   captured from each org's own live site), replacing the original invented
+   monogram-badge treatment per Avi's request. Each logo sits in a fixed-size
+   white card via object-fit so very differently-shaped real logos (a square
+   badge, a wide wordmark) still line up in one tidy grid. Since showing a
+   real org's mark next to pwl7's own brand can otherwise read as a formal
+   endorsement/partnership that doesn't exist, the grid is paired with a
+   small disclaimer line (.sources-disclaimer) directly below it. */
 
 .sources-grid {
   display: grid;
@@ -700,6 +703,19 @@ section.landing-section.is-tinted { background: var(--surface-alt); }
   box-shadow: var(--shadow);
   transform: translateY(-2px);
   outline: none;
+}
+.source-logo {
+  display: block;
+  width: 100%;
+  max-width: 148px;
+  height: 46px;
+  object-fit: contain;
+  object-position: center;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--accent-tint, rgba(192, 138, 46, 0.25));
+  box-sizing: content-box;
 }
 .source-badge {
   display: flex;
@@ -727,6 +743,14 @@ section.landing-section.is-tinted { background: var(--surface-alt); }
 .source-title {
   font-size: 0.72rem;
   line-height: 1.35;
+  color: var(--muted-light);
+}
+.sources-disclaimer {
+  max-width: 640px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  font-size: 0.74rem;
+  line-height: 1.5;
   color: var(--muted-light);
 }
 

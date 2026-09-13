@@ -154,11 +154,15 @@
   // ---------------- live sources grid ----------------
   // Same /api/sources endpoint public/sources.html already renders from —
   // one source of truth, so this page never hand-maintains a second copy
-  // of "who we're grounded in." Each card uses an original monogram badge
-  // (see the `monogram` field in src/research-sources.js), never a scraped
-  // copy of an organization's actual trademarked logo — real orgs' guidance
-  // informs pwl7's answers, but showing their real marks here would wrongly
-  // imply a formal endorsement/partnership.
+  // of "who we're grounded in." Each card shows the organization's real
+  // logo (the `logo` field in src/research-sources.js, captured directly
+  // from that org's own live site) rather than the original invented
+  // monogram badge. Pairing real trademarked marks with pwl7's own brand
+  // can look like a formal endorsement/partnership that doesn't exist, so
+  // the section carries a small disclaimer (`.sources-disclaimer` in
+  // index.html) making clear these are referenced sources, not partners.
+  // If a logo image ever fails to load, fall back to the legacy monogram
+  // text so the card never shows a broken image.
 
   var gridEl = document.getElementById("sources-grid");
   if (gridEl) {
@@ -178,11 +182,27 @@
           card.target = "_blank";
           card.rel = "noopener";
 
-          var badge = document.createElement("span");
-          badge.className = "source-badge";
-          badge.setAttribute("aria-hidden", "true");
-          badge.textContent = s.monogram || s.org.slice(0, 3).toUpperCase();
-          card.appendChild(badge);
+          if (s.logo) {
+            var logo = document.createElement("img");
+            logo.className = "source-logo";
+            logo.src = s.logo;
+            logo.alt = s.org + " logo";
+            logo.loading = "lazy";
+            logo.onerror = function () {
+              var fallback = document.createElement("span");
+              fallback.className = "source-badge";
+              fallback.setAttribute("aria-hidden", "true");
+              fallback.textContent = s.monogram || s.org.slice(0, 3).toUpperCase();
+              logo.replaceWith(fallback);
+            };
+            card.appendChild(logo);
+          } else {
+            var badge = document.createElement("span");
+            badge.className = "source-badge";
+            badge.setAttribute("aria-hidden", "true");
+            badge.textContent = s.monogram || s.org.slice(0, 3).toUpperCase();
+            card.appendChild(badge);
+          }
 
           var name = document.createElement("span");
           name.className = "source-name";
