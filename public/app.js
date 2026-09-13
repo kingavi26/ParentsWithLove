@@ -454,6 +454,12 @@
       });
       homeKids.hidden = false;
     } else {
+      // Clear out any pills left over from rendering a different account
+      // earlier in this same page's lifetime (e.g. log out, then sign up
+      // or log in as someone else without a full reload) — otherwise the
+      // previous account's kid pills stay in the DOM and, combined with
+      // the [hidden] cascade fix in styles.css, could still be visible.
+      homeKids.innerHTML = "";
       homeKids.hidden = true;
     }
   }
