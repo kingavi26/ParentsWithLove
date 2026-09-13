@@ -883,6 +883,14 @@ h1 {
 .memory-empty { font-size: 0.83rem; color: var(--muted); font-style: italic; }
 
 .pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+/* Same [hidden]-cascade issue as .memory-last-active above: #home-kids is
+   toggled via the hidden attribute when an account has no children, and
+   without this override the flex display here would keep it visibly
+   showing (and, combined with stale innerHTML from a previous account's
+   render, showing the WRONG account's kids) instead of actually
+   disappearing. #memory-children never gets [hidden], so this is safe
+   there too. */
+.pill-row[hidden] { display: none; }
 
 .kid-pill {
   font-size: 0.83rem;
