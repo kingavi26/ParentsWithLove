@@ -165,14 +165,28 @@ function initDb() {
   // Whether this account's email has been proven (clicked a verification
   // link, or signed up via Google/Facebook — see social-auth.js, which
   // only ever links/creates an account once the provider itself confirms
-  // the email). Existing rows default to 0/unverified on this migration —
-  // deliberately not backfilled to 1, since we have no actual proof for
-  // accounts created before this column existed; the frontend's
+  // the email). Existing PASSWORD accounts default to 0/unverified on this
+  // migration — deliberately not backfilled, since there's no actual proof
+  // for an account created before this column existed; the frontend's
   // "verify your email" banner + a one-click resend closes that gap for
   // anyone it affects, at no cost to already-verified new signups.
+  //
   if (!columns.includes("email_verified")) {
     db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
   }
+  // Existing SOCIAL accounts are different: google_id/facebook_id being set
+  // at all is itself already proof (findOrCreateSocialUser has always
+  // required the provider's own emailVerified flag before ever linking or
+  // creating an account, from well before the email_verified column
+  // existed) — so those get backfilled to 1 here, rather than showing
+  // every pre-existing Google/Facebook user a "verify your email" banner
+  // for something already verified the whole time. Deliberately run
+  // unconditionally (not nested in the `if` above) rather than only at the
+  // moment the column is first added: a deploy that already ran that ALTER
+  // TABLE once (e.g. this fix landing in a later deploy than the column
+  // itself) still needs this backfill applied. Cheap and idempotent — a
+  // plain UPDATE over a small table, safe to re-run every startup.
+  db.exec("UPDATE users SET email_verified = 1 WHERE google_id IS NOT NULL OR facebook_id IS NOT NULL");
 
   // Migration path for a family_notes table created before conversations
   // were timestamped. Left NULL for existing rows (we genuinely don't know
