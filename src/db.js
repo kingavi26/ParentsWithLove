@@ -88,6 +88,25 @@ function initDb() {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Short-lived, single-use tokens for email verification and password
+    -- reset (src/routes/auth.js, src/notifications.js). One table for both
+    -- purposes (same "generic shape, reuse without another migration" idea
+    -- as app_settings above) — "purpose" keeps the two from ever being
+    -- interchangeable. token_hash stores sha256(token), never the raw
+    -- token, so a leaked database row can't be replayed as a live link the
+    -- way a leaked raw token could — the raw token only ever exists in the
+    -- emailed link itself and the moment-of-lookup hash computed from it.
+    CREATE TABLE IF NOT EXISTS auth_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      token_hash TEXT NOT NULL UNIQUE,
+      purpose TEXT NOT NULL CHECK (purpose IN ('email_verify', 'password_reset')),
+      expires_at TEXT NOT NULL,
+      used_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);
+
     -- Emails collected from the beta-signup landing page (public/index.html,
     -- POST /api/beta-signup — see src/routes/beta.js). Deliberately its own
     -- table rather than a row in "users": someone joining the waitlist
@@ -142,6 +161,17 @@ function initDb() {
   // this migration doesn't invalidate anyone's existing session by itself.
   if (!columns.includes("token_version")) {
     db.exec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
+  }
+  // Whether this account's email has been proven (clicked a verification
+  // link, or signed up via Google/Facebook — see social-auth.js, which
+  // only ever links/creates an account once the provider itself confirms
+  // the email). Existing rows default to 0/unverified on this migration —
+  // deliberately not backfilled to 1, since we have no actual proof for
+  // accounts created before this column existed; the frontend's
+  // "verify your email" banner + a one-click resend closes that gap for
+  // anyone it affects, at no cost to already-verified new signups.
+  if (!columns.includes("email_verified")) {
+    db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
   }
 
   // Migration path for a family_notes table created before conversations
