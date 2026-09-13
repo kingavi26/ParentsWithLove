@@ -14,74 +14,90 @@
 // Every URL below was hand-checked live on 2026-09-09. Keep this list
 // small and only add an organization here once its URL has been verified.
 
-// `monogram` is a short, hand-curated typographic initialism used only for
-// the landing page's "grounded in real research" credibility grid — an
-// original monogram-badge treatment, deliberately NOT a reproduction of any
-// organization's actual trademarked logo/wordmark (see landing.js). Keep
-// these short (2-4 characters) and in plain caps/digits only.
+// `logo` points at a real, current logo asset for each organization (saved
+// under public/images/sources/), captured directly from that org's own live
+// site on 2026-09-13. This is a deliberate change from the original
+// monogram-badge treatment: Avi asked for the actual source logos instead of
+// invented icons. Showing a real org's mark next to pwl7's brand can read as
+// a formal endorsement/partnership that doesn't exist (these orgs just
+// publish guidance pwl7's framework draws on) — the landing page pairs the
+// grid with a small disclaimer line (`sources-disclaimer` in index.html)
+// making clear these are referenced sources, not partners or endorsers, to
+// keep this an honest, standard "as referenced" credit rather than a claimed
+// affiliation. `monogram` is kept as a legacy fallback (e.g. for alt text or
+// if an image fails to load) but is no longer the primary visual.
 const SOURCES = {
   aap: {
     id: "aap",
     org: "American Academy of Pediatrics",
     title: "HealthyChildren.org",
     url: "https://www.healthychildren.org",
-    monogram: "AAP"
+    monogram: "AAP",
+    logo: "/images/sources/aap.png"
   },
   cdc_parenting: {
     id: "cdc_parenting",
     org: "CDC",
     title: "Positive Parenting Tips (by age)",
     url: "https://www.cdc.gov/child-development/positive-parenting-tips/index.html",
-    monogram: "CDC"
+    monogram: "CDC",
+    logo: "/images/sources/cdc_parenting.png"
   },
   zerotothree: {
     id: "zerotothree",
     org: "ZERO TO THREE",
     title: "Early childhood development resources",
     url: "https://www.zerotothree.org",
-    monogram: "0–3"
+    monogram: "0–3",
+    logo: "/images/sources/zerotothree.png"
   },
   gottman: {
     id: "gottman",
     org: "The Gottman Institute",
     title: "Emotion-coaching research",
     url: "https://www.gottman.com",
-    monogram: "TGI"
+    monogram: "TGI",
+    logo: "/images/sources/gottman.png"
   },
   positive_discipline: {
     id: "positive_discipline",
     org: "Positive Discipline",
     title: "Research-backed positive discipline tools",
     url: "https://www.positivediscipline.com",
-    monogram: "PD"
+    monogram: "PD",
+    logo: "/images/sources/positive_discipline.png"
   },
   circle_of_security: {
     id: "circle_of_security",
     org: "Circle of Security International",
     title: "Attachment-based parenting",
     url: "https://www.circleofsecurityinternational.com",
-    monogram: "COS"
+    monogram: "COS",
+    logo: "/images/sources/circle_of_security.png"
   },
   sleep_foundation: {
     id: "sleep_foundation",
     org: "Sleep Foundation",
     title: "Children's sleep guidance",
     url: "https://www.sleepfoundation.org",
-    monogram: "SF"
+    monogram: "SF",
+    logo: "/images/sources/sleep_foundation.png"
   },
   common_sense_media: {
     id: "common_sense_media",
     org: "Common Sense Media",
     title: "Kids & screen time guidance",
     url: "https://www.commonsensemedia.org",
-    monogram: "CSM"
+    monogram: "CSM",
+    logo: "/images/sources/common_sense_media.png"
   },
   child_mind: {
     id: "child_mind",
     org: "Child Mind Institute",
     title: "Child behavior & mental health resources",
     url: "https://childmind.org",
-    monogram: "CMI"
+    monogram: "CMI",
+    logo: "/images/sources/child_mind.png"
   }
 };
 

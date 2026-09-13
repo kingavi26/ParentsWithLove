@@ -208,6 +208,7 @@ const ALLOWED_EDITABLE = {
   "sources-eyebrow": { label: "Eyebrow label", maxLen: 40, group: "Research credibility" },
   "sources-heading": { label: "Heading", maxLen: 120, group: "Research credibility" },
   "sources-subheading": { label: "Subheading", maxLen: 200, group: "Research credibility" },
+  "sources-disclaimer": { label: "Logo disclaimer", maxLen: 220, group: "Research credibility" },
 
   // Final CTA
   "final-cta-heading": { label: "Heading", maxLen: 120, group: "Final signup" },
