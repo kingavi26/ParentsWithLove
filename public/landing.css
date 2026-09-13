@@ -120,28 +120,67 @@ a { color: inherit; }
 .nav-cta:hover { background: color-mix(in srgb, var(--accent) 85%, black); }
 
 /* ---------- hero ---------- */
+/* The hero photo/video is the background of `.hero-media`; the text header
+   overlays it directly (rather than sitting below it) so the headline and
+   CTA read as part of the scene. `.hero-media` takes its height from `.hero`
+   itself (the only normal-flow child — the video and scrim are both
+   absolutely positioned), so the video simply crops to fill whatever height
+   the text content needs at any screen width. That means there's no fixed
+   aspect-ratio to overflow: short text -> shorter banner, wrapped text on a
+   narrow phone -> a taller one, and the video always fills it via
+   object-fit: cover. `--hero-min-h` is just a floor so the video still reads
+   as a real banner even when the text is short. */
+
+.hero-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  --hero-min-h: 460px;
+  min-height: var(--hero-min-h);
+}
+@media (max-width: 700px) {
+  .hero-media { --hero-min-h: 420px; }
+}
 
 .hero-photo-banner {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  display: block;
-  aspect-ratio: 16 / 7.5;
+  height: 100%;
   object-fit: cover;
   object-position: center 30%;
 }
-@media (max-width: 700px) {
-  .hero-photo-banner { aspect-ratio: 4 / 3; }
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    rgba(14, 24, 39, 0.86) 0%,
+    rgba(14, 24, 39, 0.72) 32%,
+    rgba(14, 24, 39, 0.32) 58%,
+    rgba(14, 24, 39, 0) 82%
+  );
 }
 
 .hero {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
+  justify-content: center;
   gap: 1rem;
-  padding: 2.75rem 1.25rem 3rem;
-  border-bottom: 1px solid var(--border);
-  max-width: 720px;
-  margin: 0 auto;
+  min-height: var(--hero-min-h);
+  box-sizing: border-box;
+  padding: 2.75rem 2.5rem;
+  max-width: 580px;
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .hero { padding: 2.25rem 1.25rem; max-width: 100%; }
 }
 
 .eyebrow-pill {
@@ -152,9 +191,9 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: none;
-  border: 1px solid var(--border);
+  color: #f4ead9;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 4px;
   padding: 0.32rem 0.75rem;
 }
@@ -173,15 +212,16 @@ a { color: inherit; }
   font-size: clamp(1.9rem, 4vw, 2.6rem);
   line-height: 1.25;
   font-weight: 700;
-  color: var(--navy);
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   margin: 0;
 }
-.hero h1 .accent-text { color: var(--navy); }
+.hero h1 .accent-text { color: var(--accent); }
 
 .hero-sub {
   font-size: 1.02rem;
   line-height: 1.65;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.9);
   max-width: 52ch;
   margin: 0;
 }
@@ -233,9 +273,10 @@ a { color: inherit; }
 
 .signup-note {
   font-size: 0.82rem;
-  color: var(--muted-light);
+  color: rgba(255, 255, 255, 0.75);
   margin: 0.15rem 0 0;
 }
+.cta-section .signup-note { color: var(--muted-light); }
 
 .signup-feedback {
   font-size: 0.88rem;
@@ -245,6 +286,10 @@ a { color: inherit; }
 }
 .signup-feedback.is-success { color: var(--green); }
 .signup-feedback.is-error { color: var(--error); }
+/* Brighter variants for the hero, which sits on the dark video scrim rather
+   than the light page background the base colors were tuned for. */
+.hero .signup-feedback.is-success { color: #7fd996; }
+.hero .signup-feedback.is-error { color: #ff9a8a; }
 
 /* ---------- generic section scaffolding ---------- */
 

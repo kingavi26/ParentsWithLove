@@ -28,26 +28,29 @@
   </div>
 
   <!-- ============ HERO ============ -->
-  <video class="hero-photo-banner" id="hero-video" muted loop playsinline preload="auto" poster="/images/family-painting-chess.jpg" aria-hidden="true">
-    <source src="/images/hero-family-painting.webm" type="video/webm" />
-    <source src="/images/hero-family-painting.mp4" type="video/mp4" />
-  </video>
+  <div class="hero-media">
+    <video class="hero-photo-banner" id="hero-video" muted loop playsinline preload="auto" poster="/images/family-painting-chess.jpg" aria-hidden="true">
+      <source src="/images/hero-family-painting.webm" type="video/webm" />
+      <source src="/images/hero-family-painting.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-scrim" aria-hidden="true"></div>
 
-  <header class="hero">
-    <div class="eyebrow-pill"><span class="dot"></span> <span data-editable="hero-eyebrow">Now in beta</span></div>
-    <h1><span data-editable="hero-title-plain">Parenting help that</span> <span class="accent-text" data-editable="hero-title-accent">remembers your family</span></h1>
-    <p class="hero-sub" data-editable="hero-subtitle">
-      An AI parenting assistant that remembers your kids, what you've tried, and what's working — so you're never starting from scratch.
-    </p>
+    <header class="hero">
+      <div class="eyebrow-pill"><span class="dot"></span> <span data-editable="hero-eyebrow">Now in beta</span></div>
+      <h1><span data-editable="hero-title-plain">Parenting help that</span> <span class="accent-text" data-editable="hero-title-accent">remembers your family</span></h1>
+      <p class="hero-sub" data-editable="hero-subtitle">
+        An AI parenting assistant that remembers your kids, what you've tried, and what's working — so you're never starting from scratch.
+      </p>
 
-    <form class="signup-form" id="hero-signup-form">
-      <label class="sr-only" for="hero-email">Email address</label>
-      <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
-      <button type="submit" class="signup-btn"><span data-editable="hero-cta-btn">Get beta access</span></button>
-    </form>
-    <p class="signup-feedback" aria-live="polite"></p>
-    <p class="signup-note" data-editable="hero-signup-note">Free during beta. One email when your spot opens — no spam, unsubscribe anytime.</p>
-  </header>
+      <form class="signup-form" id="hero-signup-form">
+        <label class="sr-only" for="hero-email">Email address</label>
+        <input id="hero-email" type="email" required placeholder="you@example.com" autocomplete="email" />
+        <button type="submit" class="signup-btn"><span data-editable="hero-cta-btn">Get beta access</span></button>
+      </form>
+      <p class="signup-feedback" aria-live="polite"></p>
+      <p class="signup-note" data-editable="hero-signup-note">Free during beta. One email when your spot opens — no spam, unsubscribe anytime.</p>
+    </header>
+  </div>
 
   <div data-reorder-group="landing-sections">
 
