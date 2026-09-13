@@ -119,6 +119,13 @@ router.delete("/account", requireAuth, (req, res) => {
     db.prepare("DELETE FROM session_reviews WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM children WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM family_notes WHERE user_id = ?").run(userId);
+    // auth_tokens (src/db.js) references users(id) — added for email
+    // verification/password reset (src/routes/auth.js). Anyone who has ever
+    // verified their email or requested a password reset has a row here, so
+    // this has to be cleared before the DELETE FROM users below or it fails
+    // with a foreign key constraint error instead of actually deleting the
+    // account.
+    db.prepare("DELETE FROM auth_tokens WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM users WHERE id = ?").run(userId);
   });
   deleteEverything(user.id);
