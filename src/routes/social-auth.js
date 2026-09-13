@@ -109,7 +109,7 @@ router.get("/auth/google/callback", async (req, res) => {
       return redirectWithError(res, "This account has been suspended.");
     }
     issueSession(res, user.id, user.token_version);
-    res.redirect("/");
+    res.redirect("/app");
   } catch (err) {
     console.error("[pwl7] Google sign-in failed:", err);
     redirectWithError(res, socialAuthErrorMessage(err, "Google"));
@@ -144,7 +144,7 @@ router.get("/auth/facebook/callback", async (req, res) => {
       return redirectWithError(res, "This account has been suspended.");
     }
     issueSession(res, user.id, user.token_version);
-    res.redirect("/");
+    res.redirect("/app");
   } catch (err) {
     console.error("[pwl7] Facebook sign-in failed:", err);
     redirectWithError(res, socialAuthErrorMessage(err, "Facebook"));
