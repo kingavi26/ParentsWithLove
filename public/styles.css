@@ -568,6 +568,18 @@ h1 {
   color: var(--accent-contrast);
 }
 
+/* The entry point into the full-screen voice-mode overlay (voice-mode.css) —
+   filled with the accent color so it reads as the primary way to talk to
+   the app hands-free, distinct from the plain outlined read-aloud toggle
+   next to it. */
+.voice-mode-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+.voice-mode-btn:hover { filter: brightness(1.06); }
+
 .chat-log {
   padding: 1.25rem;
   display: flex;
@@ -1988,6 +2000,7 @@ body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target 
   .chat-send,
   .mic-btn,
   .voice-toggle,
+  .voice-mode-btn,
   .btn-primary,
   .btn-secondary-outline,
   .btn-danger,
@@ -2106,6 +2119,7 @@ body.modal-open { overflow: hidden; }
   .chat-send,
   .mic-btn,
   .voice-toggle,
+  .voice-mode-btn,
   .quick-action-card,
   .account-child-save,
   .account-child-delete,

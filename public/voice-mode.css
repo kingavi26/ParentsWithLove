@@ -1,0 +1,301 @@
+/* ---------- Voice mode: full-screen hands-free conversation overlay ----------
+   Deliberately its own file and its own dark visual world, separate from the
+   rest of the app's light iOS-style theme (styles.css) — same reasoning as
+   landing.css being self-contained: this is a distinct "mode" (like Siri's
+   full-screen voice UI looking nothing like the rest of iOS), not a themed
+   variant of the everyday chat screen, so it isn't wired into the Design
+   Mode editor's light/dark palette at all. Every token below is scoped to
+   .voice-overlay so nothing here can leak into or collide with styles.css. */
+
+.voice-overlay {
+  --vo-ground: #0e1a2c;
+  --vo-ground-deep: #0a1322;
+  --vo-panel: #16283f;
+  --vo-ember: #c98a3e;
+  --vo-ember-bright: #ffd28a;
+  --vo-mist: #6f93b8;
+  --vo-mist-bright: #a9c6e6;
+  --vo-error: #ff8a7a;
+  --vo-paper: #f3ede0;
+  --vo-paper-dim: rgba(243, 237, 224, 0.62);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 18%, var(--vo-panel), var(--vo-ground) 55%, var(--vo-ground-deep) 100%);
+  color: var(--vo-paper);
+  font-family: var(--font-body);
+  box-sizing: border-box;
+  padding: calc(env(safe-area-inset-top, 0px) + 1rem) 1.25rem calc(env(safe-area-inset-bottom, 0px) + 1.75rem);
+}
+
+.voice-overlay[hidden] { display: none; }
+
+/* ---- topbar ---- */
+
+.vo-topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.vo-icon-btn,
+.vo-icon-btn-spacer {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.vo-icon-btn {
+  border-radius: 50%;
+  border: 1px solid rgba(243, 237, 224, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--vo-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+}
+.vo-icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.vo-icon-btn svg { width: 18px; height: 18px; }
+
+.vo-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 237, 224, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--vo-paper-dim);
+  white-space: nowrap;
+}
+
+.vo-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--vo-ember);
+  transition: background-color 0.4s ease;
+  flex-shrink: 0;
+}
+.voice-overlay[data-state="listening"] .vo-state-dot { background: var(--vo-mist); }
+.voice-overlay[data-state="speaking"] .vo-state-dot { background: var(--vo-ember-bright); }
+.voice-overlay[data-state="error"] .vo-state-dot { background: var(--vo-error); }
+
+/* ---- orb stage ---- */
+
+.vo-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vo-orb-wrap {
+  --level: 0;
+  position: relative;
+  width: min(58vw, 240px);
+  height: min(58vw, 240px);
+}
+
+.voice-overlay[data-state="thinking"] .vo-orb-wrap {
+  animation: vo-spin 3.2s linear infinite;
+}
+@keyframes vo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vo-halo {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 138, 62, 0.35), transparent 68%);
+  filter: blur(2px);
+  transform: scale(calc(1 + var(--level) * 0.35));
+  transition: background 0.5s ease, transform 0.08s linear;
+  animation: vo-halo-pulse 3.4s ease-in-out infinite;
+}
+.voice-overlay[data-state="listening"] .vo-halo {
+  background: radial-gradient(circle, rgba(111, 147, 184, 0.4), transparent 68%);
+  animation-duration: 1.8s;
+}
+.voice-overlay[data-state="thinking"] .vo-halo { animation-duration: 1.6s; }
+.voice-overlay[data-state="speaking"] .vo-halo {
+  background: radial-gradient(circle, rgba(255, 210, 138, 0.45), transparent 66%);
+  animation-duration: 1s;
+}
+.voice-overlay[data-state="error"] .vo-halo {
+  background: radial-gradient(circle, rgba(255, 138, 122, 0.4), transparent 68%);
+}
+
+@keyframes vo-halo-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.vo-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.vo-orb {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(calc(1 + var(--level) * 0.06));
+}
+.vo-orb:focus-visible { outline: 2px solid var(--vo-mist-bright); outline-offset: 4px; }
+
+/* Clips the blurred/contrasted goo to a circle against a solid dark
+   backing — without this, the blob color bleeds outward past the orb's
+   edge into a flat, oversaturated glow instead of reading as a contained,
+   dimensional sphere (the inset shadow plus the vignette layer below do
+   the rest of that dimensional work). */
+.vo-orb-mask {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--vo-ground-deep);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.5);
+  display: block;
+}
+
+.vo-goo {
+  position: absolute;
+  inset: -20%;
+  filter: blur(16px) contrast(6);
+}
+
+.vo-blob {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--vo-ember);
+  width: 58%;
+  height: 58%;
+  top: 21%;
+  left: 21%;
+  animation-duration: 7s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transition: background-color 0.7s ease;
+}
+.vo-blob.b1 { animation-name: vo-drift1; }
+.vo-blob.b2 { width: 46%; height: 46%; animation-name: vo-drift2; animation-duration: 6s; }
+.vo-blob.b3 { width: 40%; height: 40%; animation-name: vo-drift3; animation-duration: 8.5s; }
+
+@keyframes vo-drift1 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(8%, -6%); }
+  66% { transform: translate(-6%, 7%); }
+}
+@keyframes vo-drift2 {
+  0%, 100% { transform: translate(0, 0); }
+  40% { transform: translate(-9%, 5%); }
+  75% { transform: translate(7%, 8%); }
+}
+@keyframes vo-drift3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(6%, -9%); }
+}
+
+.voice-overlay[data-state="listening"] .vo-blob { background-color: var(--vo-mist); animation-duration: 2.6s; }
+.voice-overlay[data-state="thinking"] .vo-blob { animation-duration: 2.1s; }
+.voice-overlay[data-state="speaking"] .vo-blob { background-color: var(--vo-ember-bright); animation-duration: 1.1s; }
+.voice-overlay[data-state="error"] .vo-blob { background-color: var(--vo-error); animation-duration: 4s; }
+
+.vo-vignette {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, transparent 38%, rgba(8, 13, 22, 0.65) 100%);
+  pointer-events: none;
+}
+
+.vo-bloom {
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.7), rgba(255, 210, 138, 0.16) 45%, transparent 72%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.vo-mic-icon {
+  position: relative;
+  width: 30%;
+  height: 30%;
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.voice-overlay[data-state="listening"] .vo-mic-icon,
+.voice-overlay[data-state="thinking"] .vo-mic-icon,
+.voice-overlay[data-state="speaking"] .vo-mic-icon {
+  opacity: 0;
+}
+
+/* ---- caption ---- */
+
+.vo-caption-panel {
+  flex: 0 0 auto;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 1.5rem;
+}
+
+.vo-caption {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  min-height: 1.65em;
+  color: var(--vo-paper);
+}
+.voice-overlay[data-state="error"] .vo-caption { color: var(--vo-error); }
+
+/* ---- motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .vo-orb-wrap,
+  .vo-halo,
+  .vo-blob {
+    animation: none !important;
+  }
+  .vo-halo,
+  .vo-orb {
+    transition: none;
+  }
+}
+
+/* ---- native tap feel on phones, matching styles.css's convention ---- */
+@media (max-width: 720px) {
+  .vo-icon-btn,
+  .vo-orb {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}

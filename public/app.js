@@ -79,6 +79,17 @@
   var micBtn = document.getElementById("mic-btn");
   var voicePlayer = document.getElementById("voice-player");
 
+  // ---------------- voice mode (full-screen hands-free overlay) ----------------
+  var voiceModeBtn = document.getElementById("voice-mode-btn");
+  var voiceModeOverlay = document.getElementById("voice-mode-overlay");
+  var voiceModeCloseBtn = document.getElementById("voice-mode-close-btn");
+  var voiceModeStateLabel = document.getElementById("voice-mode-state-label");
+  var voiceModeCaption = document.getElementById("voice-mode-caption");
+  var voiceModeOrbWrap = document.getElementById("voice-mode-orb-wrap");
+  var voiceModeOrb = document.getElementById("voice-mode-orb");
+  var voiceModeRingCanvas = document.getElementById("voice-mode-ring");
+  var voiceModePlayer = document.getElementById("voice-mode-player");
+
   var authMode = "login"; // or "signup"
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
   var currentEmail = "";
@@ -175,7 +186,10 @@
       if (voiceAvailable) {
         voiceToggleBtn.hidden = false;
         updateVoiceToggleUI();
-        if (micSupported) micBtn.hidden = false;
+        if (micSupported) {
+          micBtn.hidden = false;
+          voiceModeBtn.hidden = false;
+        }
       }
 
       // appleLoginAvailable isn't sent by the server yet (no Apple Sign-In
@@ -555,20 +569,30 @@
     return el;
   }
 
-  chatForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var text = chatInput.value.trim();
-    if (!text) return;
+  // Shared by the typed chat form and voice mode (see the "voice mode"
+  // section near the bottom of this file) so both paths append to the same
+  // on-screen transcript and the same `conversation` history — a user can
+  // start a thought by voice and finish it by typing (or vice versa)
+  // without losing context. Returns a promise resolving to
+  // { ok: true, reply } or { ok: false, error } — voice mode uses this to
+  // decide what to speak next; the typed form ignores the return value.
+  // opts.viaVoice suppresses the typed-input-box UI updates and the
+  // regular read-aloud call (voice mode does its own TTS with the
+  // reactive orb instead of calling speakText()).
+  function sendChatMessage(text, opts) {
+    opts = opts || {};
 
     addMessage(text, "user");
     conversation.push({ role: "user", content: text });
-    chatInput.value = "";
-    chatInput.disabled = true;
-    chatSend.disabled = true;
+    if (!opts.viaVoice) {
+      chatInput.value = "";
+      chatInput.disabled = true;
+      chatSend.disabled = true;
+    }
 
     var pending = addTypingIndicator();
 
-    fetch("/api/chat", {
+    return fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ history: conversation })
@@ -580,26 +604,41 @@
       })
       .then(function (result) {
         pending.remove();
-        chatInput.disabled = false;
-        chatSend.disabled = false;
-        chatInput.focus();
+        if (!opts.viaVoice) {
+          chatInput.disabled = false;
+          chatSend.disabled = false;
+          chatInput.focus();
+        }
 
         if (!result.ok) {
-          addMessage(result.data.error || "Something went wrong. Please try again.", "bot");
-          return;
+          var errMsg = result.data.error || "Something went wrong. Please try again.";
+          addMessage(errMsg, "bot");
+          return { ok: false, error: errMsg };
         }
 
         addMessage(result.data.reply, "bot", result.data.sources);
         conversation.push({ role: "assistant", content: result.data.reply });
         if (result.data.remembered) renderMemory(Object.assign({ email: accountEmail.textContent }, result.data.remembered));
-        speakText(result.data.reply);
+        if (!opts.viaVoice) speakText(result.data.reply);
+        return { ok: true, reply: result.data.reply };
       })
       .catch(function () {
         pending.remove();
-        chatInput.disabled = false;
-        chatSend.disabled = false;
-        addMessage("Couldn't reach the server. Please try again.", "bot");
+        if (!opts.viaVoice) {
+          chatInput.disabled = false;
+          chatSend.disabled = false;
+        }
+        var errMsg = "Couldn't reach the server. Please try again.";
+        addMessage(errMsg, "bot");
+        return { ok: false, error: errMsg };
       });
+  }
+
+  chatForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = chatInput.value.trim();
+    if (!text) return;
+    sendChatMessage(text);
   });
 
   // ---------------- session self-review ----------------
@@ -1325,6 +1364,426 @@
         addMessage("Couldn't reach the server to transcribe that. Please try again.", "bot");
       });
   }
+
+  // ---------------- voice mode (full-screen hands-free overlay) ----------------
+  // A real conversation loop, not a scripted demo: tap the orb to record,
+  // it auto-stops on silence (or a manual tap, or a 20s cap), transcribes
+  // via /api/voice/transcribe, sends the result through the same
+  // sendChatMessage() the typed chat box uses, then speaks the reply via
+  // /api/voice/speak. The orb's ring/glow react to real audio levels — the
+  // mic while listening, the reply's own playback while speaking — via the
+  // Web Audio API, not a scripted animation.
+  //
+  // State machine: idle -> listening -> thinking -> speaking -> idle, with
+  // an "error" state for mic/network failures. voState is the single
+  // source of truth; every async callback below re-checks it before acting
+  // so that closing the overlay (which forces state back to "idle") cleanly
+  // stops any in-flight recording, transcription, chat call, or playback
+  // rather than letting it land after the user has moved on.
+
+  var voState = "idle";
+  var voReduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  var voRecorder = null;
+  var voRecordedChunks = [];
+  var voMicStream = null;
+  var voHasSpoken = false;
+  var voLastSpeechAt = 0;
+  var voRecordStartedAt = 0;
+  var voAutoStopTimer = null;
+  var voAbort = null;
+
+  var VO_MAX_MS = 20000; // hard cap so a stuck recording can't run forever
+  var VO_MIN_MS = 600; // ignore silence-based auto-stop for this long, so a quick "um" doesn't cut itself off
+  var VO_SILENCE_MS = 1600; // how long to hear nothing after speech before auto-stopping
+  var VO_SPEECH_LEVEL = 0.12; // level above which we count it as "the user is talking"
+
+  var voAudioCtx = null;
+  var voMicSource = null;
+  var voMicAnalyser = null;
+  var voPlaybackSource = null; // createMediaElementSource can only be called once per <audio> ever — created lazily, reused for every reply
+  var voPlaybackAnalyser = null;
+  var voLevelBuf = null;
+  var voLevelRAF = null;
+  var voCurrentLevel = 0;
+
+  var voRingCtx = voiceModeRingCanvas ? voiceModeRingCanvas.getContext("2d") : null;
+  var voRingRAF = null;
+  var voRingT = 0;
+
+  var VO_STATE_LABELS = {
+    idle: "Tap to talk",
+    listening: "Listening…",
+    thinking: "Thinking…",
+    speaking: "Speaking…",
+    error: "Let's try again"
+  };
+
+  function getVoAudioCtx() {
+    if (!voAudioCtx) {
+      var AudioCtor = window.AudioContext || window.webkitAudioContext;
+      voAudioCtx = new AudioCtor();
+    }
+    if (voAudioCtx.state === "suspended") voAudioCtx.resume();
+    return voAudioCtx;
+  }
+
+  function setVoState(next) {
+    voState = next;
+    voiceModeOverlay.setAttribute("data-state", next);
+    voiceModeStateLabel.textContent = VO_STATE_LABELS[next] || "";
+    voiceModeOrb.setAttribute(
+      "aria-label",
+      next === "listening" ? "Stop listening" : next === "speaking" ? "Stop speaking" : "Tap to talk"
+    );
+  }
+
+  function voStartLevelLoop(analyser) {
+    voStopLevelLoop();
+    voLevelBuf = new Uint8Array(analyser.fftSize);
+    function tick() {
+      analyser.getByteTimeDomainData(voLevelBuf);
+      var sumSquares = 0;
+      for (var i = 0; i < voLevelBuf.length; i++) {
+        var v = (voLevelBuf[i] - 128) / 128;
+        sumSquares += v * v;
+      }
+      var rms = Math.sqrt(sumSquares / voLevelBuf.length);
+      voCurrentLevel = Math.min(1, rms * 3.5);
+      if (voiceModeOrbWrap) voiceModeOrbWrap.style.setProperty("--level", voCurrentLevel.toFixed(3));
+      voLevelRAF = requestAnimationFrame(tick);
+    }
+    voLevelRAF = requestAnimationFrame(tick);
+  }
+
+  function voStopLevelLoop() {
+    if (voLevelRAF) cancelAnimationFrame(voLevelRAF);
+    voLevelRAF = null;
+    voCurrentLevel = 0;
+    if (voiceModeOrbWrap) voiceModeOrbWrap.style.setProperty("--level", "0");
+  }
+
+  function voRingAmplitude(state) {
+    if (state === "listening") return 6;
+    if (state === "speaking") return 8;
+    if (state === "thinking") return 3;
+    return 1.2;
+  }
+
+  function voRingColor(state) {
+    if (state === "listening") return "111,147,184";
+    if (state === "speaking") return "255,210,138";
+    if (state === "error") return "255,138,122";
+    return "201,138,62";
+  }
+
+  function voDrawRing() {
+    if (voRingCtx) {
+      var w = voiceModeRingCanvas.width;
+      var h = voiceModeRingCanvas.height;
+      voRingCtx.clearRect(0, 0, w, h);
+      var cx = w / 2;
+      var cy = h / 2;
+      var baseR = Math.min(w, h) * 0.42;
+      var amp = voRingAmplitude(voState) * (0.5 + voCurrentLevel * 1.5);
+      var points = 96;
+      voRingCtx.beginPath();
+      for (var i = 0; i <= points; i++) {
+        var a = (i / points) * Math.PI * 2;
+        var wobble = Math.sin(a * 3 + voRingT) * amp * 0.5 + Math.sin(a * 5 - voRingT * 1.3) * amp * 0.3;
+        var r = baseR + wobble;
+        var x = cx + Math.cos(a) * r;
+        var y = cy + Math.sin(a) * r;
+        if (i === 0) voRingCtx.moveTo(x, y);
+        else voRingCtx.lineTo(x, y);
+      }
+      voRingCtx.closePath();
+      voRingCtx.strokeStyle = "rgba(" + voRingColor(voState) + "," + (0.55 + voCurrentLevel * 0.3) + ")";
+      voRingCtx.lineWidth = 2;
+      voRingCtx.stroke();
+      if (!voReduceMotion) voRingT += 0.02 + voCurrentLevel * 0.03;
+    }
+    voRingRAF = requestAnimationFrame(voDrawRing);
+  }
+
+  function voStartRingLoop() {
+    if (voRingRAF) return;
+    voRingT = 0;
+    voRingRAF = requestAnimationFrame(voDrawRing);
+  }
+
+  function voStopRingLoop() {
+    if (voRingRAF) cancelAnimationFrame(voRingRAF);
+    voRingRAF = null;
+  }
+
+  function voTeardownMic() {
+    voStopLevelLoop();
+    if (voMicStream) {
+      voMicStream.getTracks().forEach(function (track) { track.stop(); });
+      voMicStream = null;
+    }
+    if (voMicSource) {
+      try { voMicSource.disconnect(); } catch (e) { /* already disconnected */ }
+      voMicSource = null;
+    }
+    if (voMicAnalyser) {
+      try { voMicAnalyser.disconnect(); } catch (e) { /* already disconnected */ }
+      voMicAnalyser = null;
+    }
+    if (voAutoStopTimer) {
+      clearInterval(voAutoStopTimer);
+      voAutoStopTimer = null;
+    }
+    voRecorder = null;
+  }
+
+  function voScheduleAutoStop() {
+    clearInterval(voAutoStopTimer);
+    voAutoStopTimer = setInterval(function () {
+      if (voState !== "listening") {
+        clearInterval(voAutoStopTimer);
+        return;
+      }
+      var elapsed = Date.now() - voRecordStartedAt;
+      if (voCurrentLevel > VO_SPEECH_LEVEL) {
+        voHasSpoken = true;
+        voLastSpeechAt = Date.now();
+      }
+      if (elapsed >= VO_MAX_MS) {
+        stopVoiceListening();
+        return;
+      }
+      if (voHasSpoken && elapsed >= VO_MIN_MS && Date.now() - voLastSpeechAt >= VO_SILENCE_MS) {
+        stopVoiceListening();
+      }
+    }, 150);
+  }
+
+  function startVoiceListening() {
+    getVoAudioCtx(); // created/resumed inside this click gesture so later TTS playback isn't blocked by autoplay policy
+    voiceModeCaption.textContent = "";
+
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(function (stream) {
+        voMicStream = stream;
+        var mimeType = "";
+        if (window.MediaRecorder.isTypeSupported("audio/webm")) {
+          mimeType = "audio/webm";
+        } else if (window.MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        }
+
+        voRecordedChunks = [];
+        voRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+
+        voRecorder.addEventListener("dataavailable", function (e) {
+          if (e.data && e.data.size > 0) voRecordedChunks.push(e.data);
+        });
+
+        voRecorder.addEventListener("stop", function () {
+          var recordedType = voRecorder ? voRecorder.mimeType || mimeType || "audio/webm" : mimeType || "audio/webm";
+          var blob = new Blob(voRecordedChunks, { type: recordedType });
+          var hadSpoken = voHasSpoken;
+          var wasCancelled = voState === "idle";
+          voTeardownMic();
+          if (wasCancelled) return;
+          if (!hadSpoken || blob.size < 800) {
+            setVoState("idle");
+            voiceModeCaption.textContent = "Didn't catch anything — tap the orb and try again.";
+            return;
+          }
+          handleVoiceTranscription(blob);
+        });
+
+        try {
+          var ctx = getVoAudioCtx();
+          voMicSource = ctx.createMediaStreamSource(stream);
+          voMicAnalyser = ctx.createAnalyser();
+          voMicAnalyser.fftSize = 512;
+          voMicSource.connect(voMicAnalyser);
+          voStartLevelLoop(voMicAnalyser);
+        } catch (e) {
+          // The reactive ring is a visual enhancement only — recording still works without it.
+        }
+
+        voHasSpoken = false;
+        voRecordStartedAt = Date.now();
+        voRecorder.start();
+        setVoState("listening");
+        voScheduleAutoStop();
+      })
+      .catch(function () {
+        setVoState("error");
+        voiceModeCaption.textContent = "Couldn't access your microphone. Check your browser's microphone permission and try again.";
+      });
+  }
+
+  function stopVoiceListening() {
+    clearInterval(voAutoStopTimer);
+    if (voRecorder && voRecorder.state === "recording") {
+      setVoState("thinking");
+      voiceModeCaption.textContent = "";
+      voRecorder.stop();
+    }
+  }
+
+  function handleVoiceTranscription(blob) {
+    voAbort = new AbortController();
+    fetch("/api/voice/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": blob.type || "audio/webm" },
+      body: blob,
+      signal: voAbort.signal
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (voState !== "thinking") return; // overlay closed, or the user backed out, meanwhile
+        if (!result.ok || !result.data.text || !result.data.text.trim()) {
+          setVoState("idle");
+          voiceModeCaption.textContent = (result.data && result.data.error) || "Didn't catch that — tap the orb and try again.";
+          return;
+        }
+        var text = result.data.text.trim();
+        voiceModeCaption.textContent = text;
+        sendChatMessage(text, { viaVoice: true }).then(function (result2) {
+          if (voState !== "thinking") return;
+          if (!result2.ok) {
+            setVoState("idle");
+            voiceModeCaption.textContent = result2.error || "Something went wrong. Please try again.";
+            return;
+          }
+          voiceModeCaption.textContent = result2.reply;
+          speakVoiceReply(result2.reply);
+        });
+      })
+      .catch(function (err) {
+        if (err && err.name === "AbortError") return;
+        setVoState("idle");
+        voiceModeCaption.textContent = "Couldn't reach the server to transcribe that. Please try again.";
+      });
+  }
+
+  function speakVoiceReply(text) {
+    if (!voiceAvailable || !text) {
+      setVoState("idle");
+      return;
+    }
+    setVoState("speaking");
+    voAbort = new AbortController();
+
+    fetch("/api/voice/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text }),
+      signal: voAbort.signal
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("tts request failed");
+        return res.blob();
+      })
+      .then(function (blob) {
+        if (voState !== "speaking") return;
+        voiceModePlayer.src = URL.createObjectURL(blob);
+        try {
+          var ctx = getVoAudioCtx();
+          if (!voPlaybackSource) {
+            voPlaybackSource = ctx.createMediaElementSource(voiceModePlayer);
+            voPlaybackAnalyser = ctx.createAnalyser();
+            voPlaybackAnalyser.fftSize = 512;
+            // createMediaElementSource redirects the element's own output into
+            // the Web Audio graph, so the analyser has to be wired back to the
+            // speakers itself or the reply would go visually-reactive but silent.
+            voPlaybackSource.connect(voPlaybackAnalyser);
+            voPlaybackAnalyser.connect(ctx.destination);
+          }
+          voStartLevelLoop(voPlaybackAnalyser);
+        } catch (e) {
+          // Reactive orb is a visual enhancement only — playback still works without it.
+        }
+        return voiceModePlayer.play();
+      })
+      .catch(function (err) {
+        if (err && err.name === "AbortError") return;
+        // The reply text is already shown as the caption — skip the audio
+        // rather than interrupting the conversation with an error state.
+        finishVoiceSpeaking();
+      });
+  }
+
+  function finishVoiceSpeaking() {
+    voStopLevelLoop();
+    if (voState === "speaking") setVoState("idle");
+  }
+
+  function interruptVoiceSpeaking() {
+    voiceModePlayer.pause();
+    voiceModePlayer.currentTime = 0;
+    finishVoiceSpeaking();
+  }
+
+  voiceModePlayer.addEventListener("ended", finishVoiceSpeaking);
+
+  function handleVoiceOrbTap() {
+    if (voState === "idle" || voState === "error") {
+      startVoiceListening();
+    } else if (voState === "listening") {
+      stopVoiceListening();
+    } else if (voState === "speaking") {
+      interruptVoiceSpeaking();
+    }
+    // "thinking" ignores taps — nothing to start or stop mid-flight.
+  }
+
+  function cancelVoiceFlow() {
+    setVoState("idle");
+    if (voAbort) {
+      voAbort.abort();
+      voAbort = null;
+    }
+    if (voRecorder && voRecorder.state === "recording") {
+      voRecorder.stop();
+    }
+    voTeardownMic();
+    voiceModePlayer.pause();
+    voStopLevelLoop();
+  }
+
+  function onVoiceModeKeydown(e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeVoiceMode();
+    }
+  }
+
+  function openVoiceMode() {
+    if (!voiceAvailable || !micSupported) return;
+    voiceModeOverlay.hidden = false;
+    document.body.classList.add("modal-open");
+    setVoState("idle");
+    voiceModeCaption.textContent = "Tap the orb and ask about your kid.";
+    voStartRingLoop();
+    document.addEventListener("keydown", onVoiceModeKeydown);
+    voiceModeCloseBtn.focus();
+  }
+
+  function closeVoiceMode() {
+    cancelVoiceFlow();
+    voiceModeOverlay.hidden = true;
+    document.body.classList.remove("modal-open");
+    voStopRingLoop();
+    document.removeEventListener("keydown", onVoiceModeKeydown);
+    voiceModeBtn.focus();
+  }
+
+  voiceModeBtn.addEventListener("click", openVoiceMode);
+  voiceModeCloseBtn.addEventListener("click", closeVoiceMode);
+  voiceModeOrb.addEventListener("click", handleVoiceOrbTap);
 
   // ---------------- boot ----------------
 
