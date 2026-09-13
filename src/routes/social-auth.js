@@ -34,7 +34,13 @@ function findOrCreateSocialUser({ column, providerId, email, emailVerified }) {
   if (email && emailVerified) {
     user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (user) {
-      db.prepare(`UPDATE users SET ${column} = ? WHERE id = ?`).run(providerId, user.id);
+      // Linking a provider whose own verification we trust onto an
+      // existing account is itself proof of that email, so this also
+      // closes out any outstanding "verify your email" banner — matters
+      // for a password account created before email verification existed
+      // (see the email_verified migration in src/db.js) that later also
+      // links Google/Facebook.
+      db.prepare(`UPDATE users SET ${column} = ?, email_verified = 1 WHERE id = ?`).run(providerId, user.id);
       return db.prepare("SELECT * FROM users WHERE id = ?").get(user.id);
     }
   }
@@ -43,8 +49,12 @@ function findOrCreateSocialUser({ column, providerId, email, emailVerified }) {
     throw new Error("NO_EMAIL");
   }
 
+  // email_verified = 1 here, not the column default of 0: this branch only
+  // runs once the provider itself has confirmed the email (the
+  // emailVerified check above), so there's nothing left for our own
+  // verify-email flow to prove.
   const result = db
-    .prepare(`INSERT INTO users (email, password_hash, ${column}) VALUES (?, NULL, ?)`)
+    .prepare(`INSERT INTO users (email, password_hash, ${column}, email_verified) VALUES (?, NULL, ?, 1)`)
     .run(email, providerId);
   db.prepare("INSERT INTO family_notes (user_id) VALUES (?)").run(result.lastInsertRowid);
   return db.prepare("SELECT * FROM users WHERE id = ?").get(result.lastInsertRowid);
