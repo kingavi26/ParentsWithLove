@@ -1308,6 +1308,132 @@ h1 {
 .account-memory-delete:hover { border-color: var(--error); color: var(--error); }
 .account-memory-delete:disabled { opacity: 0.6; cursor: default; }
 
+/* ---------- new-parent intake wizard (#intake-modal, public/app.js) ---------- */
+
+/* "Skip for now" sits in the modal-head next to the title, not stacked
+   full-width below a form the way .link-button normally is — same inline
+   override #verify-email-banner already applies to this class for the
+   same reason. */
+#intake-modal .modal-head .link-button {
+  display: inline;
+  width: auto;
+  margin-top: 0;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.intake-progress {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0 1.2rem;
+}
+
+.intake-progress-dot {
+  height: 5px;
+  flex: 1 1 0;
+  border-radius: calc(3px * var(--radius-scale));
+  background: var(--border);
+}
+
+.intake-progress-dot.active { background: var(--accent); }
+
+.intake-children-header {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.1rem;
+  margin-bottom: 0.35rem;
+}
+.intake-children-header span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.intake-children-header span:first-child { flex: 1 1 8rem; }
+.intake-children-header span:last-child { flex: 0 1 4.5rem; }
+
+.intake-children-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.7rem; }
+
+.intake-child-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.intake-child-row input {
+  padding: 0.5rem 0.6rem;
+  border-radius: calc(4px * var(--radius-scale));
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  min-width: 0;
+}
+.intake-child-row input.intake-child-name { flex: 1 1 8rem; }
+.intake-child-row input.intake-child-age { flex: 0 1 4.5rem; }
+.intake-child-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.intake-child-remove {
+  padding: 0.45rem 0.6rem;
+  border-radius: calc(4px * var(--radius-scale));
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.intake-child-remove:hover { border-color: var(--error); color: var(--error); }
+
+.intake-add-child-btn { margin-bottom: 0.3rem; }
+
+.intake-concerns-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+/* Toggle chips — unselected reads like a quiet outlined button, selected
+   flips to the accent color so the parent's picks are obvious at a glance.
+   Same active/inactive contrast idea as .auth-tab.active, just accent-
+   colored rather than stark text/bg since this is a "pick some things you
+   like" control, not a binary mode switch. */
+.concern-chip {
+  padding: 0.45rem 0.85rem;
+  border-radius: calc(999px * var(--radius-scale));
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.concern-chip:hover { border-color: var(--accent); }
+.concern-chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+/* "Not sure yet" is a valid answer on its own, mutually exclusive with
+   every concern chip (see toggleConcern in app.js) — a dashed border keeps
+   it visually distinct from the "pick as many as apply" chips beside it. */
+.concern-chip-neutral { border-style: dashed; }
+
+.intake-other-field { margin-top: 0.2rem; }
+
+.intake-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.3rem;
+}
+.intake-actions .btn-primary { flex: 1; }
+.intake-actions .intake-back-btn { flex: 0 0 auto; width: auto; padding-left: 1.1rem; padding-right: 1.1rem; }
+
 .disclaimer-body p {
   margin: 0 0 0.95rem;
   font-size: 0.9rem;

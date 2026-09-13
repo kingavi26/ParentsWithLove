@@ -360,6 +360,58 @@
       </div>
     </div>
 
+    <!-- New-parent intake wizard — shown once, right after signup, so the
+         first real chat message already has real context instead of
+         starting cold. See POST /api/intake (src/routes/intake.js). No
+         modal-close (&times;) button on purpose: "Skip for now" in the
+         header is the one, clearly-visible way out at every step, so a
+         parent is never trapped but also never loses the thread of why
+         it's here (unlike a plain X, which reads as "dismiss and forget"). -->
+    <div id="intake-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2 data-editable="intake-heading">Tell us about your family</h2>
+          <button type="button" class="link-button" id="intake-skip-btn" data-editable="intake-skip-label">Skip for now</button>
+        </div>
+        <p class="modal-hint" data-editable="intake-intro">
+          A couple of quick questions so replies are on-target from your very first message.
+          Everything here is optional, and you can edit or delete it anytime in Settings.
+        </p>
+
+        <div class="intake-progress" aria-hidden="true">
+          <span class="intake-progress-dot active" data-intake-dot="1"></span>
+          <span class="intake-progress-dot" data-intake-dot="2"></span>
+        </div>
+
+        <section id="intake-step-1" class="intake-step">
+          <div class="modal-label" data-editable="intake-kids-label">Your kids</div>
+          <div class="intake-children-header">
+            <span>Name (optional)</span>
+            <span>Age</span>
+          </div>
+          <div id="intake-children-list" class="intake-children-list"></div>
+          <button type="button" class="btn-secondary-outline intake-add-child-btn" id="intake-add-child-btn" data-editable="intake-add-child-label">+ Add a child</button>
+        </section>
+
+        <section id="intake-step-2" class="intake-step" hidden>
+          <div class="modal-label" data-editable="intake-concerns-label">What would you like help with?</div>
+          <p class="modal-hint" data-editable="intake-concerns-hint">Pick as many as apply &mdash; this just helps us start in the right place.</p>
+          <div id="intake-concerns-list" class="intake-concerns-list"></div>
+          <div class="field intake-other-field" id="intake-other-field" hidden>
+            <label for="intake-other-input" data-editable="intake-other-label">Say a bit more</label>
+            <input id="intake-other-input" type="text" maxlength="200" placeholder="What's going on?" />
+          </div>
+        </section>
+
+        <div id="intake-error" class="form-error"></div>
+
+        <div class="intake-actions">
+          <button type="button" class="btn-secondary-outline intake-back-btn" id="intake-back-btn" hidden data-editable="intake-back-label">Back</button>
+          <button type="button" class="btn-primary" id="intake-next-btn" data-editable="intake-next-label">Continue</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Disclaimer modal -->
     <div id="disclaimer-modal" class="modal-backdrop" hidden>
       <div class="modal-card">

@@ -66,6 +66,21 @@
   var deleteConfirmEmailInput = document.getElementById("delete-confirm-email");
   var confirmDeleteBtn = document.getElementById("confirm-delete-btn");
 
+  // ---------------- new-parent intake wizard ----------------
+  var intakeModal = document.getElementById("intake-modal");
+  var intakeSkipBtn = document.getElementById("intake-skip-btn");
+  var intakeProgressDots = document.querySelectorAll("[data-intake-dot]");
+  var intakeStep1 = document.getElementById("intake-step-1");
+  var intakeStep2 = document.getElementById("intake-step-2");
+  var intakeChildrenList = document.getElementById("intake-children-list");
+  var intakeAddChildBtn = document.getElementById("intake-add-child-btn");
+  var intakeError = document.getElementById("intake-error");
+  var intakeConcernsList = document.getElementById("intake-concerns-list");
+  var intakeOtherField = document.getElementById("intake-other-field");
+  var intakeOtherInput = document.getElementById("intake-other-input");
+  var intakeBackBtn = document.getElementById("intake-back-btn");
+  var intakeNextBtn = document.getElementById("intake-next-btn");
+
   var chatLog = document.getElementById("chat-log");
   var chatForm = document.getElementById("chat-form");
   var chatInput = document.getElementById("chat-input");
@@ -380,6 +395,283 @@
     }
   })();
 
+  // ---------------- new-parent intake wizard ----------------
+  // Shown once, right after signup (or on the first /api/me after a login
+  // whose account never finished it — see the intakeAutoCheckPending hook
+  // in refreshMe() below) via POST /api/intake (src/routes/intake.js).
+  // Deliberately writes straight into the same tables chat-based fact
+  // extraction already uses (children, family_notes.topics_discussed), so
+  // nothing downstream — reply-engine.js's context assembly, the Memory
+  // tab, Settings' children/topics lists — needs to know this wizard
+  // exists at all.
+
+  // Keep this list in sync with src/intake.js's INTAKE_CONCERNS — these are
+  // the exact strings the server validates against and stores as a
+  // remembered topic, so the chip label and the saved fact are identical.
+  var INTAKE_CONCERNS = [
+    "Bedtime & sleep",
+    "Tantrums & big emotions",
+    "Sibling conflict",
+    "Screen time & tech",
+    "Listening & cooperation",
+    "Discipline & setting boundaries",
+    "School, homework, or focus",
+    "Friendships & social stuff",
+    "Separation anxiety / clinginess",
+    "Mealtime battles",
+    "Potty training",
+    "A big change lately",
+    "Talking about feelings"
+  ];
+  var INTAKE_MAX_CHILDREN = 8;
+
+  // Guards the auto-open-on-entry check so it only ever fires once per
+  // login/signup/page-load, never on the many other refreshMe() calls that
+  // happen afterward (deleting a topic, exporting data, etc.) — see the
+  // hook inside refreshMe() below, and the reset in doLogout()/refreshMe()'s
+  // own .catch() above.
+  var intakeAutoCheckPending = true;
+  var intakeChildren = [];
+  var intakeSelectedConcerns = [];
+  var intakeNotSureYet = false;
+  var intakeStepNum = 1;
+
+  function renderIntakeChildren() {
+    intakeChildrenList.innerHTML = "";
+    intakeChildren.forEach(function (child, index) {
+      var row = document.createElement("div");
+      row.className = "intake-child-row";
+
+      var nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "intake-child-name";
+      nameInput.placeholder = "Name or nickname";
+      nameInput.maxLength = 100;
+      nameInput.value = child.name || "";
+      nameInput.addEventListener("input", function () {
+        intakeChildren[index].name = nameInput.value;
+      });
+
+      var ageInput = document.createElement("input");
+      ageInput.type = "number";
+      ageInput.className = "intake-child-age";
+      ageInput.placeholder = "Age";
+      ageInput.min = "0";
+      ageInput.max = "17";
+      ageInput.value = child.age === "" || child.age == null ? "" : child.age;
+      ageInput.addEventListener("input", function () {
+        intakeChildren[index].age = ageInput.value;
+      });
+
+      row.appendChild(nameInput);
+      row.appendChild(ageInput);
+
+      // Always leave at least one row on screen — removing the last one
+      // would leave a parent staring at an empty section with no obvious
+      // way back in short of the "+ Add a child" button below it.
+      if (intakeChildren.length > 1) {
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "intake-child-remove";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", function () {
+          intakeChildren.splice(index, 1);
+          renderIntakeChildren();
+        });
+        row.appendChild(removeBtn);
+      }
+
+      intakeChildrenList.appendChild(row);
+    });
+
+    intakeAddChildBtn.disabled = intakeChildren.length >= INTAKE_MAX_CHILDREN;
+  }
+
+  intakeAddChildBtn.addEventListener("click", function () {
+    if (intakeChildren.length >= INTAKE_MAX_CHILDREN) return;
+    intakeChildren.push({ name: "", age: "" });
+    renderIntakeChildren();
+  });
+
+  function renderIntakeConcerns() {
+    intakeConcernsList.innerHTML = "";
+
+    INTAKE_CONCERNS.forEach(function (concern) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "concern-chip";
+      chip.textContent = concern;
+      chip.classList.toggle("selected", intakeSelectedConcerns.indexOf(concern) !== -1);
+      chip.addEventListener("click", function () {
+        toggleConcern(concern);
+      });
+      intakeConcernsList.appendChild(chip);
+    });
+
+    var otherChip = document.createElement("button");
+    otherChip.type = "button";
+    otherChip.className = "concern-chip";
+    otherChip.textContent = "Something else";
+    otherChip.classList.toggle("selected", !intakeOtherField.hidden);
+    otherChip.addEventListener("click", function () {
+      intakeNotSureYet = false;
+      intakeOtherField.hidden = !intakeOtherField.hidden;
+      if (intakeOtherField.hidden) {
+        intakeOtherInput.value = "";
+      } else {
+        intakeOtherInput.focus();
+      }
+      renderIntakeConcerns();
+    });
+    intakeConcernsList.appendChild(otherChip);
+
+    var notSureChip = document.createElement("button");
+    notSureChip.type = "button";
+    notSureChip.className = "concern-chip concern-chip-neutral";
+    notSureChip.textContent = "Not sure yet / just exploring";
+    notSureChip.classList.toggle("selected", intakeNotSureYet);
+    notSureChip.addEventListener("click", function () {
+      toggleNotSureYet();
+    });
+    intakeConcernsList.appendChild(notSureChip);
+  }
+
+  // A concern pick and "Not sure yet" are mutually exclusive (see the plan:
+  // "Not sure yet" is a valid answer on its own) — picking either clears
+  // the other rather than letting both sit selected at once.
+  function toggleConcern(concern) {
+    intakeNotSureYet = false;
+    var index = intakeSelectedConcerns.indexOf(concern);
+    if (index === -1) {
+      intakeSelectedConcerns.push(concern);
+    } else {
+      intakeSelectedConcerns.splice(index, 1);
+    }
+    renderIntakeConcerns();
+  }
+
+  function toggleNotSureYet() {
+    intakeNotSureYet = !intakeNotSureYet;
+    if (intakeNotSureYet) {
+      intakeSelectedConcerns = [];
+      intakeOtherField.hidden = true;
+      intakeOtherInput.value = "";
+    }
+    renderIntakeConcerns();
+  }
+
+  function showIntakeStep(step) {
+    intakeStepNum = step;
+    intakeStep1.hidden = step !== 1;
+    intakeStep2.hidden = step !== 2;
+    intakeBackBtn.hidden = step === 1;
+    intakeNextBtn.textContent = step === 1 ? "Continue" : "Finish";
+    intakeProgressDots.forEach(function (dot) {
+      dot.classList.toggle("active", Number(dot.getAttribute("data-intake-dot")) <= step);
+    });
+  }
+
+  function openIntakeModal() {
+    intakeChildren = [{ name: "", age: "" }];
+    intakeSelectedConcerns = [];
+    intakeNotSureYet = false;
+    intakeError.textContent = "";
+    intakeError.classList.remove("visible");
+    intakeOtherField.hidden = true;
+    intakeOtherInput.value = "";
+    renderIntakeChildren();
+    renderIntakeConcerns();
+    showIntakeStep(1);
+    intakeModal.hidden = false;
+    document.body.classList.add("modal-open");
+  }
+
+  function closeIntakeModal() {
+    intakeModal.hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+
+  // Drops any row with neither a name nor an age (e.g. a parent added a
+  // second row via "+ Add a child" and then left it blank) rather than
+  // sending it to the server, which would otherwise 400 on it.
+  function collectIntakeChildren() {
+    return intakeChildren
+      .map(function (c) {
+        return {
+          name: (c.name || "").trim(),
+          age: c.age === "" || c.age == null ? null : Number(c.age)
+        };
+      })
+      .filter(function (c) {
+        return c.name || c.age != null;
+      });
+  }
+
+  // Handles both "Continue"/"Finish" and "Skip for now" — skipping just
+  // means submitting whatever (if anything) has been filled in so far, so
+  // both buttons call this same function rather than a separate skip path.
+  function submitIntake() {
+    intakeError.textContent = "";
+    intakeError.classList.remove("visible");
+
+    var payload = {
+      children: collectIntakeChildren(),
+      concerns: intakeNotSureYet ? [] : intakeSelectedConcerns.slice(),
+      otherConcern: intakeNotSureYet ? "" : intakeOtherInput.value,
+      notSureYet: intakeNotSureYet
+    };
+
+    intakeNextBtn.disabled = true;
+    intakeSkipBtn.disabled = true;
+    if (!intakeBackBtn.hidden) intakeBackBtn.disabled = true;
+
+    fetch("/api/intake", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        intakeNextBtn.disabled = false;
+        intakeSkipBtn.disabled = false;
+        intakeBackBtn.disabled = false;
+        if (!result.ok) {
+          intakeError.textContent = result.data.error || "Something went wrong. Please try again.";
+          intakeError.classList.add("visible");
+          return;
+        }
+        closeIntakeModal();
+        refreshMe();
+      })
+      .catch(function () {
+        intakeNextBtn.disabled = false;
+        intakeSkipBtn.disabled = false;
+        intakeBackBtn.disabled = false;
+        intakeError.textContent = "Couldn't reach the server. Please try again.";
+        intakeError.classList.add("visible");
+      });
+  }
+
+  intakeNextBtn.addEventListener("click", function () {
+    if (intakeStepNum === 1) {
+      showIntakeStep(2);
+      return;
+    }
+    submitIntake();
+  });
+
+  intakeBackBtn.addEventListener("click", function () {
+    showIntakeStep(1);
+  });
+
+  intakeSkipBtn.addEventListener("click", function () {
+    submitIntake();
+  });
+
   // ---------------- app screen: nav + screens ----------------
   // The app is a real shell with distinct screens (Home / Chat / Memory),
   // switched by showScreen(), rather than one long page with everything
@@ -505,11 +797,23 @@
         if (chatLog.children.length === 0) {
           greet(data);
         }
+        // Only ever act on hasCompletedIntake once per "entry" into the app
+        // (first successful /api/me after login/signup, or a page reload
+        // with an existing session cookie) — refreshMe() also runs after
+        // plenty of other in-app actions (deleting a topic, exporting data,
+        // etc.) and none of those should ever pop the wizard back up.
+        if (intakeAutoCheckPending) {
+          intakeAutoCheckPending = false;
+          if (!data.hasCompletedIntake) {
+            openIntakeModal();
+          }
+        }
       })
       .catch(function () {
         appScreen.hidden = true;
         authScreen.hidden = false;
         document.body.classList.remove("app-active");
+        intakeAutoCheckPending = true;
       });
   }
 
@@ -1308,10 +1612,12 @@
       authScreen.hidden = false;
       passwordInput.value = "";
       accountModal.hidden = true;
+      intakeModal.hidden = true;
       document.body.classList.remove("modal-open");
       document.body.classList.remove("app-active");
       stopRecording();
       voicePlayer.pause();
+      intakeAutoCheckPending = true;
     });
   }
 
