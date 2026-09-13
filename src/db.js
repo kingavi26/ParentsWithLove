@@ -195,6 +195,23 @@ function initDb() {
   if (!familyNotesColumns.includes("last_message_at")) {
     db.exec("ALTER TABLE family_notes ADD COLUMN last_message_at TEXT");
   }
+
+  // Whether this account has been through (or explicitly skipped) the
+  // new-parent intake wizard (public/app.js, POST /api/intake — see
+  // src/routes/intake.js) — a short "who are your kids, what's going on"
+  // form shown once right after signup so the very first chat reply
+  // already has real context instead of starting cold. Backfilled to 1 for
+  // every account that already existed at the moment this column is added
+  // (inside this same `if`, not run unconditionally like email_verified's
+  // backfill above) — the wizard is a first-run experience, not something
+  // to retroactively nag existing parents with. Every brand-new signup
+  // after this migration gets the column's own DEFAULT 0, no extra code
+  // needed at the INSERT site in auth.js/social-auth.js.
+  const usersColumnsForIntake = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+  if (!usersColumnsForIntake.includes("has_completed_intake")) {
+    db.exec("ALTER TABLE users ADD COLUMN has_completed_intake INTEGER NOT NULL DEFAULT 0");
+    db.exec("UPDATE users SET has_completed_intake = 1");
+  }
 }
 
 module.exports = { db, initDb };
