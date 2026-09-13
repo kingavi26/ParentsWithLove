@@ -53,6 +53,15 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
         fontSrc: ["'self'"],
+        // Both the existing "read replies aloud" toggle and voice mode
+        // (public/app.js) play TTS audio via `<audio>.src =
+        // URL.createObjectURL(blob)` — a blob: URL. With no mediaSrc
+        // directive this fell back to defaultSrc ('self'), which blocks
+        // blob: outright: the browser silently refuses to load the audio
+        // (caught by app.js's deliberately-silent .catch(), so this never
+        // surfaced as a visible error — the reply text always showed up
+        // fine, it just never spoke). Found while building voice mode.
+        mediaSrc: ["'self'", "blob:"],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
