@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const { db } = require("../db");
 const {
   isAdminAvailable,
@@ -117,6 +118,69 @@ function userSummary(row) {
 router.get("/admin/users", requireAdminAuth, (req, res) => {
   const rows = db.prepare("SELECT * FROM users ORDER BY created_at DESC").all();
   res.json({ users: rows.map(userSummary) });
+});
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+// Lets an admin set someone up directly — no signup form, no email
+// verification (there isn't one yet, see pwl7-app-review notes) — mainly
+// for cases like "a parent emailed asking to be added by hand" or testing.
+// Password is optional: leaving it blank creates a password-less account
+// (fine if they'll link Google/Facebook instead, or an admin follows up
+// with the reset-password action below once they have a password to give).
+router.post("/admin/users", requireAdminAuth, async (req, res) => {
+  const email = normalizeEmail(req.body && req.body.email);
+  const password = (req.body && req.body.password) || "";
+
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ error: "Please enter a valid email address." });
+  }
+  if (password && password.length < 8) {
+    return res.status(400).json({ error: "Password must be at least 8 characters, or leave it blank." });
+  }
+
+  const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(email);
+  if (existing) {
+    return res.status(409).json({ error: "An account with that email already exists." });
+  }
+
+  const passwordHash = password ? await bcrypt.hash(password, 10) : null;
+  const result = db.prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)").run(email, passwordHash);
+  db.prepare("INSERT INTO family_notes (user_id) VALUES (?)").run(result.lastInsertRowid);
+
+  const row = db.prepare("SELECT * FROM users WHERE id = ?").get(result.lastInsertRowid);
+  res.status(201).json(userSummary(row));
+});
+
+// Admin-initiated password set/reset — the gap flagged in the Sept 5 app
+// review ("a password-only user who forgets their password has no
+// self-service way back in ... the admin panel doesn't have a 'set this
+// user's password' action either"). Bumps token_version the same way a
+// self-service password change does (src/routes/account.js), so any
+// session already open on another device is immediately invalidated —
+// the right behavior here since a reset usually means "I think someone
+// else has access" or "I'm locked out and need a fresh start."
+router.post("/admin/users/:id/password", requireAdminAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  const row = db.prepare("SELECT id, token_version FROM users WHERE id = ?").get(id);
+  if (!row) return res.status(404).json({ error: "No account with that id." });
+
+  const newPassword = (req.body && req.body.newPassword) || "";
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: "New password must be at least 8 characters." });
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 10);
+  const nextTokenVersion = (row.token_version || 0) + 1;
+  db.prepare("UPDATE users SET password_hash = ?, token_version = ? WHERE id = ?").run(
+    newHash,
+    nextTokenVersion,
+    id
+  );
+
+  res.json({ ok: true });
 });
 
 router.get("/admin/users/:id", requireAdminAuth, (req, res) => {
