@@ -86,21 +86,32 @@
       <!-- Users -->
       <div class="admin-panel" id="admin-panel-users" hidden>
         <div class="admin-card">
+          <div class="admin-users-toolbar">
+            <input
+              type="search"
+              id="admin-users-search"
+              class="admin-search-input"
+              placeholder="Search by email&hellip;"
+              autocomplete="off"
+            />
+            <button type="button" class="btn-secondary-outline" id="admin-add-user-btn" style="display: inline-block; width: auto; padding: 0.5rem 1rem;">+ Add user</button>
+          </div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Joined</th>
+                  <th class="admin-sortable" data-sort="email">Email</th>
+                  <th class="admin-sortable" data-sort="createdAt">Joined</th>
                   <th>Login</th>
-                  <th>Children</th>
-                  <th>Last chat</th>
-                  <th>Status</th>
+                  <th class="admin-sortable" data-sort="childrenCount">Children</th>
+                  <th class="admin-sortable" data-sort="lastConversationAt">Last chat</th>
+                  <th class="admin-sortable" data-sort="suspended">Status</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="admin-users-body"></tbody>
             </table>
+            <div id="admin-users-empty" class="memory-empty" hidden>No accounts match that search.</div>
           </div>
         </div>
       </div>
@@ -275,6 +286,60 @@
         <p class="modal-danger-copy" id="admin-delete-modal-copy"></p>
         <div id="admin-delete-modal-error" class="form-error"></div>
         <button type="button" class="btn-danger" id="admin-delete-modal-confirm-btn">Permanently delete this account</button>
+      </div>
+    </div>
+
+    <!-- Add user modal -->
+    <div id="admin-add-user-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Add a user account</h2>
+          <button type="button" class="modal-close" id="admin-add-user-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <p class="modal-danger-copy">
+          Creates a real account directly &mdash; no signup form or email verification involved. Useful for
+          setting someone up by hand or for testing.
+        </p>
+        <div id="admin-add-user-error" class="form-error"></div>
+        <form id="admin-add-user-form">
+          <div class="field">
+            <label for="admin-add-user-email">Email</label>
+            <input id="admin-add-user-email" type="email" autocomplete="off" required />
+          </div>
+          <div class="field">
+            <label for="admin-add-user-password">Password (optional)</label>
+            <input
+              id="admin-add-user-password"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              placeholder="Leave blank to set one later"
+            />
+          </div>
+          <button type="submit" class="btn-primary" id="admin-add-user-submit">Create account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reset password modal -->
+    <div id="admin-reset-password-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2 id="admin-reset-password-modal-title">Set a new password</h2>
+          <button type="button" class="modal-close" id="admin-reset-password-modal-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <p class="modal-danger-copy">
+          This immediately signs the account out everywhere else. Share the new password with them directly &mdash;
+          it isn't emailed to anyone.
+        </p>
+        <div id="admin-reset-password-error" class="form-error"></div>
+        <form id="admin-reset-password-form">
+          <div class="field">
+            <label for="admin-reset-password-input">New password</label>
+            <input id="admin-reset-password-input" type="password" autocomplete="new-password" minlength="8" required />
+          </div>
+          <button type="submit" class="btn-primary" id="admin-reset-password-submit">Set new password</button>
+        </form>
       </div>
     </div>
   </div>

@@ -1475,6 +1475,29 @@ h1 {
 
 .admin-muted { color: var(--muted); font-size: 0.82rem; }
 
+.admin-users-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.admin-search-input {
+  flex: 1 1 220px;
+  max-width: 320px;
+  padding: 0.5rem 0.75rem;
+  border-radius: calc(4px * var(--radius-scale));
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.admin-search-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .admin-table-wrap { overflow-x: auto; }
 
 .admin-table {
@@ -1493,6 +1516,21 @@ h1 {
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
+
+.admin-table th.admin-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-table th.admin-sortable:hover { color: var(--text); }
+
+.admin-table th.admin-sortable .admin-sort-arrow {
+  display: inline-block;
+  margin-left: 0.25rem;
+  opacity: 0.5;
+}
+
+.admin-table th.admin-sortable.is-active .admin-sort-arrow { opacity: 1; color: var(--accent); }
 
 .admin-table td {
   padding: 0.55rem 0.6rem;

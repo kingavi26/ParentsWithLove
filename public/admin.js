@@ -27,6 +27,26 @@
   var otherIssuesEl = document.getElementById("admin-other-issues");
 
   var usersBody = document.getElementById("admin-users-body");
+  var usersSearchInput = document.getElementById("admin-users-search");
+  var usersEmptyEl = document.getElementById("admin-users-empty");
+  var usersSortHeaders = document.querySelectorAll(".admin-table th.admin-sortable");
+
+  var addUserBtn = document.getElementById("admin-add-user-btn");
+  var addUserModal = document.getElementById("admin-add-user-modal");
+  var addUserModalCloseBtn = document.getElementById("admin-add-user-modal-close-btn");
+  var addUserForm = document.getElementById("admin-add-user-form");
+  var addUserError = document.getElementById("admin-add-user-error");
+  var addUserEmailInput = document.getElementById("admin-add-user-email");
+  var addUserPasswordInput = document.getElementById("admin-add-user-password");
+  var addUserSubmitBtn = document.getElementById("admin-add-user-submit");
+
+  var resetPasswordModal = document.getElementById("admin-reset-password-modal");
+  var resetPasswordModalTitle = document.getElementById("admin-reset-password-modal-title");
+  var resetPasswordModalCloseBtn = document.getElementById("admin-reset-password-modal-close-btn");
+  var resetPasswordForm = document.getElementById("admin-reset-password-form");
+  var resetPasswordError = document.getElementById("admin-reset-password-error");
+  var resetPasswordInput = document.getElementById("admin-reset-password-input");
+  var resetPasswordSubmitBtn = document.getElementById("admin-reset-password-submit");
 
   var reviewsList = document.getElementById("admin-reviews-list");
   var reviewsClearFilterBtn = document.getElementById("admin-reviews-clear-filter");
@@ -62,6 +82,10 @@
 
   var reviewsFilterUserId = null;
   var pendingDeleteUserId = null;
+  var pendingResetPasswordUserId = null;
+  var allUsers = [];
+  var usersSortKey = "createdAt";
+  var usersSortDir = "desc";
 
   function j(url, opts) {
     return fetch(url, Object.assign({ headers: { "Content-Type": "application/json" } }, opts)).then(function (res) {
@@ -259,29 +283,91 @@
   function loadUsers() {
     j("/api/admin/users").then(function (result) {
       if (!result.ok) return;
-      usersBody.innerHTML = result.data.users
-        .map(function (u) {
-          return (
-            "<tr>" +
-            "<td>" + escapeHtml(u.email) + "</td>" +
-            "<td>" + formatDate(u.createdAt) + "</td>" +
-            "<td>" + escapeHtml(loginMethods(u)) + "</td>" +
-            "<td>" + u.childrenCount + "</td>" +
-            "<td>" + formatDate(u.lastConversationAt) + "</td>" +
-            "<td>" + (u.suspended ? '<span class="admin-badge admin-badge-warn">Suspended</span>' : '<span class="admin-badge admin-badge-ok">Active</span>') + "</td>" +
-            '<td class="admin-row-actions">' +
-            '<button type="button" class="admin-link-btn" data-action="view" data-id="' + u.id + '">View</button>' +
-            '<button type="button" class="admin-link-btn" data-action="suspend" data-id="' + u.id + '" data-suspended="' + u.suspended + '">' +
-            (u.suspended ? "Unsuspend" : "Suspend") +
-            "</button>" +
-            '<button type="button" class="admin-link-btn admin-link-btn-danger" data-action="delete" data-id="' + u.id + '" data-email="' + escapeHtml(u.email) + '">Delete</button>' +
-            "</td>" +
-            "</tr>"
-          );
-        })
-        .join("");
+      allUsers = result.data.users;
+      renderUsersTable();
     });
   }
+
+  function sortedFilteredUsers() {
+    var query = (usersSearchInput.value || "").trim().toLowerCase();
+    var list = query
+      ? allUsers.filter(function (u) { return u.email.toLowerCase().indexOf(query) !== -1; })
+      : allUsers.slice();
+
+    var key = usersSortKey;
+    var dir = usersSortDir === "asc" ? 1 : -1;
+    list.sort(function (a, b) {
+      var av = a[key];
+      var bv = b[key];
+      // Nulls (e.g. no chat yet) always sort last, regardless of direction.
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === "string") av = av.toLowerCase();
+      if (typeof bv === "string") bv = bv.toLowerCase();
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+    return list;
+  }
+
+  function renderUsersTable() {
+    usersSortHeaders.forEach(function (th) {
+      var isActive = th.getAttribute("data-sort") === usersSortKey;
+      th.classList.toggle("is-active", isActive);
+      var arrow = th.querySelector(".admin-sort-arrow");
+      if (arrow) arrow.remove();
+      if (isActive) {
+        var span = document.createElement("span");
+        span.className = "admin-sort-arrow";
+        span.textContent = usersSortDir === "asc" ? "↑" : "↓";
+        th.appendChild(span);
+      }
+    });
+
+    var list = sortedFilteredUsers();
+    usersEmptyEl.hidden = list.length !== 0;
+    usersBody.innerHTML = list
+      .map(function (u) {
+        return (
+          "<tr>" +
+          "<td>" + escapeHtml(u.email) + "</td>" +
+          "<td>" + formatDate(u.createdAt) + "</td>" +
+          "<td>" + escapeHtml(loginMethods(u)) + "</td>" +
+          "<td>" + u.childrenCount + "</td>" +
+          "<td>" + formatDate(u.lastConversationAt) + "</td>" +
+          "<td>" + (u.suspended ? '<span class="admin-badge admin-badge-warn">Suspended</span>' : '<span class="admin-badge admin-badge-ok">Active</span>') + "</td>" +
+          '<td class="admin-row-actions">' +
+          '<button type="button" class="admin-link-btn" data-action="view" data-id="' + u.id + '">View</button>' +
+          '<button type="button" class="admin-link-btn" data-action="resetpw" data-id="' + u.id + '" data-email="' + escapeHtml(u.email) + '">Reset password</button>' +
+          '<button type="button" class="admin-link-btn" data-action="suspend" data-id="' + u.id + '" data-suspended="' + u.suspended + '">' +
+          (u.suspended ? "Unsuspend" : "Suspend") +
+          "</button>" +
+          '<button type="button" class="admin-link-btn admin-link-btn-danger" data-action="delete" data-id="' + u.id + '" data-email="' + escapeHtml(u.email) + '">Delete</button>' +
+          "</td>" +
+          "</tr>"
+        );
+      })
+      .join("");
+  }
+
+  usersSearchInput.addEventListener("input", function () { renderUsersTable(); });
+
+  usersSortHeaders.forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.getAttribute("data-sort");
+      if (usersSortKey === key) {
+        usersSortDir = usersSortDir === "asc" ? "desc" : "asc";
+      } else {
+        usersSortKey = key;
+        // Joined/last-chat read most naturally newest-first by default;
+        // text/numeric columns read most naturally ascending.
+        usersSortDir = key === "createdAt" || key === "lastConversationAt" ? "desc" : "asc";
+      }
+      renderUsersTable();
+    });
+  });
 
   usersBody.addEventListener("click", function (e) {
     var btn = e.target.closest("button[data-action]");
@@ -291,6 +377,8 @@
 
     if (action === "view") {
       openUserModal(id);
+    } else if (action === "resetpw") {
+      openResetPasswordModal(id, btn.getAttribute("data-email"));
     } else if (action === "suspend") {
       var currentlySuspended = btn.getAttribute("data-suspended") === "true";
       j("/api/admin/users/" + id, {
@@ -302,6 +390,85 @@
     } else if (action === "delete") {
       openDeleteModal(id, btn.getAttribute("data-email"));
     }
+  });
+
+  // ---------------- add user modal ----------------
+
+  function openAddUserModal() {
+    addUserError.textContent = "";
+    addUserError.classList.remove("visible");
+    addUserForm.reset();
+    addUserModal.hidden = false;
+    addUserEmailInput.focus();
+  }
+
+  function closeAddUserModal() { addUserModal.hidden = true; }
+
+  addUserBtn.addEventListener("click", openAddUserModal);
+  addUserModalCloseBtn.addEventListener("click", closeAddUserModal);
+  addUserModal.addEventListener("click", function (e) { if (e.target === addUserModal) closeAddUserModal(); });
+
+  addUserForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    addUserError.textContent = "";
+    addUserError.classList.remove("visible");
+    addUserSubmitBtn.disabled = true;
+
+    j("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify({ email: addUserEmailInput.value, password: addUserPasswordInput.value })
+    }).then(function (result) {
+      addUserSubmitBtn.disabled = false;
+      if (!result.ok) {
+        addUserError.textContent = (result.data && result.data.error) || "Something went wrong.";
+        addUserError.classList.add("visible");
+        return;
+      }
+      closeAddUserModal();
+      loadUsers();
+    });
+  });
+
+  // ---------------- reset password modal ----------------
+
+  function openResetPasswordModal(id, email) {
+    pendingResetPasswordUserId = id;
+    resetPasswordModalTitle.textContent = "Set a new password for " + email;
+    resetPasswordError.textContent = "";
+    resetPasswordError.classList.remove("visible");
+    resetPasswordForm.reset();
+    resetPasswordModal.hidden = false;
+    resetPasswordInput.focus();
+  }
+
+  function closeResetPasswordModal() {
+    resetPasswordModal.hidden = true;
+    pendingResetPasswordUserId = null;
+  }
+
+  resetPasswordModalCloseBtn.addEventListener("click", closeResetPasswordModal);
+  resetPasswordModal.addEventListener("click", function (e) { if (e.target === resetPasswordModal) closeResetPasswordModal(); });
+
+  resetPasswordForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (pendingResetPasswordUserId == null) return;
+    resetPasswordError.textContent = "";
+    resetPasswordError.classList.remove("visible");
+    resetPasswordSubmitBtn.disabled = true;
+
+    j("/api/admin/users/" + pendingResetPasswordUserId + "/password", {
+      method: "POST",
+      body: JSON.stringify({ newPassword: resetPasswordInput.value })
+    }).then(function (result) {
+      resetPasswordSubmitBtn.disabled = false;
+      if (!result.ok) {
+        resetPasswordError.textContent = (result.data && result.data.error) || "Something went wrong.";
+        resetPasswordError.classList.add("visible");
+        return;
+      }
+      closeResetPasswordModal();
+      loadUsers();
+    });
   });
 
   // ---------------- user detail modal ----------------
