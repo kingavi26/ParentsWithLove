@@ -436,6 +436,14 @@ h1 {
 
 .app-main { padding-bottom: 5rem; } /* clears the fixed bottom nav */
 
+/* The topbar (mobile-only title bar) is hidden by default everywhere —
+   only the mobile app-active rule below (@media max-width:720px) turns it
+   back on. This used to live ONLY inside that same media query, which
+   meant it was never actually hidden at desktop widths: it rendered as a
+   visible flex child of .app-shell, sharing the row with .app-nav and
+   .app-main and pushing them sideways instead of clearing out of the way. */
+.app-topbar { display: none; }
+
 /* ---------- home screen ---------- */
 
 .home-greeting {
@@ -505,8 +513,23 @@ h1 {
 @media (min-width: 721px) {
   .app-shell {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 2rem;
+  }
+
+  /* .app-shell's only "real" row is .app-nav + .app-main below — but the
+     verify-email banner (src/routes/auth.js's email-verification feature)
+     is also a direct child of .app-shell, added right before .app-topbar/
+     .app-nav in the markup. Without this, flex-direction:row lays all four
+     children out left to right on one line: banner, (invisible) topbar,
+     nav, main — visibly shoving the real nav+content sideways off screen.
+     flex-basis:100% forces it onto its own full-width line; flex-wrap
+     above then wraps .app-nav + .app-main onto the line below it, back to
+     the normal two-column layout. */
+  #verify-email-banner {
+    flex-basis: 100%;
+    margin-bottom: 0;
   }
 
   .app-nav {
@@ -1968,8 +1991,6 @@ body.design-mode-active [data-reorder-group] > [data-reorder-id].is-drop-target 
   }
 
   /* ---- top bar ---- */
-  .app-topbar { display: none; }
-
   body.app-active .app-topbar {
     display: flex;
     align-items: center;
