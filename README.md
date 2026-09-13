@@ -193,9 +193,13 @@ pay for the Developer Program for the web-only case.
 - Set a real, random `SESSION_SECRET` before deploying anywhere real
   users can reach — the app will print a warning on startup if you
   haven't.
-- This is a first pass: there's no email verification, password reset,
-  or rate limiting yet. Fine for an early prototype; worth adding before
-  a wide public launch.
+- Signup sends an email verification link, and there's a full forgot
+  password / reset password flow (`src/notifications.js`,
+  `src/routes/auth.js`) — both need `RESEND_API_KEY`/`EMAIL_FROM` set
+  (see `.env.example`) to actually send mail; without them, emails are
+  logged to the server console instead, so login/signup still work
+  end-to-end in local dev. Auth endpoints are rate-limited
+  (`src/rate-limit.js`).
 - Social login uses a random per-attempt `state` value stored in a short-lived
   httpOnly cookie to prevent CSRF on the OAuth callback, and never trusts an
   email address as "verified" unless the provider itself confirms it.
