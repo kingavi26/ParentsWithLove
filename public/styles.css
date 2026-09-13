@@ -324,6 +324,46 @@ h1 {
 
 .form-error.visible { display: block; }
 
+/* A plain text link styled as a button — "Forgot password?", "Back to log
+   in", "Resend email" — deliberately lighter-weight than .btn-primary/
+   .btn-secondary-outline since these are secondary, low-commitment actions
+   next to a form's main button, not another call to action competing with
+   it. */
+.link-button {
+  display: block;
+  width: 100%;
+  margin-top: 0.7rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:hover { filter: brightness(0.9); }
+
+#verify-email-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+/* display:flex above would otherwise beat the [hidden] attribute's default
+   display:none (author styles always win regardless of specificity) — same
+   gotcha already called out for .btn-social/.social-auth above. */
+#verify-email-banner[hidden] { display: none; }
+#verify-email-banner .link-button {
+  display: inline;
+  width: auto;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
 /* ---------- app shell ---------- */
 
 .app-header {

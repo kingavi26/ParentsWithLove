@@ -13,6 +13,23 @@
   var facebookLoginBtn = document.getElementById("facebook-login-btn");
   var emailInput = document.getElementById("email");
   var passwordInput = document.getElementById("password");
+  var authSuccess = document.getElementById("auth-success");
+  var authTabsWrap = document.querySelector(".auth-tabs");
+  var forgotPasswordLink = document.getElementById("forgot-password-link");
+  var forgotPasswordPanel = document.getElementById("forgot-password-panel");
+  var forgotPasswordForm = document.getElementById("forgot-password-form");
+  var forgotPasswordEmailInput = document.getElementById("forgot-password-email");
+  var forgotPasswordError = document.getElementById("forgot-password-error");
+  var forgotPasswordSuccess = document.getElementById("forgot-password-success");
+  var forgotPasswordSubmit = document.getElementById("forgot-password-submit");
+  var backToLoginLink = document.getElementById("back-to-login-link");
+  var resetPasswordPanel = document.getElementById("reset-password-panel");
+  var resetPasswordForm = document.getElementById("reset-password-form");
+  var resetPasswordNewInput = document.getElementById("reset-password-new");
+  var resetPasswordError = document.getElementById("reset-password-error");
+  var resetPasswordSubmit = document.getElementById("reset-password-submit");
+  var verifyEmailBanner = document.getElementById("verify-email-banner");
+  var resendVerificationBtn = document.getElementById("resend-verification-btn");
 
   var demoBanner = document.getElementById("demo-banner");
   var accountEmail = document.getElementById("account-email");
@@ -91,6 +108,8 @@
   var voiceModePlayer = document.getElementById("voice-mode-player");
 
   var authMode = "login"; // or "signup"
+  var pendingResetToken = null; // set from ?resetToken=... in the URL, see checkUrlAuthParams()
+  var socialAuthAvailable = false; // set from /api/status — whether to ever show the social-auth block on the login view
   var conversation = []; // { role: 'user' | 'assistant', content: string } — this browser tab's session only
   var currentEmail = "";
   var accountHasPassword = false;
@@ -131,6 +150,145 @@
   function hideAuthError() {
     authError.classList.remove("visible");
   }
+
+  function showAuthSuccess(message) {
+    authSuccess.textContent = message;
+    authSuccess.hidden = false;
+  }
+
+  function hideAuthSuccess() {
+    authSuccess.hidden = true;
+  }
+
+  // Three mutually exclusive views inside the auth card: the normal log
+  // in/sign up form, the "email me a reset link" request form, and (only
+  // reachable via a ?resetToken=... link, see checkUrlAuthParams) the
+  // "choose a new password" form. Switching to one always hides the other
+  // two plus any stray error/success messages left over from before.
+  function showAuthView(view) {
+    authTabsWrap.hidden = view !== "login";
+    authForm.hidden = view !== "login";
+    forgotPasswordLink.hidden = view !== "login";
+    socialAuthWrap.hidden = view !== "login" || !socialAuthAvailable;
+    forgotPasswordPanel.hidden = view !== "forgot-password";
+    resetPasswordPanel.hidden = view !== "reset-password";
+    hideAuthError();
+    hideAuthSuccess();
+  }
+
+  forgotPasswordLink.addEventListener("click", function () {
+    forgotPasswordEmailInput.value = emailInput.value || "";
+    forgotPasswordError.classList.remove("visible");
+    forgotPasswordSuccess.hidden = true;
+    forgotPasswordForm.hidden = false;
+    showAuthView("forgot-password");
+  });
+
+  backToLoginLink.addEventListener("click", function () {
+    showAuthView("login");
+  });
+
+  forgotPasswordForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    forgotPasswordError.classList.remove("visible");
+    forgotPasswordSubmit.disabled = true;
+
+    fetch("/api/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: forgotPasswordEmailInput.value })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        forgotPasswordSubmit.disabled = false;
+        if (!result.ok) {
+          forgotPasswordError.textContent = result.data.error || "Something went wrong. Please try again.";
+          forgotPasswordError.classList.add("visible");
+          return;
+        }
+        forgotPasswordSuccess.textContent =
+          result.data.message || "If an account exists for that email, we've sent a link to reset the password.";
+        forgotPasswordSuccess.hidden = false;
+        forgotPasswordForm.hidden = true;
+      })
+      .catch(function () {
+        forgotPasswordSubmit.disabled = false;
+        forgotPasswordError.textContent = "Couldn't reach the server. Please try again.";
+        forgotPasswordError.classList.add("visible");
+      });
+  });
+
+  resetPasswordForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    resetPasswordError.classList.remove("visible");
+    resetPasswordSubmit.disabled = true;
+
+    fetch("/api/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: pendingResetToken, newPassword: resetPasswordNewInput.value })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        resetPasswordSubmit.disabled = false;
+        if (!result.ok) {
+          resetPasswordError.textContent = result.data.error || "Something went wrong. Please try again.";
+          resetPasswordError.classList.add("visible");
+          return;
+        }
+        pendingResetToken = null;
+        enterApp();
+      })
+      .catch(function () {
+        resetPasswordSubmit.disabled = false;
+        resetPasswordError.textContent = "Couldn't reach the server. Please try again.";
+        resetPasswordError.classList.add("visible");
+      });
+  });
+
+  // A verification-link click or a password-reset link both bring someone
+  // back here via a plain browser navigation (GET /api/verify-email
+  // redirects to /app?verified=1|0; the reset email links straight to
+  // /app?resetToken=...) rather than an app.js-initiated fetch, so this has
+  // to read them from the URL on load rather than from a JSON response.
+  // Cleans the query string afterward (same pattern already used for
+  // ?authError= above) so refreshing the page doesn't re-trigger it.
+  (function checkUrlAuthParams() {
+    var params = new URLSearchParams(window.location.search);
+    var resetToken = params.get("resetToken");
+    var verified = params.get("verified");
+    var handled = false;
+
+    if (resetToken) {
+      pendingResetToken = resetToken;
+      showAuthView("reset-password");
+      handled = true;
+    } else if (verified === "1") {
+      showAuthView("login");
+      showAuthSuccess("Your email is verified.");
+      handled = true;
+    } else if (verified === "0") {
+      showAuthView("login");
+      showAuthError("That verification link is invalid or has expired. You can request a new one from Account settings once logged in.");
+      handled = true;
+    }
+
+    if (handled) {
+      params.delete("resetToken");
+      params.delete("verified");
+      var rest = params.toString();
+      var cleanUrl = window.location.pathname + (rest ? "?" + rest : "");
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  })();
 
   authForm.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -202,7 +360,8 @@
       if (appleOn) appleLoginBtn.hidden = false;
       if (googleOn) googleLoginBtn.hidden = false;
       if (facebookOn) facebookLoginBtn.hidden = false;
-      if (appleOn || googleOn || facebookOn) socialAuthWrap.hidden = false;
+      socialAuthAvailable = appleOn || googleOn || facebookOn;
+      if (socialAuthAvailable) socialAuthWrap.hidden = false;
     })
     .catch(function () {});
 
@@ -329,6 +488,7 @@
         accountEmail.textContent = data.email;
         currentEmail = data.email;
         accountHasPassword = Boolean(data.hasPassword);
+        renderVerifyEmailBanner(data);
         renderHome(data);
         renderMemory(data);
         if (!accountModal.hidden) {
@@ -346,6 +506,40 @@
         document.body.classList.remove("app-active");
       });
   }
+
+  // data.emailVerified is false only for a password account that hasn't
+  // clicked its signup verification link yet — social accounts arrive
+  // already verified (see social-auth.js) and never show this.
+  function renderVerifyEmailBanner(data) {
+    verifyEmailBanner.hidden = Boolean(data.emailVerified);
+  }
+
+  resendVerificationBtn.addEventListener("click", function () {
+    resendVerificationBtn.disabled = true;
+    var originalLabel = resendVerificationBtn.textContent;
+    fetch("/api/resend-verification", { method: "POST" })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (result.ok) {
+          resendVerificationBtn.textContent = "Sent — check your inbox";
+          setTimeout(function () {
+            resendVerificationBtn.textContent = originalLabel;
+            resendVerificationBtn.disabled = false;
+          }, 8000);
+        } else {
+          resendVerificationBtn.disabled = false;
+          window.alert(result.data.error || "Something went wrong. Please try again.");
+        }
+      })
+      .catch(function () {
+        resendVerificationBtn.disabled = false;
+        window.alert("Couldn't reach the server. Please try again.");
+      });
+  });
 
   // Accepts either "YYYY-MM-DD" or a SQLite "YYYY-MM-DD HH:MM:SS" timestamp.
   // Returns null (rather than "Invalid Date") for anything missing/bad.

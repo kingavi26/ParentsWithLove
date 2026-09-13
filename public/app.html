@@ -39,6 +39,7 @@
         </div>
 
         <div id="auth-error" class="form-error"></div>
+        <div id="auth-success" class="form-success" hidden></div>
 
         <form id="auth-form">
           <div class="field">
@@ -51,6 +52,8 @@
           </div>
           <button type="submit" class="btn-primary" id="auth-submit">Log in</button>
         </form>
+
+        <button type="button" class="link-button" id="forgot-password-link">Forgot password?</button>
 
         <div id="social-auth" class="social-auth" hidden>
           <div class="social-divider"><span data-editable="social-divider-or">or</span></div>
@@ -69,12 +72,55 @@
           <a href="/api/auth/google" class="btn-social btn-google" id="google-login-btn" hidden><span data-editable="social-google-btn">Continue with Google</span></a>
           <a href="/api/auth/facebook" class="btn-social btn-facebook" id="facebook-login-btn" hidden><span data-editable="social-facebook-btn">Continue with Facebook</span></a>
         </div>
+
+        <!-- Forgot password: request a reset link. Swapped in over the
+             login/signup form (below) rather than a separate page — same
+             card, same layout, so this doesn't feel like a jarring context
+             switch mid-flow. -->
+        <div id="forgot-password-panel" hidden>
+          <p class="modal-hint">Enter your email and we'll send a link to reset your password.</p>
+          <div id="forgot-password-error" class="form-error"></div>
+          <div id="forgot-password-success" class="form-success" hidden></div>
+          <form id="forgot-password-form">
+            <div class="field">
+              <label for="forgot-password-email">Email</label>
+              <input id="forgot-password-email" type="email" autocomplete="email" required />
+            </div>
+            <button type="submit" class="btn-primary" id="forgot-password-submit">Send reset link</button>
+          </form>
+          <button type="button" class="link-button" id="back-to-login-link">Back to log in</button>
+        </div>
+
+        <!-- Reset password: only shown when the page loads with
+             ?resetToken=... (the link from the reset email) — see
+             checkUrlAuthParams() in app.js. -->
+        <div id="reset-password-panel" hidden>
+          <p class="modal-hint">Choose a new password for your account.</p>
+          <div id="reset-password-error" class="form-error"></div>
+          <form id="reset-password-form">
+            <div class="field">
+              <label for="reset-password-new">New password</label>
+              <input id="reset-password-new" type="password" autocomplete="new-password" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-primary" id="reset-password-submit">Set new password</button>
+          </form>
+        </div>
       </div>
     </section>
 
     <!-- App screen: a real app shell (nav + screens) rather than one long page -->
     <section id="app-screen" hidden>
       <div class="app-shell">
+        <!-- Shown only when /api/me reports emailVerified: false (see
+             renderVerifyEmailBanner() in app.js) — password accounts start
+             unverified until the signup email's link is clicked; social
+             accounts never show this (email_verified is set at creation
+             from the provider's own verification, see social-auth.js). -->
+        <div id="verify-email-banner" class="demo-banner" hidden>
+          <span id="verify-email-banner-text">Please verify your email address — check your inbox for a link.</span>
+          <button type="button" class="link-button" id="resend-verification-btn">Resend email</button>
+        </div>
+
         <header class="app-topbar" id="app-topbar">
           <span class="app-topbar-title" id="app-topbar-title">Home</span>
           <span class="app-topbar-badge" id="app-topbar-badge" hidden>Demo</span>
