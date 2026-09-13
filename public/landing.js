@@ -1,6 +1,24 @@
 (function () {
   "use strict";
 
+  // ---------------- hero video ----------------
+  // The hero banner is a short looping video (see the `poster` attribute for
+  // the static-image fallback). Autoplay is started from JS, not the HTML
+  // `autoplay` attribute, so a visitor with prefers-reduced-motion set never
+  // sees it start playing even for a frame — they just get the poster image.
+  var heroVideo = document.getElementById("hero-video");
+  if (heroVideo) {
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion) {
+      var playPromise = heroVideo.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function () {
+          /* Autoplay blocked by the browser — the poster image still shows. */
+        });
+      }
+    }
+  }
+
   // ---------------- signup forms ----------------
   // Two forms on the page (hero + bottom CTA) share this same handler.
 
