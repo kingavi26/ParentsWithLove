@@ -144,6 +144,17 @@ const ALLOWED_EDITABLE = {
   "quick-action-bedtime-label": { label: "Quick action: bedtime battles", maxLen: 60, group: "Home screen" },
   "quick-action-tantrums-label": { label: "Quick action: tantrums", maxLen: 60, group: "Home screen" },
   "quick-action-screen-time-label": { label: "Quick action: screen time", maxLen: 60, group: "Home screen" },
+  "quick-action-picky-eating-label": { label: "Quick action: picky eating", maxLen: 60, group: "Home screen" },
+  "quick-action-separation-anxiety-label": { label: "Quick action: separation anxiety", maxLen: 60, group: "Home screen" },
+  "quick-action-backtalk-label": { label: "Quick action: backtalk & defiance", maxLen: 60, group: "Home screen" },
+  "quick-action-listening-label": { label: "Quick action: listening & following directions", maxLen: 60, group: "Home screen" },
+  "quick-action-honesty-label": { label: "Quick action: lying & honesty", maxLen: 60, group: "Home screen" },
+  "quick-action-school-age-anger-label": { label: "Quick action: anger & big emotions", maxLen: 60, group: "Home screen" },
+  "quick-action-worry-label": { label: "Quick action: anxiety & worry", maxLen: 60, group: "Home screen" },
+  "quick-action-bullying-label": { label: "Quick action: bullying", maxLen: 60, group: "Home screen" },
+  "quick-action-social-media-label": { label: "Quick action: social media & online safety", maxLen: 60, group: "Home screen" },
+  "quick-action-homework-label": { label: "Quick action: homework & motivation", maxLen: 60, group: "Home screen" },
+  "quick-action-other-label": { label: "Quick action: something else (\"Other\")", maxLen: 60, group: "Home screen" },
   "home-continue-btn": { label: "\"Continue chatting\" button", maxLen: 60, group: "Home screen" },
 
   // Chat screen
@@ -222,7 +233,18 @@ const ALLOWED_REORDER_GROUPS = {
       { id: "sibling", label: "Sibling conflict" },
       { id: "bedtime", label: "Bedtime battles" },
       { id: "tantrums", label: "Tantrums" },
-      { id: "screen-time", label: "Screen time" }
+      { id: "screen-time", label: "Screen time" },
+      { id: "picky-eating", label: "Picky eating" },
+      { id: "separation-anxiety", label: "Separation anxiety" },
+      { id: "backtalk", label: "Backtalk & defiance" },
+      { id: "listening", label: "Listening & following directions" },
+      { id: "honesty", label: "Lying & honesty" },
+      { id: "school-age-anger", label: "Anger & big emotions" },
+      { id: "worry", label: "Anxiety & worry" },
+      { id: "bullying", label: "Bullying" },
+      { id: "social-media", label: "Social media & online safety" },
+      { id: "homework", label: "Homework & motivation" },
+      { id: "other", label: "Something else" }
     ]
   },
   "app-nav": {
