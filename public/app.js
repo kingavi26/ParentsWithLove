@@ -713,10 +713,14 @@
 
   function goToChatWithPrompt(text) {
     showScreen("chat");
-    if (text) {
-      chatInput.value = text;
-      chatInput.focus();
-    }
+    // Always set (and clear, if empty) the input rather than only setting
+    // it when non-empty — otherwise the "Something else" quick action
+    // (which has no pre-filled prompt, by design) could leave behind
+    // whatever an earlier quick-action card had pre-filled if the parent
+    // clicked it, went back to Home, and picked "Something else" without
+    // sending. Then always focus it so the parent lands ready to type.
+    chatInput.value = text || "";
+    chatInput.focus();
   }
 
   quickActionCards.forEach(function (card) {

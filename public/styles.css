@@ -566,7 +566,11 @@ h1 {
     min-width: 0;
   }
 
-  .home-quick-actions { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  /* auto-fill rather than a fixed 4 columns — the grid now holds 15 cards
+     (up from the original 4), so this keeps card width consistent and
+     reasonable instead of stretching 4 fixed columns across whatever the
+     app-main pane happens to be. */
+  .home-quick-actions { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 
   .home-continue-btn { width: auto; }
 }
