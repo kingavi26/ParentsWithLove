@@ -720,6 +720,7 @@
     // clicked it, went back to Home, and picked "Something else" without
     // sending. Then always focus it so the parent lands ready to type.
     chatInput.value = text || "";
+    autoSizeChatInput();
     chatInput.focus();
   }
 
@@ -1147,7 +1148,30 @@
     var text = chatInput.value.trim();
     if (!text) return;
     sendChatMessage(text);
+    autoSizeChatInput();
   });
+
+  // Multi-line chat box: grows with its content (up to the CSS max-height, then
+  // scrolls). Enter sends; Shift+Enter inserts a new line. Skips Enter while an
+  // IME composition is in progress so non-Latin keyboards aren't cut off mid-word.
+  function autoSizeChatInput() {
+    chatInput.style.height = "auto";
+    var max = parseFloat(getComputedStyle(chatInput).maxHeight) || Infinity;
+    var full = chatInput.scrollHeight + (chatInput.offsetHeight - chatInput.clientHeight);
+    chatInput.style.height = Math.min(full, max) + "px";
+    chatInput.style.overflowY = full > max ? "auto" : "hidden";
+  }
+
+  chatInput.addEventListener("input", autoSizeChatInput);
+  chatInput.addEventListener("focus", autoSizeChatInput);
+  chatInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
+      e.preventDefault();
+      if (typeof chatForm.requestSubmit === "function") chatForm.requestSubmit();
+      else chatForm.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+  window.addEventListener("resize", autoSizeChatInput);
 
   // ---------------- session self-review ----------------
 
@@ -1865,6 +1889,7 @@
         }
         if (result.data.text) {
           chatInput.value = result.data.text;
+          autoSizeChatInput();
           chatInput.focus();
         }
       })

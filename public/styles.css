@@ -739,6 +739,7 @@ h1 {
 
 .chat-inputrow {
   display: flex;
+  align-items: flex-end; /* keep mic/Send pinned to the bottom as the textarea grows */
   gap: 0.5rem;
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--border);
@@ -753,8 +754,13 @@ h1 {
   border: 1px solid var(--border);
   font-size: 0.93rem;
   font-family: inherit;
+  line-height: 1.45;
   background: var(--surface);
   color: var(--text);
+  resize: none;          /* height is managed by autoSizeChatInput() in app.js */
+  overflow-y: hidden;    /* switched to auto by JS once max height is reached */
+  max-height: 11rem;     /* ~7 lines, then it scrolls */
+  display: block;
 }
 
 .chat-send {

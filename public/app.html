@@ -276,15 +276,16 @@
 
               <form class="chat-inputrow" id="chat-form">
                 <button type="button" class="mic-btn" id="mic-btn" aria-label="Record a voice message" hidden>&#127908;</button>
-                <input
-                  type="text"
+                <textarea
                   id="chat-input"
                   class="chat-input"
+                  rows="1"
                   placeholder="Type a question about your kid&hellip;"
                   autocomplete="off"
+                  aria-label="Your message (Enter to send, Shift+Enter for a new line)"
                   data-editable="chat-input-placeholder"
                   data-editable-attr="placeholder"
-                />
+                ></textarea>
                 <button type="submit" class="chat-send" id="chat-send"><span data-editable="chat-send-btn">Send</span></button>
               </form>
               <audio id="voice-player" hidden></audio>
